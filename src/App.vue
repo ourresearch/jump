@@ -20,16 +20,10 @@
     </v-toolbar>
 
     <v-content>
-      <v-container fluid fill-height>
-        <v-layout
-          justify-center
-        >
 
           <router-view></router-view>
 
 
-        </v-layout>
-      </v-container>
     </v-content>
     <v-footer
     height="auto"

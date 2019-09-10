@@ -1,7 +1,28 @@
 <template>
     <div class="home">
 
-        <h1 class="display-4">jump!</h1>
+        <v-container fluid grid-list-lg>
+            <v-layout row>
+                <v-flex xs12>
+                    <h1 class="display-4">jump!</h1>
+                    <div>top stuff aqui</div>
+                </v-flex>
+            </v-layout>
+            <v-layout row>
+                <v-flex md3>
+                    filters aqui
+                </v-flex>
+                <v-flex md9>
+                    journals aqui
+                </v-flex>
+
+
+
+            </v-layout>
+
+
+
+        </v-container>
 
 
 
