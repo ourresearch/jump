@@ -18,9 +18,7 @@
 
 <script>
 
-    import SearchBox from "./SearchBox";
     export default {
-        components: {SearchBox},
         name: 'MainHeader',
         computed: {
           isOnBasepage(){
