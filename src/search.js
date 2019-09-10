@@ -34,10 +34,10 @@ export const store = {
         console.log("fetching journals from", url)
 
         // mock out the api response for now, because slow interwebs
-        this.journals = resp.list
-        this.journalsCount = resp.count
-
-        return
+        // this.journals = resp.list
+        // this.journalsCount = resp.count
+        //
+        // return
 
 
 
@@ -46,7 +46,7 @@ export const store = {
             .then(resp => {
                 console.log("got journals back")
                 this.journals = resp.data.list
-                this.resultsCount = resp.data.total_count
+                this.resultsCount = resp.data.count
 
             })
             .catch(e => {
