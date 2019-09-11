@@ -4,7 +4,34 @@ import _ from 'lodash'
 import {resp} from "./journalsRespMock.js"
 
 
-console.log("this is the journals response mock", resp)
+function makeYearBins(downloadsByYear){
+    const years = [0,1,2,3,4]
+    const metrics = [
+        "back_catalog",
+        "oa",
+        "turnaways"
+    ]
+    let ret = []
+    years.forEach(i => {
+        let year = {
+            year: downloads_by_year.year[i],
+            raw: {
+                backCatalog: downloadsByYear["back_catalog"][i],
+                oa: downloadsByYear["oa"][i],
+                turnaways: downloadsByYear["turnaways"][i],
+                total: downloadsByYear["total"][i],
+            },
+            prop: {}
+        }
+        year.prop.backCatalog =  year.raw.backCatalog / year.raw.total
+        year.prop.oa =  year.raw.oa / year.raw.total
+        year.prop.turnaways =  year.raw.turnaways / year.raw.total
+        ret.push(year)
+    })
+    return ret
+}
+
+
 
 export const store = {
     loading: false,
@@ -45,7 +72,11 @@ export const store = {
         let request = axios.get(url)
             .then(resp => {
                 console.log("got journals back")
-                this.journals = resp.data.list
+                this.journals = resp.data.list.map(journal => {
+                    journal.selected = true
+                    journal.years = makeYearBins(journal.downloads_by_year)
+                    return journal
+                })
                 this.resultsCount = resp.data.count
 
             })
@@ -58,4 +89,45 @@ export const store = {
         return request
     },
 
+}
+
+
+
+
+let downloads_by_year = {
+    back_catalog: [
+        47889,
+        38643,
+        31629,
+        25658,
+        20543
+    ],
+    oa: [
+        13073,
+        20623,
+        27121,
+        33091,
+        38206
+    ],
+    total: [
+        86722,
+        86722,
+        86722,
+        86722,
+        86722
+    ],
+    turnaways: [
+        25759,
+        27454,
+        27970,
+        27972,
+        27972
+    ],
+    year: [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+    ]
 }
