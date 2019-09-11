@@ -106,6 +106,28 @@
                                         </v-flex>
 
 
+                                        <v-flex shrink>
+                                            <table>
+                                                <tr>
+                                                    <td>price per download</td>
+                                                    <td>${{journal.windowTotals.pricePer.download.toFixed(2)}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>price per unfulfilled download</td>
+                                                    <td>${{journal.windowTotals.pricePer.turnaways.toFixed(2)}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>price per requested download</td>
+                                                    <td>${{journal.windowTotals.pricePer.requestedItem.toFixed(2)}}</td>
+                                                </tr>
+                                            </table>
+                                        </v-flex>
+                                        <v-flex shrink>
+                                            annual DocDel price: ${{ journal.windowTotals.priceWithDocdel.toFixed(2).toLocaleString() }}
+                                        </v-flex>
+
+
+
                                         <!--                                        <v-flex>-->
                                         <!--                                            downloads: {{journal.downloads_next_3_years.total.toLocaleString()}} (-->
                                         <!--                                            <span>{{ Math.round(journal.downloads_next_3_years.back_catalog / journal.downloads_next_3_years.total * 100) }}% back catalog, </span>-->

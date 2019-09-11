@@ -58,11 +58,11 @@ function makeWindowTotals(downloadsByYear, price){
     ret.prop.oa = ret.raw.oa / ret.raw.total
     ret.prop.turnaways = ret.raw.turnaways / ret.raw.total
 
-    ret.pricePer.download = ret.raw.total / ret.raw.price
-    ret.pricePer.turnaway = ret.raw.turnaway / ret.raw.price
-    ret.pricePer.requestedItem = (ret.raw.turnaway * .1) / ret.raw.price
+    ret.pricePer.download =  ret.raw.price / ret.raw.total
+    ret.pricePer.turnaways =  ret.raw.price / ret.raw.turnaways
+    ret.pricePer.requestedItem = ret.raw.price / (ret.raw.turnaways * .1)
 
-    ret.priceWithDocdel = ret.pricePer.requestedItem * 25
+    ret.priceWithDocdel = (ret.raw.turnaways * .1 * 25) / 5
 
     return ret
 
@@ -113,7 +113,7 @@ export const store = {
                 this.journals = resp.data.list.map(journal => {
                     journal.selected = true
                     journal.years = makeYearBins(journal.downloads_by_year)
-                    journal.windowTotals = makeWindowTotals(journal.downloads_by_year)
+                    journal.windowTotals = makeWindowTotals(journal.downloads_by_year, journal.dollars_2018_subscription)
                     return journal
                 })
                 this.resultsCount = resp.data.count
