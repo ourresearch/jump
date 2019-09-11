@@ -78,6 +78,8 @@ export const store = {
     journals: [],
     resultsPerPage: 20,
     baseUrl: "https://rickscafe-api.herokuapp.com/jump/temp",
+    page: 1,
+    pageSize: 50,
 
 
     // this is for if you are doing filtering on the server, so you are making
@@ -89,6 +91,27 @@ export const store = {
     reset(){
         this.journals = []
         this.resultsCount = 0
+    },
+
+    getSorted: function(){
+        let fn = function(a, b){
+            return a.windowTotals.pricePer.requestedItem - b.windowTotals.pricePer.requestedItem
+        }
+        this.journals.sort(fn)
+
+        let startIndex = (this.page - 1) * this.pageSize
+        let endIndex = (this.page * this.pageSize) - 1
+
+        return this.journals.slice(startIndex, endIndex)
+    },
+
+    getSelected: function(){
+        return this.journals.filter(x =>{
+            return x.selected
+        })
+    },
+    getNumPages: function(){
+        return Math.ceil(this.journals.length / this.pageSize)
     },
 
 
