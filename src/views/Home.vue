@@ -44,7 +44,7 @@
                                                       <template v-slot:activator="{ on }">
                                                         <div class="turnaways" v-on="on" :style="{background: 'gray', height: year.prop.turnaways*100 +'%'}"></div>
                                                       </template>
-                                                      <span>{{ year.year }} turnaways: {{ Math.round(year.prop.turnaways*100) + "%" }}</span>
+                                                      <span>{{ year.year }} turnaways: {{ Math.round(year.prop.turnaways*100) + "%" }} ({{ year.raw.turnaways.toLocaleString() }} total)</span>
                                                     </v-tooltip>
 
                                                     <v-tooltip left>
