@@ -31,6 +31,44 @@ function makeYearBins(downloadsByYear){
     return ret
 }
 
+function makeWindowTotals(downloadsByYear, price){
+    const years = [0,2,3,4,5]
+    const add = (a, b) => a + b;
+    let ret1 = {
+        backCatalog: 0,
+        oa: 0,
+        turnaways: 0,
+        total: 0,
+        price: 0
+    }
+
+    let ret = {
+        raw: {
+            backCatalog: downloadsByYear.back_catalog.reduce(add),
+            oa: downloadsByYear.oa.reduce(add),
+            turnaways: downloadsByYear.turnaways.reduce(add),
+            total: downloadsByYear.total.reduce(add),
+            price: price * years.length
+        },
+        prop: {},
+        pricePer: {},
+
+    }
+    ret.prop.backCatalog = ret.raw.backCatalog / ret.raw.total
+    ret.prop.oa = ret.raw.oa / ret.raw.total
+    ret.prop.turnaways = ret.raw.turnaways / ret.raw.total
+
+    ret.pricePer.download = ret.raw.total / ret.raw.price
+    ret.pricePer.turnaway = ret.raw.turnaway / ret.raw.price
+    ret.pricePer.requestedItem = (ret.raw.turnaway * .1) / ret.raw.price
+
+    ret.priceWithDocdel = ret.pricePer.requestedItem * 25
+
+    return ret
+
+
+}
+
 
 
 export const store = {
@@ -75,6 +113,7 @@ export const store = {
                 this.journals = resp.data.list.map(journal => {
                     journal.selected = true
                     journal.years = makeYearBins(journal.downloads_by_year)
+                    journal.windowTotals = makeWindowTotals(journal.downloads_by_year)
                     return journal
                 })
                 this.resultsCount = resp.data.count

@@ -19,7 +19,7 @@
                             <v-layout align-items-top>
                                 <v-flex shrink>
                                     <v-checkbox class="mt-0"
-                                            v-model="journal.selected"
+                                                v-model="journal.selected"
                                     ></v-checkbox>
                                 </v-flex>
 
@@ -36,32 +36,34 @@
                                     </v-layout>
 
                                     <v-layout>
-                                        <v-flex xs4>
-                                            <v-layout style="height: 100px">
-                                                <v-flex class="pa-0 pr-1 year"  v-for="year in journal.years">
+                                        <v-flex xs1>
+                                            <v-layout style="height: 50px">
+                                                <v-flex class="pa-0 year" style="border-right: 1px solid #fff;"
+                                                        v-for="year in journal.years">
 
                                                     <v-tooltip top>
-                                                      <template v-slot:activator="{ on }">
-                                                        <div class="turnaways" v-on="on" :style="{background: 'gray', height: year.prop.turnaways*100 +'%'}"></div>
-                                                      </template>
-                                                      <span>{{ year.year }} turnaways: {{ Math.round(year.prop.turnaways*100) + "%" }} ({{ year.raw.turnaways.toLocaleString() }} total)</span>
+                                                        <template v-slot:activator="{ on }">
+                                                            <div class="turnaways" v-on="on"
+                                                                 :style="{background: 'gray', height: year.prop.turnaways*100 +'%'}"></div>
+                                                        </template>
+                                                        <span>{{ year.year }} turnaways: {{ Math.round(year.prop.turnaways*100) + "%" }} ({{ year.raw.turnaways.toLocaleString() }} total)</span>
                                                     </v-tooltip>
 
                                                     <v-tooltip left>
-                                                      <template v-slot:activator="{ on }">
-                                                        <div class="oa" v-on="on" :style="{background: 'orange', height: year.prop.oa*100 +'%'}"></div>
-                                                      </template>
-                                                      <span>{{ year.year }} OA: {{ Math.round(year.prop.oa*100) + "%" }}</span>
+                                                        <template v-slot:activator="{ on }">
+                                                            <div class="oa" v-on="on"
+                                                                 :style="{background: 'orange', height: year.prop.oa*100 +'%'}"></div>
+                                                        </template>
+                                                        <span>{{ year.year }} OA: {{ Math.round(year.prop.oa*100) + "%" }}</span>
                                                     </v-tooltip>
 
                                                     <v-tooltip bottom>
-                                                      <template v-slot:activator="{ on }">
-                                                        <div class="back-catalog" v-on="on" :style="{background: 'mediumblue', height: year.prop.backCatalog*100 +'%'}"></div>
-                                                      </template>
-                                                      <span>{{ year.year }} Back catalog: {{ Math.round(year.prop.backCatalog*100) + "%" }}</span>
+                                                        <template v-slot:activator="{ on }">
+                                                            <div class="back-catalog" v-on="on"
+                                                                 :style="{background: 'mediumblue', height: year.prop.backCatalog*100 +'%'}"></div>
+                                                        </template>
+                                                        <span>{{ year.year }} Back catalog: {{ Math.round(year.prop.backCatalog*100) + "%" }}</span>
                                                     </v-tooltip>
-
-
 
 
                                                 </v-flex>
@@ -69,15 +71,48 @@
                                         </v-flex>
 
 
+                                        <!-- overall -->
+                                        <v-flex xs1 class="pl-3 pr-5">
+                                            <v-layout style="height: 50px">
+                                                <v-flex class="pa-0 overall">
+
+                                                    <v-tooltip top>
+                                                        <template v-slot:activator="{ on }">
+                                                            <div class="turnaways" v-on="on"
+                                                                 :style="{background: 'gray', height: journal.windowTotals.prop.turnaways*100 +'%'}"></div>
+                                                        </template>
+                                                        <span>window turnaways: {{ Math.round(journal.windowTotals.prop.turnaways*100) + "%" }} ({{ journal.windowTotals.raw.turnaways.toLocaleString() }} total)</span>
+                                                    </v-tooltip>
+
+                                                    <v-tooltip right>
+                                                        <template v-slot:activator="{ on }">
+                                                            <div class="oa" v-on="on"
+                                                                 :style="{background: 'orange', height: journal.windowTotals.prop.oa*100 +'%'}"></div>
+                                                        </template>
+                                                        <span>window OA: {{ Math.round(journal.windowTotals.prop.oa*100) + "%" }}</span>
+                                                    </v-tooltip>
+
+                                                    <v-tooltip bottom>
+                                                        <template v-slot:activator="{ on }">
+                                                            <div class="back-catalog" v-on="on"
+                                                                 :style="{background: 'mediumblue', height: journal.windowTotals.prop.backCatalog*100 +'%'}"></div>
+                                                        </template>
+                                                        <span>window Back catalog: {{ Math.round(journal.windowTotals.prop.backCatalog*100) + "%" }}</span>
+                                                    </v-tooltip>
 
 
-<!--                                        <v-flex>-->
-<!--                                            downloads: {{journal.downloads_next_3_years.total.toLocaleString()}} (-->
-<!--                                            <span>{{ Math.round(journal.downloads_next_3_years.back_catalog / journal.downloads_next_3_years.total * 100) }}% back catalog, </span>-->
-<!--                                            <span>{{ Math.round(journal.downloads_next_3_years.oa / journal.downloads_next_3_years.total * 100) }}% OA, </span>-->
-<!--                                            <span>{{ Math.round(journal.downloads_next_3_years.turnaways / journal.downloads_next_3_years.total * 100) }}% turnaway</span>-->
-<!--                                            )-->
-<!--                                        </v-flex>-->
+                                                </v-flex>
+                                            </v-layout>
+                                        </v-flex>
+
+
+                                        <!--                                        <v-flex>-->
+                                        <!--                                            downloads: {{journal.downloads_next_3_years.total.toLocaleString()}} (-->
+                                        <!--                                            <span>{{ Math.round(journal.downloads_next_3_years.back_catalog / journal.downloads_next_3_years.total * 100) }}% back catalog, </span>-->
+                                        <!--                                            <span>{{ Math.round(journal.downloads_next_3_years.oa / journal.downloads_next_3_years.total * 100) }}% OA, </span>-->
+                                        <!--                                            <span>{{ Math.round(journal.downloads_next_3_years.turnaways / journal.downloads_next_3_years.total * 100) }}% turnaway</span>-->
+                                        <!--                                            )-->
+                                        <!--                                        </v-flex>-->
                                     </v-layout>
 
 
