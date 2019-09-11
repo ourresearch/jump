@@ -39,9 +39,29 @@
                                         <v-flex xs4>
                                             <v-layout style="height: 100px">
                                                 <v-flex class="pa-0 pr-1 year"  v-for="year in journal.years">
-                                                    <div class="turnaways" :style="{background: 'gray', height: year.prop.turnaways*100 +'%'}"></div>
-                                                    <div class="oa" :style="{background: 'orange', height: year.prop.oa*100 +'%'}"></div>
-                                                    <div class="back-catalog" :style="{background: 'mediumblue', height: year.prop.backCatalog*100 +'%'}"></div>
+
+                                                    <v-tooltip top>
+                                                      <template v-slot:activator="{ on }">
+                                                        <div class="turnaways" v-on="on" :style="{background: 'gray', height: year.prop.turnaways*100 +'%'}"></div>
+                                                      </template>
+                                                      <span>{{ year.year }} turnaways: {{ Math.round(year.prop.turnaways*100) + "%" }}</span>
+                                                    </v-tooltip>
+
+                                                    <v-tooltip left>
+                                                      <template v-slot:activator="{ on }">
+                                                        <div class="oa" v-on="on" :style="{background: 'orange', height: year.prop.oa*100 +'%'}"></div>
+                                                      </template>
+                                                      <span>{{ year.year }} OA: {{ Math.round(year.prop.oa*100) + "%" }}</span>
+                                                    </v-tooltip>
+
+                                                    <v-tooltip bottom>
+                                                      <template v-slot:activator="{ on }">
+                                                        <div class="back-catalog" v-on="on" :style="{background: 'mediumblue', height: year.prop.backCatalog*100 +'%'}"></div>
+                                                      </template>
+                                                      <span>{{ year.year }} Back catalog: {{ Math.round(year.prop.backCatalog*100) + "%" }}</span>
+                                                    </v-tooltip>
+
+
 
 
                                                 </v-flex>
