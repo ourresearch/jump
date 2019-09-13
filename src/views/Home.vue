@@ -1,11 +1,34 @@
 <template>
     <div class="home">
 
-        <v-container fluid grid-list-lg>
+        <v-container fluid grid-list-lg v-if="store.loadingState=='complete'">
             <v-layout row>
-                <v-flex xs12>
-                    <div>journals selected: {{ store.getSelected().length }}</div>
-                </v-flex>
+                <v-container fluid>
+                    <v-layout>
+                        <v-flex xs2 >
+                            <div class="label">
+                                baseline: {{store.journals.length}} journals
+                            </div>
+                            <div style="height: 100px;">
+                                <access-graph style="height: 100px;" :scenario="store.baselineScenario"></access-graph>
+
+                            </div>
+                        </v-flex>
+                        <v-flex xs2 class="ml-5">
+                            <div class="label">
+                                new: {{store.getSelected().length}} journals
+                            </div>
+                            <div style="height: 100px;">
+                                <access-graph style="height: 100px;" :scenario="store.getNewScenario()"></access-graph>
+
+                            </div>
+                        </v-flex>
+                    </v-layout>
+                    <v-layout>
+                    </v-layout>
+                </v-container>
+
+
             </v-layout>
             <v-layout row>
                 <v-flex md3>
@@ -39,29 +62,15 @@
                                             </v-layout>
 
 
+
+
                                             <v-layout>
+                                                <v-flex xs2>
+                                                    <access-graph style="height: 50px;" :scenario="journal.scenario"></access-graph>
 
-                                                <!-- year by year -->
-                                                <v-flex xs1>
-                                                    <v-layout style="height: 50px">
-                                                        <v-flex
-                                                                class="pa-0 year"
-                                                                style="border-right: 1px solid #fff;"
-                                                                v-for="snap in journal.timeline"
-                                                        >
-                                                            <downloads-bar :snap="snap"></downloads-bar>
-                                                        </v-flex>
-                                                    </v-layout>
+
                                                 </v-flex>
 
-                                                <!-- overall -->
-                                                <v-flex xs1>
-                                                    <v-layout style="height: 50px;">
-                                                        <v-flex class="pa-0 pl-2 pr-4">
-                                                            <downloads-bar :snap="journal.snap"></downloads-bar>
-                                                        </v-flex>
-                                                    </v-layout>
-                                                </v-flex>
 
 
 
@@ -154,11 +163,13 @@
     import axios from 'axios'
     import {store} from "../search.js"
     import DownloadsBar from "../components/DownloadsBar"
+    import AccessGraph from "../components/AccessGraph"
 
     export default {
         name: 'Home',
         components: {
-            DownloadsBar
+            DownloadsBar,
+            AccessGraph
         },
         data: () => ({
             store: store,

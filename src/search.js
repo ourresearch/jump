@@ -80,17 +80,55 @@ function makeSnapTimelineFromApi(apiTimeline, price){
     return ret
 }
 
+function makeSnapsFromTimeline(apiTimeline, price){
+    let ret = []
+    apiTimeline.year.forEach((year, i) => {
+
+        let downloads = {
+            backCatalog: apiTimeline.back_catalog[i],
+            oa: apiTimeline.oa[i],
+            turnaway: apiTimeline.turnaways[i]
+        }
+        let mySnap = new DownloadSnap(downloads, price)
+        mySnap.year = year
+        ret.push(mySnap)
+    })
+    return ret
+}
+
+function makeScenario(snaps){
+    let ret = {
+        years: makeSnapTimelineFromSnaps(snaps),
+        overall: combineSnaps(snaps)
+    }
+    return ret
+}
+
 function combineSnaps(snaps){
     let newSnap = new DownloadSnap()
     snaps.forEach(mySnap => {
         newSnap.add(mySnap.raw, mySnap.cost)
     })
-    console.log("new snap", newSnap)
     return newSnap
 }
 
+function makeSnapTimelineFromSnaps(snaps){
+    let years = {}
+    snaps.forEach(snap=>{
+        if (years[snap.year]) {
+            years[snap.year].add(snap.raw, snap.cost)
+        }
+        else {
+            years[snap.year] = new DownloadSnap(snap.raw, snap.cost)
+            years[snap.year].year = snap.year
+        }
+    })
+    let yearsArr = Object.values(years).sort((a, b) => {
+        return a.year - b.year
+    })
+    return yearsArr
 
-
+}
 
 
 
@@ -99,6 +137,7 @@ export const store = {
     loadingState: "ready",
     journalsCount: 0,
     journals: [],
+    scenarios: {},
     baseUrl: "https://rickscafe-api.herokuapp.com/jump/temp",
     page: 1,
     pageSize: 10,
@@ -140,6 +179,16 @@ export const store = {
         return Math.ceil(this.journals.length / this.pageSize)
     },
 
+    getNewScenario: function(){
+        let selectedSnaps = []
+        this.journals.forEach(journal => {
+            if (journal.selected){
+                selectedSnaps.push(...journal.timeline)
+            }
+        })
+
+        return makeScenario(selectedSnaps)
+    },
 
     fetchResults: function () {
 
@@ -163,8 +212,23 @@ export const store = {
                     journal.selected = true
                     journal.timeline = makeSnapTimelineFromApi(journal.downloads_by_year, journal.dollars_2018_subscription)
                     journal.snap = combineSnaps(journal.timeline)
+
+                    let snaps = makeSnapsFromTimeline(
+                        journal.downloads_by_year,
+                        journal.dollars_2018_subscription
+                    )
+                    journal.scenario = makeScenario(snaps)
+
                     return journal
                 })
+
+
+                let allSnaps = []
+                this.journals.forEach(journal => {
+                    allSnaps.push(...journal.timeline)
+                })
+                this.baselineScenario = makeScenario(allSnaps)
+
 
             })
             .catch(e => {
