@@ -12,51 +12,47 @@ import {resp} from "./journalsRespMock.js"
 
 class DownloadSnap{
     constructor(downloads, cost){
-        this.outcomes = [
-            "backCatalog",
-            "oa",
-            "turnaway"
-        ]
-        this.cost = 0
-        this.raw = {}
-        this.outcomes.forEach(x => {
+        this.turnawayAdjFactor = 0.1
+        this.docdelCostPerUse = 25
+        this.raw = {
+            backCatalog: 0,
+            oa: 0,
+            turnaway: 0
+        }
+
+        Object.keys(this.raw).forEach(x => {
             this.raw[x] = 0
         })
-
-
+        this.cost = 0
         this.prop = {}
         this.pricePer = {}
 
-        this.add(downloads, cost)
-    }
-    toDict(){
-        return {
-            year: this.year,
-            total: this.total,
-            cost: this.cost,
-            raw: this.raw,
-            prop: this.prop,
-            pricePer: this.pricePer
+        if (downloads && cost){
+            this.add(downloads, cost)
         }
     }
+
 
     add(downloads, cost){
         this.cost += cost
 
-        this.outcomes.forEach(x => {
+        Object.keys(this.raw).forEach(x => {
             this.raw[x] += downloads[x]
         })
         this.total = this.raw.backCatalog + this.raw.oa + this.raw.turnaway
 
-        this.outcomes.forEach(x => {
+        Object.keys(this.raw).forEach(x => {
             this.prop[x] = this.raw[x] / this.total
         })
 
         this.pricePer = {
-            download: this.total / cost,
-            turnaway: this.raw.turnaway / cost,
-            adjTurnaway: this.raw.turnaway * .1 / cost
+            download: cost /  this.total,
+            turnaway: cost / this.raw.turnaway,
+            adjTurnaway: cost / (this.raw.turnaway * this.turnawayAdjFactor)
         }
+
+        this.docdelCost = this.docdelCostPerUse * this.raw.turnaway * this.turnawayAdjFactor
+        this.docdelSavings = this.cost - this.docdelCost
     }
 }
 
@@ -82,7 +78,15 @@ function makeSnapTimelineFromApi(apiTimeline, price){
         ret.push(mySnap)
     })
     return ret
+}
 
+function combineSnaps(snaps){
+    let newSnap = new DownloadSnap()
+    snaps.forEach(mySnap => {
+        newSnap.add(mySnap.raw, mySnap.cost)
+    })
+    console.log("new snap", newSnap)
+    return newSnap
 }
 
 
@@ -158,7 +162,7 @@ export const store = {
                 this.journals = resp.data.list.map(journal => {
                     journal.selected = true
                     journal.timeline = makeSnapTimelineFromApi(journal.downloads_by_year, journal.dollars_2018_subscription)
-                    journal.snap = journal.timeline.reduce(addDownloadSnaps)
+                    journal.snap = combineSnaps(journal.timeline)
                     return journal
                 })
 
