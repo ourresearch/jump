@@ -61,12 +61,10 @@ class DownloadSnap{
 }
 
 function addDownloadSnaps(a, b){
-    if (!b) {
-        return a
-    }
     a.add(b.raw, b.cost)
     return a
 }
+
 
 
 
@@ -89,70 +87,6 @@ function makeSnapTimelineFromApi(apiTimeline, price){
 
 
 
-
-
-function makeYearBins(downloadsByYear){
-    const years = [0,1,2,3,4]
-    const metrics = [
-        "back_catalog",
-        "oa",
-        "turnaways"
-    ]
-    let ret = []
-    years.forEach(i => {
-        let year = {
-            year: downloads_by_year.year[i],
-            raw: {
-                backCatalog: downloadsByYear["back_catalog"][i],
-                oa: downloadsByYear["oa"][i],
-                turnaways: downloadsByYear["turnaways"][i],
-                total: downloadsByYear["total"][i],
-            },
-            prop: {}
-        }
-        year.prop.backCatalog =  year.raw.backCatalog / year.raw.total
-        year.prop.oa =  year.raw.oa / year.raw.total
-        year.prop.turnaways =  year.raw.turnaways / year.raw.total
-        ret.push(year)
-    })
-    return ret
-}
-
-function makeWindowTotals(downloadsByYear, price){
-    const years = [0,2,3,4,5]
-    const add = (a, b) => a + b;
-    let ret1 = {
-        backCatalog: 0,
-        oa: 0,
-        turnaways: 0,
-        total: 0,
-        price: 0
-    }
-
-    let ret = {
-        raw: {
-            backCatalog: downloadsByYear.back_catalog.reduce(add),
-            oa: downloadsByYear.oa.reduce(add),
-            turnaways: downloadsByYear.turnaways.reduce(add),
-            total: downloadsByYear.total.reduce(add),
-            price: price * years.length
-        },
-        prop: {},
-        pricePer: {},
-
-    }
-    ret.prop.backCatalog = ret.raw.backCatalog / ret.raw.total
-    ret.prop.oa = ret.raw.oa / ret.raw.total
-    ret.prop.turnaways = ret.raw.turnaways / ret.raw.total
-
-    ret.pricePer.download =  ret.raw.price / ret.raw.total
-    ret.pricePer.turnaways =  ret.raw.price / ret.raw.turnaways
-    ret.pricePer.requestedItem = ret.raw.price / (ret.raw.turnaways * .1)
-
-    ret.priceWithDocdel = (ret.raw.turnaways * .1 * 25) / 5
-
-    return ret
-}
 
 
 
@@ -224,7 +158,7 @@ export const store = {
                 this.journals = resp.data.list.map(journal => {
                     journal.selected = true
                     journal.timeline = makeSnapTimelineFromApi(journal.downloads_by_year, journal.dollars_2018_subscription)
-                    // journal.windowTotals = makeWindowTotals(journal.downloads_by_year, journal.dollars_2018_subscription)
+                    journal.snap = journal.timeline.reduce(addDownloadSnaps)
                     return journal
                 })
 

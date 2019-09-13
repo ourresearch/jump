@@ -40,6 +40,8 @@
 
 
                                             <v-layout>
+
+                                                <!-- year by year -->
                                                 <v-flex xs1>
                                                     <v-layout style="height: 50px">
                                                         <v-flex
@@ -47,46 +49,20 @@
                                                                 style="border-right: 1px solid #fff;"
                                                                 v-for="snap in journal.timeline"
                                                         >
-
                                                             <downloads-bar :snap="snap"></downloads-bar>
                                                         </v-flex>
                                                     </v-layout>
                                                 </v-flex>
 
-
                                                 <!-- overall -->
-<!--                                                <v-flex xs1 class="pl-3 pr-5">-->
-<!--                                                    <v-layout style="height: 50px">-->
-<!--                                                        <v-flex class="pa-0 overall">-->
+                                                <v-flex xs1>
+                                                    <v-layout style="height: 50px;">
+                                                        <v-flex class="pa-0 pl-2 pr-4">
+                                                            <downloads-bar :snap="journal.snap"></downloads-bar>
+                                                        </v-flex>
+                                                    </v-layout>
+                                                </v-flex>
 
-<!--                                                            <v-tooltip top>-->
-<!--                                                                <template v-slot:activator="{ on }">-->
-<!--                                                                    <div class="turnaways" v-on="on"-->
-<!--                                                                         :style="{background: 'gray', height: journal.windowTotals.prop.turnaways*100 +'%'}"></div>-->
-<!--                                                                </template>-->
-<!--                                                                <span>window turnaways: {{ Math.round(journal.windowTotals.prop.turnaways*100) + "%" }} ({{ journal.windowTotals.raw.turnaways.toLocaleString() }} total)</span>-->
-<!--                                                            </v-tooltip>-->
-
-<!--                                                            <v-tooltip right>-->
-<!--                                                                <template v-slot:activator="{ on }">-->
-<!--                                                                    <div class="oa" v-on="on"-->
-<!--                                                                         :style="{background: 'orange', height: journal.windowTotals.prop.oa*100 +'%'}"></div>-->
-<!--                                                                </template>-->
-<!--                                                                <span>window OA: {{ Math.round(journal.windowTotals.prop.oa*100) + "%" }}</span>-->
-<!--                                                            </v-tooltip>-->
-
-<!--                                                            <v-tooltip bottom>-->
-<!--                                                                <template v-slot:activator="{ on }">-->
-<!--                                                                    <div class="back-catalog" v-on="on"-->
-<!--                                                                         :style="{background: 'mediumblue', height: journal.windowTotals.prop.backCatalog*100 +'%'}"></div>-->
-<!--                                                                </template>-->
-<!--                                                                <span>window Back catalog: {{ Math.round(journal.windowTotals.prop.backCatalog*100) + "%" }}</span>-->
-<!--                                                            </v-tooltip>-->
-
-
-<!--                                                        </v-flex>-->
-<!--                                                    </v-layout>-->
-<!--                                                </v-flex>-->
 
 
 <!--                                                <v-flex shrink>-->
