@@ -4,6 +4,93 @@ import _ from 'lodash'
 import {resp} from "./journalsRespMock.js"
 
 
+
+
+
+
+
+
+class DownloadSnap{
+    constructor(downloads, cost){
+        this.outcomes = [
+            "backCatalog",
+            "oa",
+            "turnaway"
+        ]
+        this.cost = 0
+        this.raw = {}
+        this.outcomes.forEach(x => {
+            this.raw[x] = 0
+        })
+
+
+        this.prop = {}
+        this.pricePer = {}
+
+        this.add(downloads, cost)
+    }
+    toDict(){
+        return {
+            year: this.year,
+            total: this.total,
+            cost: this.cost,
+            raw: this.raw,
+            prop: this.prop,
+            pricePer: this.pricePer
+        }
+    }
+
+    add(downloads, cost){
+        this.cost += cost
+
+        this.outcomes.forEach(x => {
+            this.raw[x] += downloads[x]
+        })
+        this.total = this.raw.backCatalog + this.raw.oa + this.raw.turnaway
+
+        this.outcomes.forEach(x => {
+            this.prop[x] = this.raw[x] / this.total
+        })
+
+        this.pricePer = {
+            download: this.total / cost,
+            turnaway: this.raw.turnaway / cost,
+            adjTurnaway: this.raw.turnaway * .1 / cost
+        }
+    }
+}
+
+function addDownloadSnaps(a, b){
+    if (!b) {
+        return a
+    }
+    a.add(b.raw, b.cost)
+    return a
+}
+
+
+
+function makeSnapTimelineFromApi(apiTimeline, price){
+    let ret = []
+    apiTimeline.year.forEach((year, i) => {
+
+        let downloads = {
+            backCatalog: apiTimeline.back_catalog[i],
+            oa: apiTimeline.oa[i],
+            turnaway: apiTimeline.turnaways[i]
+        }
+        let mySnap = new DownloadSnap(downloads, price)
+        mySnap.year = year
+        ret.push(mySnap)
+    })
+    return ret
+
+}
+
+
+
+
+
 function makeYearBins(downloadsByYear){
     const years = [0,1,2,3,4]
     const metrics = [
@@ -65,8 +152,6 @@ function makeWindowTotals(downloadsByYear, price){
     ret.priceWithDocdel = (ret.raw.turnaways * .1 * 25) / 5
 
     return ret
-
-
 }
 
 
@@ -76,10 +161,9 @@ export const store = {
     loadingState: "ready",
     journalsCount: 0,
     journals: [],
-    resultsPerPage: 20,
     baseUrl: "https://rickscafe-api.herokuapp.com/jump/temp",
     page: 1,
-    pageSize: 50,
+    pageSize: 10,
 
 
     // this is for if you are doing filtering on the server, so you are making
@@ -94,10 +178,14 @@ export const store = {
     },
 
     getSorted: function(){
-        let fn = function(a, b){
-            return a.windowTotals.pricePer.requestedItem - b.windowTotals.pricePer.requestedItem
-        }
-        this.journals.sort(fn)
+
+
+
+
+        // let fn = function(a, b){
+        //     return a.windowTotals.pricePer.requestedItem - b.windowTotals.pricePer.requestedItem
+        // }
+        // this.journals.sort(fn)
 
         let startIndex = (this.page - 1) * this.pageSize
         let endIndex = (this.page * this.pageSize) - 1
@@ -135,11 +223,10 @@ export const store = {
                 console.log("got journals back")
                 this.journals = resp.data.list.map(journal => {
                     journal.selected = true
-                    journal.years = makeYearBins(journal.downloads_by_year)
-                    journal.windowTotals = makeWindowTotals(journal.downloads_by_year, journal.dollars_2018_subscription)
+                    journal.timeline = makeSnapTimelineFromApi(journal.downloads_by_year, journal.dollars_2018_subscription)
+                    // journal.windowTotals = makeWindowTotals(journal.downloads_by_year, journal.dollars_2018_subscription)
                     return journal
                 })
-                this.resultsCount = resp.data.count
 
             })
             .catch(e => {
@@ -152,6 +239,9 @@ export const store = {
     },
 
 }
+
+
+
 
 
 
