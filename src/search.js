@@ -19,11 +19,13 @@ class Snap {
             closed: 0
         }
         this.price = 0
+
     }
 
     getDownloadsSum(){
         return Object.values(this.rawDownloads).reduce((a,b)=>a+b)
     }
+
 
     getDownloadsPerc(){
         let ret = {}
@@ -33,17 +35,31 @@ class Snap {
         })
         return ret
     }
-    getDownloads(){
+    getDownloads() {
         console.log("Snap.getDownloads() need to be overridden")
+        return null
     }
 
     getCostPerClosedDownload(){
         return this.price / this.rawDownloads.closed
     }
 
+    getDict(){
+        return {
+            downloads: this.getDownloads(),
+            price: this.price,
+            downloadsPerc: this.getDownloadsPerc(),
+            downloadsClosed: this.rawDownloads.closed,
+            downloadsSum: this.getDownloadsSum(),
+            costPerNonfreeDownload: this.price / this.rawDownloads.closed,
+            costPerDownload: this.price / this.getDownloadsSum()
+        }
+    }
+
     addSnap(snap){
         console.log("Snap.addSnap() need to be overridden")
     }
+
 }
 
 
@@ -129,6 +145,7 @@ class JournalSnapTimeline {
         return ret
     }
 
+
     getSnaps(){
         return Object.keys(this.snaps).map(k=>{
             let mySnap = this.snaps[k]
@@ -136,6 +153,13 @@ class JournalSnapTimeline {
             mySnap.year = k
             return mySnap
         })
+    }
+
+    getSnapsDicts(){
+        return this.getSnaps().map(snap => snap.getDict())
+    }
+    getSummarySnapDict(){
+        return this.getSummarySnap().getDict()
     }
 }
 
@@ -179,6 +203,10 @@ class ScenarioSnapTimeline{
         })
 
         return Object.values(ret)
+    }
+
+    getSnapsDicts(){
+        return this.getSnaps().map(snap => snap.getDict())
     }
 
 }
@@ -277,6 +305,7 @@ export const store = {
                 })
 
                 // make a baseline here, using a deep copy of the response
+                // use this: JSON.parse(JSON.stringify(o))
                 this.baselineScenario = makeScenarioSnapTimeline(this.journals)
             })
             .catch(e => {

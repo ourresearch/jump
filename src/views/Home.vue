@@ -65,9 +65,11 @@
                                                     </span>
                                                 </v-flex>
                                             </v-layout>
+
                                             <v-layout>
                                                 <v-flex>
-                                                    <pre>{{journal.timeline.getSummarySnap().getDownloadsPerc()}}</pre>
+                                                    <timeline :timeline="journal.timeline"></timeline>
+
                                                 </v-flex>
                                             </v-layout>
 
@@ -152,13 +154,13 @@
     import axios from 'axios'
     import {store} from "../search.js"
     import DownloadsBar from "../components/DownloadsBar"
-    import AccessGraph from "../components/AccessGraph"
+    import Timeline from "../components/Timeline"
 
     export default {
         name: 'Home',
         components: {
             DownloadsBar,
-            AccessGraph
+            Timeline
         },
         data: () => ({
             store: store,

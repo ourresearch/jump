@@ -1,34 +1,14 @@
 <template>
-    <div style="height: 100%; width: 100%;">
-        <v-tooltip top>
+    <div class="bar-container" style="height: 100%; width: 100%;">
+
+        <v-tooltip top v-for="(perc, name) in snap.downloadsPerc">
             <template v-slot:activator="{ on }">
-                <div class="turnaways" v-on="on"
-                     :style="{background: 'gray', height: snap.prop.turnaway*100 +'%'}"></div>
+                <div class="download-type" v-on="on" :style="{background: color(name), height: perc+'%'}"></div>
             </template>
-            <span>{{ snap.year }} turnaways: {{ Math.round(snap.prop.turnaway*100) + "%" }} ({{ snap.raw.turnaway.toLocaleString() }} total)</span>
-        </v-tooltip>
-        <v-tooltip left>
-            <template v-slot:activator="{ on }">
-                <div class="purchased" v-on="on"
-                     :style="{background: '#d32f2f', height: snap.prop.purchased*100 +'%'}"></div>
-            </template>
-            <span>{{ snap.year }} purchased: {{ Math.round(snap.prop.purchased*100) + "%" }} ({{ snap.raw.purchased.toLocaleString() }} total)</span>
-        </v-tooltip>
-    
-        <v-tooltip left>
-            <template v-slot:activator="{ on }">
-                <div class="oa" v-on="on"
-                     :style="{background: 'orange', height: snap.prop.oa*100 +'%'}"></div>
-            </template>
-            <span>{{ snap.year }} OA: {{ Math.round(snap.prop.oa*100) + "%" }}</span>
-        </v-tooltip>
-    
-        <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-                <div class="back-catalog" v-on="on"
-                     :style="{background: 'mediumblue', height: snap.prop.backCatalog*100 +'%'}"></div>
-            </template>
-            <span>{{ snap.year }} Back catalog: {{ Math.round(snap.prop.backCatalog*100) + "%" }}</span>
+            <span>
+                {{snap.year}} {{name}}: {{Math.round(perc)+'%'}} ({{ snap.downloads[name].toLocaleString() }} total)
+            </span>
+
         </v-tooltip>
     </div>
     
@@ -41,6 +21,17 @@
         data: () => ({
 
         }),
+        methods: {
+            color(downloadType){
+                let colors = {
+                    backCatalog: "dodgerblue",
+                    oa: "gold",
+                    turnaway: "gray",
+                    purchased: "#d32f2f"
+                }
+                return colors[downloadType]
+            }
+        },
         computed: {
           isOnBasepage(){
               return false;
