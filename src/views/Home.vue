@@ -3,33 +3,31 @@
 
         <v-container fluid grid-list-lg v-if="store.loadingState=='complete'">
             <v-layout row>
-                <v-container fluid>
-                    <v-layout>
-                        <v-flex xs2 >
-                            <div class="label">
-                                baseline: {{store.journals.length}} journals
-                            </div>
-                            <div style="height: 100px;">
-                                <access-graph style="height: 100px;" :scenario="store.baselineScenario"></access-graph>
 
-                            </div>
-                        </v-flex>
-                        <v-flex xs2 class="ml-5">
-                            <div class="label">
-                                new: {{store.getSelected().length}} journals
-                            </div>
-                            <div style="height: 100px;">
-                                <access-graph style="height: 100px;" :scenario="store.getNewScenario()"></access-graph>
+                <v-flex xs2 >
+                    <div class="label">
+                        baseline: {{store.journals.length}} journals
+                    </div>
+                    <div style="height: 100px;">
+                        <access-graph style="height: 100px;" :scenario="store.baselineScenario"></access-graph>
 
-                            </div>
-                        </v-flex>
-                    </v-layout>
-                    <v-layout>
-                    </v-layout>
-                </v-container>
+                    </div>
+                </v-flex>
+                <v-flex xs2 class="ml-5">
+                    <div class="label">
+                        new: {{store.getSelected().length}} journals
+                    </div>
+                    <div style="height: 100px;">
+                        <access-graph style="height: 100px;" :scenario="store.getNewScenario()"></access-graph>
+
+                    </div>
+                </v-flex>
 
 
             </v-layout>
+
+
+
             <v-layout row>
                 <v-flex md3>
                     filters aqui
@@ -40,6 +38,8 @@
                             sorting by price per requested item.
                         </v-layout>
                         <v-layout column>
+
+                            <!-- journal row -->
                             <v-flex class="journal-row" v-for="(journal, index) in sortedJournals">
                                 <v-container>
                                     <v-layout align-items-top>
@@ -49,7 +49,7 @@
                                             ></v-checkbox>
                                         </v-flex>
 
-                                        <v-flex xs10>
+                                        <v-flex grow>
                                             <v-layout>
                                                 <v-flex>
                                                     <span class="name headline">
@@ -65,11 +65,26 @@
 
 
                                             <v-layout>
-                                                <v-flex xs2>
-                                                    <access-graph style="height: 50px;" :scenario="journal.scenario"></access-graph>
+                                                <div>
+                                                <div class="purchased">
+                                                    <div>Downloads purchased:</div>
+                                                    <div class="display-2">
+                                                        {{ journal.scenario.overall.raw.purchased.toLocaleString() }}
+                                                    </div>
+                                                    <div>
+                                                        {{ Math.round(journal.scenario.overall.prop.purchased*100) }}% of {{ journal.scenario.overall.total.toLocaleString() }} total
+                                                    </div>
+                                                </div>
 
 
-                                                </v-flex>
+                                            </div>
+
+
+<!--                                                <v-flex xs2>-->
+<!--                                                    <access-graph style="height: 50px;" :scenario="journal.scenario"></access-graph>-->
+
+
+<!--                                                </v-flex>-->
 
 
 
