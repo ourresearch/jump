@@ -66,7 +66,7 @@
 
                                             <v-layout>
                                                 <div>
-                                                <div class="purchased">
+                                                <div class="purchased text-xs-right">
                                                     <div>Downloads purchased:</div>
                                                     <div class="display-2">
                                                         {{ journal.scenario.overall.raw.purchased.toLocaleString() }}
@@ -80,11 +80,11 @@
                                             </div>
 
 
-<!--                                                <v-flex xs2>-->
-<!--                                                    <access-graph style="height: 50px;" :scenario="journal.scenario"></access-graph>-->
+                                                <v-flex xs2>
+                                                    <access-graph style="height: 100%;" :scenario="journal.scenario"></access-graph>
 
 
-<!--                                                </v-flex>-->
+                                                </v-flex>
 
 
 
