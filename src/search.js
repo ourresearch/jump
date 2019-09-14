@@ -18,12 +18,22 @@ class Snap {
             oa: 0,
             closed: 0
         }
+
+        // price never changes
         this.price = 0
+
+        // cost changes depending on subscription status
+        this.subscribed = true
+        this.cost = 0
 
     }
 
     getDownloadsSum(){
         return Object.values(this.rawDownloads).reduce((a,b)=>a+b)
+    }
+
+    getClassName(){
+        return this.constructor.name
     }
 
 
@@ -40,23 +50,22 @@ class Snap {
         return null
     }
 
-    getCostPerClosedDownload(){
-        return this.price / this.rawDownloads.closed
-    }
-
     getDict(){
         return {
             downloads: this.getDownloads(),
             price: this.price,
+            cost: this.cost,
+            subscribed: this.subscribed,
+
             downloadsPerc: this.getDownloadsPerc(),
             downloadsClosed: this.rawDownloads.closed,
             downloadsSum: this.getDownloadsSum(),
 
-            costPerNonfreeDownload: this.price / this.rawDownloads.closed,
-            costPerPurchasedDownload: this.price / this.getDownloads().purchased,
+            costPerPurchasedUse: this.cost / this.getDownloads().purchased,
+            pricePerPurchasedUse: this.price / this.rawDownloads.closed,
 
-
-            costPerDownload: this.price / this.getDownloadsSum()
+            isJournal: this.constructor.name === "JournalSnap",
+            isScenario: this.constructor.name === "ScenarioSnap"
         }
     }
 
@@ -73,6 +82,8 @@ class ScenarioSnap extends Snap {
     constructor(){
         super()
         this.numDownloadsPurchased = 0
+
+        this.cost = 0
     }
     getDownloads(){
 
@@ -89,17 +100,19 @@ class ScenarioSnap extends Snap {
         return ret
     }
 
+    // i think having an add(a, b) function might be better, so we don't have to carry state?
     addSnap(snap) {
         Object.keys(snap.rawDownloads).forEach(k=> {
             this.rawDownloads[k] += snap.rawDownloads[k]
         })
 
 
-        if (snap.isFullySubscribed){
+        if (snap.subscribed){
             this.numDownloadsPurchased += snap.rawDownloads.closed
-            let price = snap.price || 0
-            this.price += price
+            this.cost += (snap.price || 0)
         }
+
+        this.price += (snap.price || 0)
 
     }
 }
@@ -109,7 +122,7 @@ class ScenarioSnap extends Snap {
 class JournalSnap extends Snap {
     constructor(){
         super()
-        this.isFullySubscribed = true
+        this.subscribed = true
     }
     getDownloads(){
         let ret = {
@@ -119,11 +132,13 @@ class JournalSnap extends Snap {
         let numDownloadsWithAccess = Object.values(ret).reduce((a,b)=>a+b)
         let numPurchasable = this.getDownloadsSum() - numDownloadsWithAccess
 
-        if (this.isFullySubscribed){
+        if (this.subscribed){
             ret.purchased = numPurchasable
+            ret.turnaway = 0
         }
         else {
             ret.turnaway = numPurchasable
+            ret.purchased = 0
         }
         return ret
     }
@@ -149,7 +164,7 @@ class JournalSnapTimeline {
         Object.values(this.snaps).forEach(snap=>{
             ret.addSnap(snap)
         })
-        ret.isFullySubscribed = this.subscribed
+        ret.subscribed = this.subscribed
         return ret
     }
 
@@ -157,7 +172,7 @@ class JournalSnapTimeline {
     getSnaps(){
         return Object.keys(this.snaps).map(k=>{
             let mySnap = this.snaps[k]
-            mySnap.isFullySubscribed = this.subscribed
+            mySnap.subscribed = this.subscribed
             mySnap.year = k
             return mySnap
         })
@@ -198,7 +213,6 @@ class ScenarioSnapTimeline{
         })
 
         if (this.hardCodedPrice){
-            console.log("hard coded price", this.hardCodedPrice)
             ret.price = this.hardCodedPrice
         }
 

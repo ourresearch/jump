@@ -7,7 +7,7 @@
                      {{ summarySnap.downloadsSum.toLocaleString() }}
                 </div>
 
-                <div class="small-num" v-if="summarySnap.downloads.purchased">
+                <div class="small-num" v-if="1">
                     {{ summarySnap.downloads.purchased.toLocaleString() }}
                     <span class="perc">
                         ({{ Math.round(100*summarySnap.downloads.purchased / summarySnap.downloadsSum) }}%)
@@ -17,7 +17,7 @@
 
                 </div>
 
-                <div class="small-num" v-if="summarySnap.downloads.turnaway">
+                <div class="small-num" v-if="1">
                     {{ summarySnap.downloads.turnaway.toLocaleString() }}
                     <span class="perc">
                         ({{ Math.round(100*summarySnap.downloads.turnaway / summarySnap.downloadsSum) }}%)
@@ -39,21 +39,37 @@
                 </div>
             </v-flex>
 
-            <v-flex class="stat-col">
-                <div class="label">Price</div>
-                <div class="big-num">
-                    {{ currency(summarySnap.price) }}
+            <v-flex class="stat-col money">
+
+                <div v-if="summarySnap.isScenario">
+                    <div class="label">Cost</div>
+                    <div class="big-num">
+                        {{ currency(summarySnap.cost) }}
+                    </div>
+                </div>
+
+                <div v-if="summarySnap.isJournal">
+                    <div class="label">Price</div>
+                    <div class="big-num" :class="{unsubscribed: !summarySnap.subscribed}">
+                        {{ currency(summarySnap.price) }}
+                    </div>
+                </div>
+
+            </v-flex>
+
+
+            <v-flex class="stat-col money-per-use" v-if="summarySnap.isScenario">
+                <div class="label">Cost per purchased use</div>
+                <div class="big-num" >
+                    {{currency(summarySnap.costPerPurchasedUse)}}
                 </div>
             </v-flex>
-            <v-flex class="stat-col">
-                <div class="label">Cost per purchased download</div>
-                <div class="big-num">
-                    {{currency(summarySnap.costPerPurchasedDownload)}}
+
+            <v-flex class="stat-col money-per-use" v-if="summarySnap.isJournal">
+                <div class="label">Price per purchased use</div>
+                <div class="big-num" :class="{unsubscribed: !summarySnap.subscribed}">
+                    {{currency(summarySnap.pricePerPurchasedUse)}}
                 </div>
-<!--                <div class="small-num">-->
-<!--                    {{ currency(summarySnap.costPerDownload) }}-->
-<!--                    per any download-->
-<!--                </div>-->
             </v-flex>
 
 
@@ -96,6 +112,9 @@
 
         .big-num {
             font-size: 30px;
+            &.unsubscribed {
+                opacity: 0.1;
+            }
         }
     }
 

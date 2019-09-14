@@ -22,6 +22,12 @@
             <v-layout row>
                 <v-flex md3>
                     filters aqui
+                    <v-btn @click="uncheckEverything">
+                        <div>
+                            <i class="fas fa-radiation"></i>
+                            scorched earth
+                        </div>
+                    </v-btn>
                 </v-flex>
 
 
@@ -127,7 +133,14 @@
             }
 
         },
-        methods: {},
+        methods: {
+            uncheckEverything(){
+                console.log("uncheck everything!")
+                this.store.journals.map(journal=>{
+                    journal.timeline.subscribed = false
+                })
+            }
+        },
         mounted() {
             store.fetchResults()
         }
