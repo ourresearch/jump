@@ -6,16 +6,27 @@
                 <div class="big-num">
                      {{ summarySnap.downloadsSum.toLocaleString() }}
                 </div>
-                <div class="small-num">
-                    {{ summarySnap.downloadsClosed.toLocaleString() }}
+
+                <div class="small-num" v-if="summarySnap.downloads.purchased">
+                    {{ summarySnap.downloads.purchased.toLocaleString() }}
                     <span class="perc">
-                        ({{ Math.round(100*summarySnap.downloadsClosed / summarySnap.downloadsSum) }}%)
+                        ({{ Math.round(100*summarySnap.downloads.purchased / summarySnap.downloadsSum) }}%)
 
                     </span>
+                    purchased
 
-
-                    nonfree
                 </div>
+
+                <div class="small-num" v-if="summarySnap.downloads.turnaway">
+                    {{ summarySnap.downloads.turnaway.toLocaleString() }}
+                    <span class="perc">
+                        ({{ Math.round(100*summarySnap.downloads.turnaway / summarySnap.downloadsSum) }}%)
+
+                    </span>
+                    turnaways
+
+                </div>
+
             </v-flex>
             <v-flex class="stat-col">
                 <div class="bar-graph" style="height: 100%; display: flex;">
@@ -35,9 +46,9 @@
                 </div>
             </v-flex>
             <v-flex class="stat-col">
-                <div class="label">Cost per nonfree download</div>
+                <div class="label">Cost per purchased download</div>
                 <div class="big-num">
-                    {{currency(summarySnap.costPerNonfreeDownload)}}
+                    {{currency(summarySnap.costPerPurchasedDownload)}}
                 </div>
 <!--                <div class="small-num">-->
 <!--                    {{ currency(summarySnap.costPerDownload) }}-->

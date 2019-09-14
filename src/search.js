@@ -53,7 +53,7 @@ class Snap {
             downloadsSum: this.getDownloadsSum(),
 
             costPerNonfreeDownload: this.price / this.rawDownloads.closed,
-            costPerPurchasedDownload: this.price / this.getDownloadsSum().purchased,
+            costPerPurchasedDownload: this.price / this.getDownloads().purchased,
 
 
             costPerDownload: this.price / this.getDownloadsSum()
