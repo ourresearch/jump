@@ -51,7 +51,11 @@ class Snap {
             downloadsPerc: this.getDownloadsPerc(),
             downloadsClosed: this.rawDownloads.closed,
             downloadsSum: this.getDownloadsSum(),
+
             costPerNonfreeDownload: this.price / this.rawDownloads.closed,
+            costPerPurchasedDownload: this.price / this.getDownloadsSum().purchased,
+
+
             costPerDownload: this.price / this.getDownloadsSum()
         }
     }
@@ -171,8 +175,9 @@ class JournalSnapTimeline {
 
 
 class ScenarioSnapTimeline{
-    constructor(looseSnaps) {
+    constructor(looseSnaps, hardCodePrice) {
         this.looseSnaps = looseSnaps
+        this.hardCodedPrice = hardCodePrice
     }
 
     getSnapsByYear(){
@@ -191,6 +196,12 @@ class ScenarioSnapTimeline{
         this.looseSnaps.forEach(snap=>{
             ret.addSnap(snap)
         })
+
+        if (this.hardCodedPrice){
+            console.log("hard coded price", this.hardCodedPrice)
+            ret.price = this.hardCodedPrice
+        }
+
         return ret
     }
 
@@ -246,13 +257,12 @@ function makeJournalSnapTimeline(journal){
 }
 
 
-function makeScenarioSnapTimeline(journals) {
-    console.log("making the newScenario timeline")
+function makeScenarioSnapTimeline(journals, hardCodedPrice) {
     let looseSnaps = []
     journals.forEach(journal => {
         looseSnaps.push(...journal.timeline.getSnaps())
     })
-    return new ScenarioSnapTimeline(looseSnaps)
+    return new ScenarioSnapTimeline(looseSnaps, hardCodedPrice)
 }
 
 
@@ -320,8 +330,10 @@ export const store = {
                     journal.timeline = makeJournalSnapTimeline(journal)
                     return journal
                 })
-                this.baselineScenario = makeScenarioSnapTimeline(journalsDeepCopy)
-                this.baselineScenario.price = 1 * 1000 * 1000;  // a milli
+                this.baselineScenario = makeScenarioSnapTimeline(
+                    journalsDeepCopy,
+                    1000000
+                )
 
 
                 this.journals = resp.data.list.map(journal => {

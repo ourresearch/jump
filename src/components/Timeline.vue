@@ -71,7 +71,6 @@
                 return this.timeline.getSnapsDicts()
             },
             summarySnap() {
-                console.log("getting new summary")
                 return this.timeline.getSummarySnapDict()
             }
 
