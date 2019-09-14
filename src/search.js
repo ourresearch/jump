@@ -190,9 +190,9 @@ class JournalSnapTimeline {
 
 
 class ScenarioSnapTimeline{
-    constructor(looseSnaps, hardCodePrice) {
+    constructor(looseSnaps, hardCodedCost) {
         this.looseSnaps = looseSnaps
-        this.hardCodedPrice = hardCodePrice
+        this.hardCodedCost = hardCodedCost
     }
 
     getSnapsByYear(){
@@ -212,8 +212,8 @@ class ScenarioSnapTimeline{
             ret.addSnap(snap)
         })
 
-        if (this.hardCodedPrice){
-            ret.price = this.hardCodedPrice
+        if (this.hardCodedCost){
+            ret.cost = this.hardCodedCost
         }
 
         return ret
@@ -271,12 +271,12 @@ function makeJournalSnapTimeline(journal){
 }
 
 
-function makeScenarioSnapTimeline(journals, hardCodedPrice) {
+function makeScenarioSnapTimeline(journals, hardCodedCost) {
     let looseSnaps = []
     journals.forEach(journal => {
         looseSnaps.push(...journal.timeline.getSnaps())
     })
-    return new ScenarioSnapTimeline(looseSnaps, hardCodedPrice)
+    return new ScenarioSnapTimeline(looseSnaps, hardCodedCost)
 }
 
 
