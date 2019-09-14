@@ -74,42 +74,24 @@
 
 
 
-                                                <v-flex shrink>
-                                                    <table>
-                                                        <tr>
-                                                            <td>price per download</td>
-                                                            <td>${{journal.snap.pricePer.download.toFixed(2)}}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>price per unfulfilled download</td>
-                                                            <td>${{journal.snap.pricePer.turnaway.toFixed(2)}}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>price per requested download</td>
-                                                            <td>${{journal.snap.pricePer.adjTurnaway.toFixed(2)}}</td>
-                                                        </tr>
-                                                    </table>
-                                                </v-flex>
+<!--                                                <v-flex shrink>-->
+<!--                                                    <table>-->
+<!--                                                        <tr>-->
+<!--                                                            <td>price per download</td>-->
+<!--                                                            <td>${{journal.snap.pricePer.download.toFixed(2)}}</td>-->
+<!--                                                        </tr>-->
+<!--                                                        <tr>-->
+<!--                                                            <td>price per unfulfilled download</td>-->
+<!--                                                            <td>${{journal.snap.pricePer.turnaway.toFixed(2)}}</td>-->
+<!--                                                        </tr>-->
+<!--                                                        <tr>-->
+<!--                                                            <td>price per requested download</td>-->
+<!--                                                            <td>${{journal.snap.pricePer.adjTurnaway.toFixed(2)}}</td>-->
+<!--                                                        </tr>-->
+<!--                                                    </table>-->
+<!--                                                </v-flex>-->
 
 
-                                                <v-flex shrink>
-                                                    <table>
-                                                        <tr>
-                                                            <td>
-                                                                annual DocDel:
-                                                            </td>
-                                                            <td>
-                                                                ${{ (journal.snap.docdelCost / 5).toLocaleString() }}
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>annual DocDel savings</td>
-                                                            <td>
-                                                                ${{(journal.snap.docdelSavings / 5).toLocaleString()}}
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </v-flex>
 
 
 

@@ -7,6 +7,13 @@
             </template>
             <span>{{ snap.year }} turnaways: {{ Math.round(snap.prop.turnaway*100) + "%" }} ({{ snap.raw.turnaway.toLocaleString() }} total)</span>
         </v-tooltip>
+        <v-tooltip left>
+            <template v-slot:activator="{ on }">
+                <div class="purchased" v-on="on"
+                     :style="{background: '#d32f2f', height: snap.prop.purchased*100 +'%'}"></div>
+            </template>
+            <span>{{ snap.year }} purchased: {{ Math.round(snap.prop.purchased*100) + "%" }} ({{ snap.raw.purchased.toLocaleString() }} total)</span>
+        </v-tooltip>
     
         <v-tooltip left>
             <template v-slot:activator="{ on }">

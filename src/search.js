@@ -12,12 +12,13 @@ import {resp} from "./journalsRespMock.js"
 
 class DownloadSnap{
     constructor(downloads, cost){
-        this.turnawayAdjFactor = 0.1
+        this.purchasedAdjFactor = 0.1
         this.docdelCostPerUse = 25
         this.raw = {
             backCatalog: 0,
             oa: 0,
-            turnaway: 0
+            turnaway: 0,
+            purchased: 0
         }
 
         Object.keys(this.raw).forEach(x => {
@@ -39,7 +40,7 @@ class DownloadSnap{
         Object.keys(this.raw).forEach(x => {
             this.raw[x] += downloads[x]
         })
-        this.total = this.raw.backCatalog + this.raw.oa + this.raw.turnaway
+        this.total = this.raw.backCatalog + this.raw.oa + this.raw.turnaway + this.raw.purchased
 
         Object.keys(this.raw).forEach(x => {
             this.prop[x] = this.raw[x] / this.total
@@ -47,12 +48,12 @@ class DownloadSnap{
 
         this.pricePer = {
             download: cost /  this.total,
-            turnaway: cost / this.raw.turnaway,
-            adjTurnaway: cost / (this.raw.turnaway * this.turnawayAdjFactor)
+            purchased: cost / this.raw.purchased,
+            adjPurchased: cost / (this.raw.purchased * this.purchasedAdjFactor)
         }
 
-        this.docdelCost = this.docdelCostPerUse * this.raw.turnaway * this.turnawayAdjFactor
-        this.docdelSavings = this.cost - this.docdelCost
+        // this.docdelCost = this.docdelCostPerUse * this.raw.turnaway * this.purchasedAdjFactor
+        // this.docdelSavings = this.cost - this.docdelCost
     }
 }
 
@@ -71,7 +72,8 @@ function makeSnapTimelineFromApi(apiTimeline, price){
         let downloads = {
             backCatalog: apiTimeline.back_catalog[i],
             oa: apiTimeline.oa[i],
-            turnaway: apiTimeline.turnaways[i]
+            purchased: apiTimeline.turnaways[i],
+            turnaway: 0
         }
         let mySnap = new DownloadSnap(downloads, price)
         mySnap.year = year
@@ -87,7 +89,8 @@ function makeSnapsFromTimeline(apiTimeline, price){
         let downloads = {
             backCatalog: apiTimeline.back_catalog[i],
             oa: apiTimeline.oa[i],
-            turnaway: apiTimeline.turnaways[i]
+            purchased: apiTimeline.turnaways[i],
+            turnaway: 0
         }
         let mySnap = new DownloadSnap(downloads, price)
         mySnap.year = year
