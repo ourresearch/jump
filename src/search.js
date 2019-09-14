@@ -71,6 +71,7 @@ class ScenarioSnap extends Snap {
         this.numDownloadsPurchased = 0
     }
     getDownloads(){
+
         let ret = {
             backCatalog: this.rawDownloads.backCatalog,
             oa: this.rawDownloads.oa
@@ -88,10 +89,12 @@ class ScenarioSnap extends Snap {
         Object.keys(snap.rawDownloads).forEach(k=> {
             this.rawDownloads[k] += snap.rawDownloads[k]
         })
-        this.price += snap.price
-        console.log("adding a snap", this.price)
+
+
         if (snap.isFullySubscribed){
-            this.numDownloadsPurchased += snap.getDownloadsSum()
+            this.numDownloadsPurchased += snap.rawDownloads.closed
+            let price = snap.price || 0
+            this.price += price
         }
 
     }
@@ -127,6 +130,7 @@ class JournalSnap extends Snap {
         this.price += snap.price
     }
 }
+
 
 
 
@@ -209,6 +213,15 @@ class ScenarioSnapTimeline{
         return this.getSnaps().map(snap => snap.getDict())
     }
 
+
+    getSnapsDicts(){
+        return this.getSnaps().map(snap => snap.getDict())
+    }
+    getSummarySnapDict(){
+        return this.getSummarySnap().getDict()
+    }
+
+
 }
 
 
@@ -234,6 +247,7 @@ function makeJournalSnapTimeline(journal){
 
 
 function makeScenarioSnapTimeline(journals) {
+    console.log("making the newScenario timeline")
     let looseSnaps = []
     journals.forEach(journal => {
         looseSnaps.push(...journal.timeline.getSnaps())
@@ -299,14 +313,21 @@ export const store = {
         let request = axios.get(url)
             .then(resp => {
                 console.log("got journals back")
+
+                // make the baseline scenario
+                let respDeepCopy = JSON.parse(JSON.stringify(resp.data.list))
+                let journalsDeepCopy = respDeepCopy.map(journal => {
+                    journal.timeline = makeJournalSnapTimeline(journal)
+                    return journal
+                })
+                this.baselineScenario = makeScenarioSnapTimeline(journalsDeepCopy)
+                this.baselineScenario.price = 1 * 1000 * 1000;  // a milli
+
+
                 this.journals = resp.data.list.map(journal => {
                     journal.timeline = makeJournalSnapTimeline(journal)
                     return journal
                 })
-
-                // make a baseline here, using a deep copy of the response
-                // use this: JSON.parse(JSON.stringify(o))
-                this.baselineScenario = makeScenarioSnapTimeline(this.journals)
             })
             .catch(e => {
                 console.log("journals API error", e)
