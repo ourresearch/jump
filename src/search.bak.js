@@ -1,199 +1,270 @@
 import axios from 'axios'
 import _ from 'lodash'
 
+import {resp} from "./journalsRespMock.js"
 
 
-class UserInput {
-    constructor(defaultValue) {
-        this.default = defaultValue
-        this.selected = defaultValue
-    }
-    set(newVal){
-        this.selected = newVal
-    }
-    reset(){
-        this.selected = this.default
-    }
-
-    getString() {
-        return String(this.selected)
-    }
-
-    isDefault() {
-        return this.getString() === String(this.default)
-    }
-
-}
 
 
-class UserInputBool extends UserInput {
-    constructor(defaultValue) {
-        super(defaultValue)
-    }
 
-    setFromStr(newVal) {
-        this.selected = this.default
-        if (["1", "yes", "true"].includes(newVal)) {
-            this.selected = true
-        } else if (["0", "no", "false"].includes(newVal)) {
-            this.selected = false
+
+
+
+class DownloadSnap{
+    constructor(downloads, cost){
+        this.purchasedAdjFactor = 0.1
+        this.docdelCostPerUse = 25
+        this.raw = {
+            backCatalog: 0,
+            oa: 0,
+            turnaway: 0,
+            purchased: 0
+        }
+
+        Object.keys(this.raw).forEach(x => {
+            this.raw[x] = 0
+        })
+        this.cost = 0
+        this.prop = {}
+        this.pricePer = {}
+
+        if (downloads && cost){
+            this.add(downloads, cost)
         }
     }
 
-}
 
-class UserInputString extends UserInput {
-    constructor(defaultValue) {
-        super(defaultValue)
-    }
+    add(downloads, cost){
+        this.cost += cost
 
-    setFromStr(newVal) {
-        this.selected = this.default
-        if (typeof newVal === "string") {
-            this.selected = newVal
+        Object.keys(this.raw).forEach(x => {
+            this.raw[x] += downloads[x]
+        })
+        this.total = this.raw.backCatalog + this.raw.oa + this.raw.turnaway + this.raw.purchased
+
+        Object.keys(this.raw).forEach(x => {
+            this.prop[x] = this.raw[x] / this.total
+        })
+
+        this.pricePer = {
+            download: cost /  this.total,
+            purchased: cost / this.raw.purchased,
+            adjPurchased: cost / (this.raw.purchased * this.purchasedAdjFactor)
         }
-    }
-}
 
-
-class UserInputInt extends UserInput {
-    constructor(defaultValue) {
-        super(defaultValue)
-    }
-
-    setFromStr(newVal) {
-        this.selected = this.default
-        if (typeof newVal === "string") {
-            this.selected = parseInt(newVal)
-        }
+        // this.docdelCost = this.docdelCostPerUse * this.raw.turnaway * this.purchasedAdjFactor
+        // this.docdelSavings = this.cost - this.docdelCost
     }
 }
 
-
-class UserInputList extends UserInput {
-    // this is a work in progress. see the geo version of this (unpaywall-analytics-webapp) for code that handles arrays as a type of user input.
-
-    constructor(defaultValue, choices) {
-        super(defaultValue)
-        this.choices = choices
-    }
-
-    setFromStr(newVal) {
-        if (!newVal) {
-            newVal = this.default
-        } else if (newVal.indexOf(",") > -1) {
-            newVal = newVal.split(",")
-            newVal.sort()
-        }
-        this.selected = newVal
-    }
-
-    getForUrl() {
-        if (this.getString() === this.default.toString()) {
-            return
-        }
-        return this.getString()
-    }
-
-    getAsKey() {
-        return this.getString().replace(/,/g, "_")
-    }
-
-    getString() {
-        let selected
-        if (Array.isArray(this.selected)) {
-            selected = this.selected.concat().sort().join()
-        } else {
-            selected = this.selected.slice()
-        }
-        return selected
-    }
-
+function addDownloadSnaps(a, b){
+    a.add(b.raw, b.cost)
+    return a
 }
 
 
 
-export const articleSearch = {
+
+function makeSnapTimelineFromApi(apiTimeline, price){
+    let ret = []
+    apiTimeline.year.forEach((year, i) => {
+
+        let downloads = {
+            backCatalog: apiTimeline.back_catalog[i],
+            oa: apiTimeline.oa[i],
+            purchased: apiTimeline.turnaways[i],
+            turnaway: 0
+        }
+        let mySnap = new DownloadSnap(downloads, price)
+        mySnap.year = year
+        ret.push(mySnap)
+    })
+    return ret
+}
+
+function makeSnapsFromApi(apiTimeline, price){
+    let ret = []
+    apiTimeline.year.forEach((year, i) => {
+
+        let downloads = {
+            backCatalog: apiTimeline.back_catalog[i],
+            oa: apiTimeline.oa[i],
+            purchased: apiTimeline.turnaways[i],
+            turnaway: 0
+        }
+        let mySnap = new DownloadSnap(downloads, price)
+        mySnap.year = year
+        ret.push(mySnap)
+    })
+    return ret
+}
+
+function makeScenario(snaps){
+    let ret = {
+        years: makeSnapTimelineFromSnaps(snaps),
+        overall: combineSnaps(snaps)
+    }
+    return ret
+}
+
+function combineSnaps(snaps){
+    let newSnap = new DownloadSnap()
+    snaps.forEach(mySnap => {
+        newSnap.add(mySnap.raw, mySnap.cost)
+    })
+    return newSnap
+}
+
+function makeSnapTimelineFromSnaps(snaps){
+    let years = {}
+    snaps.forEach(snap=>{
+        if (years[snap.year]) {
+            years[snap.year].add(snap.raw, snap.cost)
+        }
+        else {
+            years[snap.year] = new DownloadSnap(snap.raw, snap.cost)
+            years[snap.year].year = snap.year
+        }
+    })
+    let yearsArr = Object.values(years).sort((a, b) => {
+        return a.year - b.year
+    })
+    return yearsArr
+
+}
+
+function addSnaps(a, b){
+    let ret = {
+        downloads: {},
+        price: 0,
+        year: null
+    }
+    Object.keys(a.downloads).forEach(k=>{
+        ret.downloads[k] = a.downloads[k] + b.downloads[k]
+    })
+    ret.price = a.price + b.price
+    return ret
+}
+
+function combineSnaps(snaps, reduceToOne){
+    let years = {}
+    snaps.forEach(snap=>{
+        if (years[snap.year]) {
+            years[snap.year].add(snap.raw, snap.cost)
+        }
+        else {
+            years[snap.year] = new DownloadSnap(snap.raw, snap.cost)
+            years[snap.year].year = snap.year
+        }
+    })
+    let yearsArr = Object.values(years).sort((a, b) => {
+        return a.year - b.year
+    })
+    return yearsArr
+
+}
+
+
+
+export const store = {
     loading: false,
     loadingState: "ready",
-    results: [],
-    resultsCount: 0,
-    resultsPerPage: 20,
-    db: [],
-    params: {
-        isOa: new UserInputBool(false),
-        page: new UserInputInt(1),
-        q: new UserInputString("")
-    },
-    baseUrl: "https://api.cdl.metrics.unpaywall.org/articles",
+    journalsCount: 0,
+    journals: [],
+    scenarios: {},
+    baseUrl: "https://rickscafe-api.herokuapp.com/jump/temp",
+    page: 1,
+    pageSize: 10,
 
 
     // this is for if you are doing filtering on the server, so you are making
     // a new API call to reflect the current state of the search params.
     getApiUrl: function () {
-        let params = this.getParams(true)
-        console.log("using these params to create search URL", params)
-        let queryObj = new URLSearchParams
-        let paramsStr = Object.entries(params)
-            .forEach(([paramName, paramVal]) => {
-                queryObj.append(paramName, paramVal)
-            })
-
-        // hack to handle naming issue in API signature
-        let queryStr = queryObj.toString()
-            .replace("isOa=false", "oa_host=none")
-            .replace("isOa=true", "oa_host=any")
-
-        return [this.baseUrl, queryStr].join("?")
+        return this.baseUrl
     },
 
     reset(){
-        this.results = []
+        this.journals = []
         this.resultsCount = 0
     },
 
-    getParams(hideDefaultValues){
-        let ret = {}
-        Object.entries(this.params).forEach(([paramName, paramObj]) => {
-            if (hideDefaultValues && paramObj.isDefault()) {
-                return true // continue looping
-            }
-            else {
-                ret[paramName] = paramObj.getString()
+    getSorted: function(){
+
+
+
+
+        // let fn = function(a, b){
+        //     return a.windowTotals.pricePer.requestedItem - b.windowTotals.pricePer.requestedItem
+        // }
+        // this.journals.sort(fn)
+
+        let startIndex = (this.page - 1) * this.pageSize
+        let endIndex = (this.page * this.pageSize) - 1
+
+        return this.journals.slice(startIndex, endIndex)
+    },
+
+    getSelected: function(){
+        return this.journals.filter(x =>{
+            return x.selected
+        })
+    },
+    getNumPages: function(){
+        return Math.ceil(this.journals.length / this.pageSize)
+    },
+
+    getNewScenario: function(){
+        let selectedSnaps = []
+        this.journals.forEach(journal => {
+            if (journal.selected){
+                selectedSnaps.push(...journal.snaps)
             }
         })
-        return ret
-    },
 
-    getNumPages(){
-      return Math.ceil(this.resultsCount / this.resultsPerPage)
+        return makeScenario(selectedSnaps)
     },
-    getPageOffsets(){
-        let startOffset = this.params.page.selected * this.resultsPerPage - (this.resultsPerPage - 1)
-        let endOffset = startOffset + 19
-        if (endOffset > this.resultsCount){
-            endOffset = this.resultsCount
-        }
-        return {
-            start: startOffset,
-            end: endOffset
-        }
-    },
-
 
     fetchResults: function () {
+
         this.loadingState = "loading"
         let url = this.getApiUrl()
-        console.log("fetching article results from", url)
+        console.log("fetching journals from", url)
+
+        // mock out the api response for now, because slow interwebs
+        // this.journals = resp.list
+        // this.journalsCount = resp.count
+        //
+        // return
+
+
+
+
         let request = axios.get(url)
             .then(resp => {
-                console.log("got article data back")
-                this.results = resp.data.list
-                this.resultsCount = resp.data.total_count
+                console.log("got journals back")
+                this.journals = resp.data.list.map(journal => {
+                    journal.selected = true
+                    journal.snaps = makeSnapsFromApi(
+                        journal.downloads_by_year,
+                        journal.dollars_2018_subscription
+                    )
+
+                    journal.scenario = makeScenario(snaps)
+
+                    return journal
+                })
+
+
+                let allSnaps = []
+                this.journals.forEach(journal => {
+                    allSnaps.push(...journal.timeline)
+                })
+                this.baselineScenario = makeScenario(allSnaps)
+
 
             })
             .catch(e => {
-                console.log("article API error", e)
+                console.log("journals API error", e)
             })
             .finally(() => {
                 this.loadingState = "complete"
@@ -201,40 +272,48 @@ export const articleSearch = {
         return request
     },
 
-    setUserInputsFromUrl(queryObj) {
-        for (const k in this.params) {
-            this.params[k].setFromStr(queryObj[k])
-        }
-
-    },
-
-    getUserInputsForUrl() {
-        let ret = {}
-        Object.entries(this.userInputs).forEach(([userInputName, userInput]) => {
-            if (userInput.getForUrl()) {
-                ret[userInputName] = userInput.getForUrl()
-            }
-        })
-        return ret
-
-    },
-    incrementYear() {
-        let intYear = parseInt(userInputs.year.selected)
-        if (intYear < 2018) {
-            intYear += 1
-        }
-
-        userInputs.year.selected = intYear.toString()
-    },
-    decrementYear() {
-        let intYear = parseInt(userInputs.year.selected)
-        if (intYear > 2009) {
-            intYear -= 1
-        }
-        console.log("intyear", intYear)
-        userInputs.year.selected = intYear.toString()
-
-    }
+}
 
 
+
+
+
+
+
+let downloads_by_year = {
+    back_catalog: [
+        47889,
+        38643,
+        31629,
+        25658,
+        20543
+    ],
+    oa: [
+        13073,
+        20623,
+        27121,
+        33091,
+        38206
+    ],
+    total: [
+        86722,
+        86722,
+        86722,
+        86722,
+        86722
+    ],
+    turnaways: [
+        25759,
+        27454,
+        27970,
+        27972,
+        27972
+    ],
+    year: [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+    ]
 }

@@ -3,7 +3,7 @@
         <v-flex v-for="year in scenario.years" class="px-0 mx-0" style="border-right: 0px solid transparent; max-width: 5%;">
             <downloads-bar :snap="year"></downloads-bar>
         </v-flex>
-        <v-flex class="pl-2" style="max-width: 40%">
+        <v-flex class="pl-2" style="max-width: 20%">
             <downloads-bar :snap="scenario.overall"></downloads-bar>
         </v-flex>
     </v-layout>

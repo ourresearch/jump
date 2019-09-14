@@ -10,137 +10,218 @@ import {resp} from "./journalsRespMock.js"
 
 
 
-class DownloadSnap{
-    constructor(downloads, cost){
-        this.purchasedAdjFactor = 0.1
-        this.docdelCostPerUse = 25
-        this.raw = {
+
+class Snap {
+    constructor() {
+        this.rawDownloads =  {
             backCatalog: 0,
             oa: 0,
-            turnaway: 0,
-            purchased: 0
+            closed: 0
         }
-
-        Object.keys(this.raw).forEach(x => {
-            this.raw[x] = 0
-        })
-        this.cost = 0
-        this.prop = {}
-        this.pricePer = {}
-
-        if (downloads && cost){
-            this.add(downloads, cost)
-        }
+        this.price = 0
     }
 
+    getDownloadsSum(){
+        return Object.values(this.rawDownloads).reduce((a,b)=>a+b)
+    }
 
-    add(downloads, cost){
-        this.cost += cost
-
-        Object.keys(this.raw).forEach(x => {
-            this.raw[x] += downloads[x]
+    getDownloadsPerc(){
+        let ret = {}
+        let myDownloads = this.getDownloads()
+        Object.keys(myDownloads).forEach(k=>{
+            ret[k] = 100 * myDownloads[k] / this.getDownloadsSum()
         })
-        this.total = this.raw.backCatalog + this.raw.oa + this.raw.turnaway + this.raw.purchased
+        return ret
+    }
+    getDownloads(){
+        console.log("Snap.getDownloads() need to be overridden")
+    }
 
-        Object.keys(this.raw).forEach(x => {
-            this.prop[x] = this.raw[x] / this.total
-        })
+    getCostPerClosedDownload(){
+        return this.price / this.rawDownloads.closed
+    }
 
-        this.pricePer = {
-            download: cost /  this.total,
-            purchased: cost / this.raw.purchased,
-            adjPurchased: cost / (this.raw.purchased * this.purchasedAdjFactor)
-        }
-
-        // this.docdelCost = this.docdelCostPerUse * this.raw.turnaway * this.purchasedAdjFactor
-        // this.docdelSavings = this.cost - this.docdelCost
+    addSnap(snap){
+        console.log("Snap.addSnap() need to be overridden")
     }
 }
 
-function addDownloadSnaps(a, b){
-    a.add(b.raw, b.cost)
-    return a
-}
 
 
 
-
-function makeSnapTimelineFromApi(apiTimeline, price){
-    let ret = []
-    apiTimeline.year.forEach((year, i) => {
-
-        let downloads = {
-            backCatalog: apiTimeline.back_catalog[i],
-            oa: apiTimeline.oa[i],
-            purchased: apiTimeline.turnaways[i],
-            turnaway: 0
-        }
-        let mySnap = new DownloadSnap(downloads, price)
-        mySnap.year = year
-        ret.push(mySnap)
-    })
-    return ret
-}
-
-function makeSnapsFromTimeline(apiTimeline, price){
-    let ret = []
-    apiTimeline.year.forEach((year, i) => {
-
-        let downloads = {
-            backCatalog: apiTimeline.back_catalog[i],
-            oa: apiTimeline.oa[i],
-            purchased: apiTimeline.turnaways[i],
-            turnaway: 0
-        }
-        let mySnap = new DownloadSnap(downloads, price)
-        mySnap.year = year
-        ret.push(mySnap)
-    })
-    return ret
-}
-
-function makeScenario(snaps){
-    let ret = {
-        years: makeSnapTimelineFromSnaps(snaps),
-        overall: combineSnaps(snaps)
+class ScenarioSnap extends Snap {
+    constructor(){
+        super()
+        this.numDownloadsPurchased = 0
     }
-    return ret
+    getDownloads(){
+        let ret = {
+            backCatalog: this.rawDownloads.backCatalog,
+            oa: this.rawDownloads.oa
+        }
+        let numDownloadsWithAccess = Object.values(ret).reduce((a,b)=>a+b)
+        let numPurchasable = this.getDownloadsSum() - numDownloadsWithAccess
+
+        ret.purchased = this.numDownloadsPurchased
+        ret.turnaway = numPurchasable -this.numDownloadsPurchased
+
+        return ret
+    }
+
+    addSnap(snap) {
+        Object.keys(snap.rawDownloads).forEach(k=> {
+            this.rawDownloads[k] += snap.rawDownloads[k]
+        })
+        this.price += snap.price
+        console.log("adding a snap", this.price)
+        if (snap.isFullySubscribed){
+            this.numDownloadsPurchased += snap.getDownloadsSum()
+        }
+
+    }
 }
 
-function combineSnaps(snaps){
-    let newSnap = new DownloadSnap()
-    snaps.forEach(mySnap => {
-        newSnap.add(mySnap.raw, mySnap.cost)
-    })
-    return newSnap
-}
 
-function makeSnapTimelineFromSnaps(snaps){
-    let years = {}
-    snaps.forEach(snap=>{
-        if (years[snap.year]) {
-            years[snap.year].add(snap.raw, snap.cost)
+
+class JournalSnap extends Snap {
+    constructor(){
+        super()
+        this.isFullySubscribed = true
+    }
+    getDownloads(){
+        let ret = {
+            backCatalog: this.rawDownloads.backCatalog,
+            oa: this.rawDownloads.oa
+        }
+        let numDownloadsWithAccess = Object.values(ret).reduce((a,b)=>a+b)
+        let numPurchasable = this.getDownloadsSum() - numDownloadsWithAccess
+
+        if (this.isFullySubscribed){
+            ret.purchased = numPurchasable
         }
         else {
-            years[snap.year] = new DownloadSnap(snap.raw, snap.cost)
-            years[snap.year].year = snap.year
+            ret.turnaway = numPurchasable
         }
-    })
-    let yearsArr = Object.values(years).sort((a, b) => {
-        return a.year - b.year
-    })
-    return yearsArr
+        return ret
+    }
+    addSnap(snap) {
+        Object.keys(snap.rawDownloads).forEach(k=> {
+            this.rawDownloads[k] += snap.rawDownloads[k]
+        })
+        this.price += snap.price
+    }
+}
+
+
+
+class JournalSnapTimeline {
+    constructor(){
+        this.snaps = {}
+        this.subscribed = true
+    }
+
+    getSummarySnap(){
+        let ret = new JournalSnap()
+        Object.values(this.snaps).forEach(snap=>{
+            ret.addSnap(snap)
+        })
+        ret.isFullySubscribed = this.subscribed
+        return ret
+    }
+
+    getSnaps(){
+        return Object.keys(this.snaps).map(k=>{
+            let mySnap = this.snaps[k]
+            mySnap.isFullySubscribed = this.subscribed
+            mySnap.year = k
+            return mySnap
+        })
+    }
+}
+
+
+
+
+class ScenarioSnapTimeline{
+    constructor(looseSnaps) {
+        this.looseSnaps = looseSnaps
+    }
+
+    getSnapsByYear(){
+        let ret = {}
+        this.looseSnaps.forEach(snap=>{
+            if (!ret[snap.year]){
+                ret[snap.year] = []
+            }
+            ret[snap.year].push(snap)
+        })
+        return ret
+    }
+
+    getSummarySnap(){
+        let ret = new ScenarioSnap()
+        this.looseSnaps.forEach(snap=>{
+            ret.addSnap(snap)
+        })
+        return ret
+    }
+
+    getSnaps(){
+        let snapsByYear = this.getSnapsByYear()
+        let ret = {}
+        Object.keys(snapsByYear).map(year => {
+            let yearSumSnap = new ScenarioSnap()
+            snapsByYear[year].forEach(snap=>{
+                yearSumSnap.addSnap(snap)
+            })
+            yearSumSnap.year = year
+            ret[year] = yearSumSnap
+        })
+
+        return Object.values(ret)
+    }
 
 }
+
+
+
+
+function makeJournalSnapTimeline(journal){
+    let snaps = {}
+    journal.downloads_by_year.year.forEach((year, i)=>{
+        let snap = new JournalSnap()
+        snap.rawDownloads = {
+            backCatalog: journal.downloads_by_year.back_catalog[i],
+            oa: journal.downloads_by_year.oa[i],
+            closed: journal.downloads_by_year.turnaways[i],
+        }
+        snap.price = journal.dollars_2018_subscription
+        snaps[year] = snap
+    })
+
+    let timeline = new JournalSnapTimeline()
+    timeline.snaps = snaps
+    return timeline
+}
+
+
+function makeScenarioSnapTimeline(journals) {
+    let looseSnaps = []
+    journals.forEach(journal => {
+        looseSnaps.push(...journal.timeline.getSnaps())
+    })
+    return new ScenarioSnapTimeline(looseSnaps)
+}
+
+
+
 
 
 
 export const store = {
-    loading: false,
     loadingState: "ready",
     journalsCount: 0,
     journals: [],
-    scenarios: {},
     baseUrl: "https://rickscafe-api.herokuapp.com/jump/temp",
     page: 1,
     pageSize: 10,
@@ -173,24 +254,12 @@ export const store = {
         return this.journals.slice(startIndex, endIndex)
     },
 
-    getSelected: function(){
-        return this.journals.filter(x =>{
-            return x.selected
-        })
-    },
     getNumPages: function(){
         return Math.ceil(this.journals.length / this.pageSize)
     },
 
     getNewScenario: function(){
-        let selectedSnaps = []
-        this.journals.forEach(journal => {
-            if (journal.selected){
-                selectedSnaps.push(...journal.timeline)
-            }
-        })
-
-        return makeScenario(selectedSnaps)
+        return makeScenarioSnapTimeline(this.journals)
     },
 
     fetchResults: function () {
@@ -199,40 +268,16 @@ export const store = {
         let url = this.getApiUrl()
         console.log("fetching journals from", url)
 
-        // mock out the api response for now, because slow interwebs
-        // this.journals = resp.list
-        // this.journalsCount = resp.count
-        //
-        // return
-
-
-
-
         let request = axios.get(url)
             .then(resp => {
                 console.log("got journals back")
                 this.journals = resp.data.list.map(journal => {
-                    journal.selected = true
-                    journal.timeline = makeSnapTimelineFromApi(journal.downloads_by_year, journal.dollars_2018_subscription)
-                    journal.snap = combineSnaps(journal.timeline)
-
-                    let snaps = makeSnapsFromTimeline(
-                        journal.downloads_by_year,
-                        journal.dollars_2018_subscription
-                    )
-                    journal.scenario = makeScenario(snaps)
-
+                    journal.timeline = makeJournalSnapTimeline(journal)
                     return journal
                 })
 
-
-                let allSnaps = []
-                this.journals.forEach(journal => {
-                    allSnaps.push(...journal.timeline)
-                })
-                this.baselineScenario = makeScenario(allSnaps)
-
-
+                // make a baseline here, using a deep copy of the response
+                this.baselineScenario = makeScenarioSnapTimeline(this.journals)
             })
             .catch(e => {
                 console.log("journals API error", e)
