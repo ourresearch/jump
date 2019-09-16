@@ -2,22 +2,22 @@
 
   <v-app id="inspire">
 
-    <v-toolbar color="green" dark fixed app>
-      <v-toolbar-side-icon @click.stop="drawer = !drawer" class="hidden-sm-and-up"></v-toolbar-side-icon>
-      <v-toolbar-title>
-        <v-btn flat to="/" active-class="">
-        Jump!
+<!--    <v-toolbar color="green" dark fixed app>-->
+<!--      <v-toolbar-side-icon @click.stop="drawer = !drawer" class="hidden-sm-and-up"></v-toolbar-side-icon>-->
+<!--      <v-toolbar-title>-->
+<!--        <v-btn flat to="/" active-class="">-->
+<!--        Jump!-->
 
-        </v-btn>
-      </v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-toolbar-items class="hidden-xs-only">
+<!--        </v-btn>-->
+<!--      </v-toolbar-title>-->
+<!--      <v-spacer></v-spacer>-->
+<!--      <v-toolbar-items class="hidden-xs-only">-->
 <!--        <v-btn flat to="./subscriptions">subscriptions</v-btn>-->
 <!--        <v-btn flat to="./articles">articles</v-btn>-->
 <!--        <v-btn flat to="./faq">faq</v-btn>-->
-      </v-toolbar-items>
+<!--      </v-toolbar-items>-->
 
-    </v-toolbar>
+<!--    </v-toolbar>-->
 
     <v-content>
 

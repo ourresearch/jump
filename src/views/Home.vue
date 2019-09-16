@@ -1,100 +1,96 @@
 <template>
-    <div class="home">
 
-        <v-container fluid grid-list-lg v-if="store.loadingState=='complete'">
+    <v-container class="home" fluid grid-list-lg v-if="store.loadingState=='complete'">
 
-            <v-layout row>
-                <v-flex xs3></v-flex>
-                <v-flex xs9>
-                    <timeline :timeline="store.baselineScenario"></timeline>
-                </v-flex>
-            </v-layout>
-
-            <v-layout row>
-                <v-flex xs3></v-flex>
-                <v-flex xs9>
-                    <timeline :timeline="newScenario"></timeline>
-                </v-flex>
-            </v-layout>
+        <!-- running total -->
+        <!--            <v-layout row style="position: fixed; top:0; left:0; right:0;background: #fff; z-index:1000;">-->
+        <!--                <v-flex xs3></v-flex>-->
+        <!--                <v-flex xs9>-->
+        <!--                    <timeline :timeline="newScenario"></timeline>-->
+        <!--                </v-flex>-->
+        <!--            </v-layout>-->
 
 
+        <!--- working area  -->
+        <v-layout row style="padding-top:200px;">
+            <v-flex md3>
+                filters aqui
+                <v-btn @click="uncheckEverything">
+                    <div>
+                        <i class="fas fa-radiation"></i>
+                        scorched earth
+                    </div>
+                </v-btn>
+            </v-flex>
 
-            <v-layout row>
-                <v-flex md3>
-                    filters aqui
-                    <v-btn @click="uncheckEverything">
-                        <div>
-                            <i class="fas fa-radiation"></i>
-                            scorched earth
-                        </div>
-                    </v-btn>
-                </v-flex>
 
+            <!--- journals list  -->
+            <v-flex md9>
+                <v-container>
+                    <v-layout>
+                        sorting by price per requested item.
+                    </v-layout>
 
-                <v-flex md9>
-                    <v-container>
-                        <v-layout>
-                            sorting by price per requested item.
-                        </v-layout>
-                        <v-layout column>
+                    <v-layout column>
 
-                            <!-- journal row -->
-                            <v-flex class="journal-row" v-for="(journal, index) in sortedJournals">
-                                <v-container>
-                                    <v-layout align-items-top>
-                                        <v-flex shrink>
-                                            <v-checkbox class="mt-0"
-                                                        v-model="journal.timeline.subscribed"
-                                            ></v-checkbox>
-                                        </v-flex>
+                        <!-- journal row -->
+                        <v-flex class="journal-row" v-for="(journal, index) in sortedJournals">
+                            <v-container>
+                                <v-layout align-items-top>
+                                    <v-flex shrink>
+                                        status
+                                    </v-flex>
 
-                                        <v-flex grow>
-                                            <v-layout>
-                                                <v-flex>
+                                    <v-flex grow>
+                                        <v-layout>
+                                            <v-flex>
                                                     <span class="name headline">
                                                         {{journal.title}}
                                                     </span>
-                                                    <span class="topic body-1">
+                                                <span class="topic body-1">
                                                         {{ journal.subject}}
                                                     </span>
-                                                </v-flex>
-                                            </v-layout>
+                                            </v-flex>
+                                        </v-layout>
 
-                                            <v-layout>
-                                                <v-flex>
-                                                    <timeline :timeline="journal.timeline"></timeline>
-                                                </v-flex>
-                                            </v-layout>
-                                        </v-flex>
-                                    </v-layout>
+                                        <v-layout>
 
 
-                                </v-container>
+                                            <timeline :timeline="journal.timeline">
+                                            </timeline>
+                                        </v-layout>
+                                    </v-flex>
+
+                                </v-layout>
 
 
-                            </v-flex>
-                        </v-layout>
-                        <v-layout>
-                            <v-pagination
+                            </v-container>
+
+
+                        </v-flex>
+
+
+                    </v-layout>
+                    <v-layout>
+                        <v-pagination
                                 class="ma-4"
-                              v-model="store.page"
-                              :length="store.getNumPages()"
-                              :total-visible="12"
-                            ></v-pagination>
-                        </v-layout>
+                                v-model="store.page"
+                                :length="store.getNumPages()"
+                                :total-visible="12"
+                        ></v-pagination>
+                    </v-layout>
 
-                    </v-container>
+                </v-container>
 
-                </v-flex>
-
-
-            </v-layout>
+            </v-flex>
 
 
-        </v-container>
+        </v-layout>
 
 
-    </div>
+    </v-container>
+
+
 </template>
 
 
@@ -116,27 +112,27 @@
 
         }),
         computed: {
-            numPages(){
+            numPages() {
                 return store.journals.length / 40
             },
-            pageMinIndex(){
+            pageMinIndex() {
                 return 0
             },
-            pageMaxIndex(){
+            pageMaxIndex() {
                 return 40
             },
-            sortedJournals(){
+            sortedJournals() {
                 return store.getSorted()
             },
-            newScenario(){
+            newScenario() {
                 return store.getNewScenario()
             }
 
         },
         methods: {
-            uncheckEverything(){
+            uncheckEverything() {
                 console.log("uncheck everything!")
-                this.store.journals.map(journal=>{
+                this.store.journals.map(journal => {
                     journal.timeline.subscribed = false
                 })
             }

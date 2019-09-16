@@ -2,36 +2,28 @@
     <div class="home">
 
         <v-container fluid grid-list-lg v-if="store.loadingState=='complete'">
-            <v-layout row>
 
-                <v-flex xs2 >
-                    <div class="label">
-                        baseline: {{store.journals.length}} journals
-                    </div>
-                    <div style="height: 100px;">
-                        <access-graph style="height: 100px;" :scenario="store.baselineScenario"></access-graph>
-
-                    </div>
+            <v-layout row style="position: fixed; top:0; left:0; right:0;background: #fff; z-index:1000000000000000000000;">
+                <v-flex xs3></v-flex>
+                <v-flex xs9>
+                    <timeline :timeline="newScenario"></timeline>
                 </v-flex>
-                <v-flex xs2 class="ml-5">
-                    <div class="label">
-                        new: {{store.getSelected().length}} journals
-                    </div>
-                    <div style="height: 100px;">
-                        <access-graph style="height: 100px;" :scenario="store.getNewScenario()"></access-graph>
-
-                    </div>
-                </v-flex>
-
-
             </v-layout>
 
 
 
-            <v-layout row>
+            <v-layout row style="padding-top:200px;">
                 <v-flex md3>
                     filters aqui
+                    <v-btn @click="uncheckEverything">
+                        <div>
+                            <i class="fas fa-radiation"></i>
+                            scorched earth
+                        </div>
+                    </v-btn>
                 </v-flex>
+
+
                 <v-flex md9>
                     <v-container>
                         <v-layout>
@@ -45,7 +37,7 @@
                                     <v-layout align-items-top>
                                         <v-flex shrink>
                                             <v-checkbox class="mt-0"
-                                                        v-model="journal.selected"
+                                                        v-model="journal.timeline.subscribed"
                                             ></v-checkbox>
                                         </v-flex>
 
@@ -61,80 +53,11 @@
                                                 </v-flex>
                                             </v-layout>
 
-
-
-
                                             <v-layout>
-                                                <v-flex xs3>
-                                                    <div class="access text-xs-right">
-                                                        <div>Downloads purchased:</div>
-                                                        <div class="display-2">
-                                                            {{ journal.scenario.overall.raw.purchased.toLocaleString() }}
-                                                        </div>
-                                                        <div>
-                                                            {{ Math.round(journal.scenario.overall.prop.purchased*100) }}% of {{ journal.scenario.overall.total.toLocaleString() }} total
-                                                        </div>
-                                                    </div>
-
-
+                                                <v-flex>
+                                                    <timeline :timeline="journal.timeline"></timeline>
                                                 </v-flex>
-
-
-                                                <v-flex xs2 class="ml-2 pb-0">
-                                                    <access-graph style="height: 100%;" :scenario="journal.scenario"></access-graph>
-
-
-                                                </v-flex>
-                                                <v-flex xs3>
-                                                    <div class="prices text-xs-right">
-                                                        <div>Price per:</div>
-                                                        <div class="display-2">
-                                                            ${{ journal.scenario.overall.pricePer.purchased.toLocaleString() }}
-                                                        </div>
-                                                        <div>
-                                                            ${{ journal.scenario.overall.cost.toLocaleString() }} total
-                                                        </div>
-                                                    </div>
-                                                </v-flex>
-
-
-
-
-
-<!--                                                <v-flex shrink>-->
-<!--                                                    <table>-->
-<!--                                                        <tr>-->
-<!--                                                            <td>price per download</td>-->
-<!--                                                            <td>${{journal.snap.pricePer.download.toFixed(2)}}</td>-->
-<!--                                                        </tr>-->
-<!--                                                        <tr>-->
-<!--                                                            <td>price per unfulfilled download</td>-->
-<!--                                                            <td>${{journal.snap.pricePer.turnaway.toFixed(2)}}</td>-->
-<!--                                                        </tr>-->
-<!--                                                        <tr>-->
-<!--                                                            <td>price per requested download</td>-->
-<!--                                                            <td>${{journal.snap.pricePer.adjTurnaway.toFixed(2)}}</td>-->
-<!--                                                        </tr>-->
-<!--                                                    </table>-->
-<!--                                                </v-flex>-->
-
-
-
-
-
-                                                <!--                                        <v-flex>-->
-                                                <!--                                            downloads: {{journal.downloads_next_3_years.total.toLocaleString()}} (-->
-                                                <!--                                            <span>{{ Math.round(journal.downloads_next_3_years.back_catalog / journal.downloads_next_3_years.total * 100) }}% back catalog, </span>-->
-                                                <!--                                            <span>{{ Math.round(journal.downloads_next_3_years.oa / journal.downloads_next_3_years.total * 100) }}% OA, </span>-->
-                                                <!--                                            <span>{{ Math.round(journal.downloads_next_3_years.turnaways / journal.downloads_next_3_years.total * 100) }}% turnaway</span>-->
-                                                <!--                                            )-->
-                                                <!--                                        </v-flex>-->
                                             </v-layout>
-
-
-                                        </v-flex>
-                                        <v-flex xs2 class="text-xs-right">
-                                            ${{journal.dollars_2018_subscription}}
                                         </v-flex>
                                     </v-layout>
 
@@ -172,13 +95,13 @@
     import axios from 'axios'
     import {store} from "../search.js"
     import DownloadsBar from "../components/DownloadsBar"
-    import AccessGraph from "../components/AccessGraph"
+    import Timeline from "../components/Timeline"
 
     export default {
         name: 'Home',
         components: {
             DownloadsBar,
-            AccessGraph
+            Timeline
         },
         data: () => ({
             store: store,
@@ -197,10 +120,20 @@
             },
             sortedJournals(){
                 return store.getSorted()
+            },
+            newScenario(){
+                return store.getNewScenario()
             }
 
         },
-        methods: {},
+        methods: {
+            uncheckEverything(){
+                console.log("uncheck everything!")
+                this.store.journals.map(journal=>{
+                    journal.timeline.subscribed = false
+                })
+            }
+        },
         mounted() {
             store.fetchResults()
         }

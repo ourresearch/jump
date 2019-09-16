@@ -24,10 +24,11 @@
         methods: {
             color(downloadType){
                 let colors = {
-                    backCatalog: "dodgerblue",
-                    oa: "gold",
-                    turnaway: "gray",
-                    purchased: "#d32f2f"
+                    backCatalog: "#c0ca33",
+                    oa: "#43a047",
+                    turnaway: "#555",
+                    purchased: "#ef5350",
+                    docdel: "#ff7043"
                 }
                 return colors[downloadType]
             }

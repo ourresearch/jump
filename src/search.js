@@ -9,6 +9,105 @@ import {resp} from "./journalsRespMock.js"
 
 
 
+function makeMod(usesCount, oaUsesCount, backCatalogUsesCount, subscriptionPrice, modType){
+    let softTurnawayProp = 0.1
+    let docDelPricePerUse = 25
+
+    let freeCount = oaUsesCount + backCatalogUsesCount
+    let unFreeCount = usesCount - freeCount
+
+    if (modType==="sample") {
+        return {
+            name: "default",
+            price: 0,
+            useCount: 0,
+            useProp: 0,
+            pricePerUse: 0
+        }
+    }
+    else if (modType==="oa") {
+        return {
+            name: "oa",
+            price: 0,
+            useCount: oaUsesCount,
+            useProp: oaUsesCount / usesCount,
+            pricePerUse: 0
+        }
+    }
+    else if (modType==="backCatalog") {
+        return {
+            name: "backCatalog",
+            price: 0,
+            useCount: backCatalogUsesCount,
+            useProp: backCatalogUsesCount / usesCount,
+            pricePerUse: 0
+        }
+    }
+    else if (modType==="softTurnaway") {
+        let count = unFreeCount * softTurnawayProp
+        return {
+            name: "softTurnaway",
+            price: 0,
+            useCount: count,
+            useProp: count / usesCount,
+            pricePerUse: 0
+        }
+    }
+    else if (modType==="hardTurnaway") {
+        let count = unFreeCount * (1-softTurnawayProp)
+        return {
+            name: "softTurnaway",
+            price: 0,
+            useCount: count,
+            useProp: count / usesCount,
+            pricePerUse: 0
+        }
+    }
+    else if (modType==="docdel") {
+        let count = unFreeCount * softTurnawayProp // same as soft turnaways
+        return {
+            name: "docdel",
+            price: count * docDelPricePerUse,
+            useCount: count,
+            useProp: count / usesCount,
+            pricePerUse: docDelPricePerUse
+        }
+    }
+    else if (modType==="subscription") {
+        return {
+            name: "subscription",
+            price: subscriptionPrice,
+            useCount: unFreeCount,
+            useProp: unFreeCount / usesCount,
+            pricePerUse: unFreeCount / usesCount
+        }
+    }
+}
+
+
+
+
+class UseProfile {
+    constructor(usesCount, oaUsesCount, backCatalogUsesCount, subscriptionCost) {
+        this.usesCount = this.usesCount
+        this.oaUsesCount = oaUsesCount
+        this.backCatalogUsesCount = backCatalogUsesCount
+
+        this.mods = {
+            oa: null,
+            backCatalog: null,
+            hardTurnaway: null,
+            softTurnaway: null,
+            docdel: null,
+            subscription: null
+        }
+    }
+
+    // @subscriptionType: none | docdel | full
+    getMods(subsciptionType) {
+
+    }
+}
 
 
 class Snap {
