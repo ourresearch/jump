@@ -38,7 +38,7 @@
                             <v-container>
                                 <v-layout align-items-top>
                                     <v-flex shrink>
-                                        status
+                                        <v-checkbox class="pa-0 mt-1"></v-checkbox>
                                     </v-flex>
 
                                     <v-flex grow>
@@ -56,7 +56,7 @@
                                         <v-layout>
 
 
-                                            <timeline :timeline="journal.timeline">
+                                            <timeline :stats="journal.statsByYear">
                                             </timeline>
                                         </v-layout>
                                     </v-flex>

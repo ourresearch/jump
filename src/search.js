@@ -7,376 +7,132 @@ import {resp} from "./journalsRespMock.js"
 
 
 
+const hardTurnawayProp = 0.1
+const docDelPricePerUse = 25
 
 
-function makeMod(usesCount, oaUsesCount, backCatalogUsesCount, subscriptionPrice, modType){
-    let softTurnawayProp = 0.1
-    let docDelPricePerUse = 25
-
-    let freeCount = oaUsesCount + backCatalogUsesCount
-    let unFreeCount = usesCount - freeCount
-
-    if (modType==="sample") {
-        return {
-            name: "default",
-            price: 0,
-            useCount: 0,
-            useProp: 0,
-            pricePerUse: 0
-        }
-    }
-    else if (modType==="oa") {
-        return {
-            name: "oa",
-            price: 0,
-            useCount: oaUsesCount,
-            useProp: oaUsesCount / usesCount,
-            pricePerUse: 0
-        }
-    }
-    else if (modType==="backCatalog") {
-        return {
-            name: "backCatalog",
-            price: 0,
-            useCount: backCatalogUsesCount,
-            useProp: backCatalogUsesCount / usesCount,
-            pricePerUse: 0
-        }
-    }
-    else if (modType==="softTurnaway") {
-        let count = unFreeCount * softTurnawayProp
-        return {
-            name: "softTurnaway",
-            price: 0,
-            useCount: count,
-            useProp: count / usesCount,
-            pricePerUse: 0
-        }
-    }
-    else if (modType==="hardTurnaway") {
-        let count = unFreeCount * (1-softTurnawayProp)
-        return {
-            name: "softTurnaway",
-            price: 0,
-            useCount: count,
-            useProp: count / usesCount,
-            pricePerUse: 0
-        }
-    }
-    else if (modType==="docdel") {
-        let count = unFreeCount * softTurnawayProp // same as soft turnaways
-        return {
-            name: "docdel",
-            price: count * docDelPricePerUse,
-            useCount: count,
-            useProp: count / usesCount,
-            pricePerUse: docDelPricePerUse
-        }
-    }
-    else if (modType==="subscription") {
-        return {
-            name: "subscription",
-            price: subscriptionPrice,
-            useCount: unFreeCount,
-            useProp: unFreeCount / usesCount,
-            pricePerUse: unFreeCount / usesCount
-        }
-    }
+function getModNum(stat, subscription, name, k){
+    return makeMods(stat, subscription).filter(x=>x.name === name)[0][k]
 }
 
-
-
-
-class UseProfile {
-    constructor(usesCount, oaUsesCount, backCatalogUsesCount, subscriptionCost) {
-        this.usesCount = this.usesCount
-        this.oaUsesCount = oaUsesCount
-        this.backCatalogUsesCount = backCatalogUsesCount
-
-        this.mods = {
-            oa: null,
-            backCatalog: null,
-            hardTurnaway: null,
-            softTurnaway: null,
-            docdel: null,
-            subscription: null
-        }
+function makeMods(stat, subscription){
+    let base = {
+        name: name,
+        price: 0,
+        count: 0,
+        prop: 0,
+        pricePerCount: 0,
+        color: "#000",
+        isFulfillment: true,
+        isEquipped: false
     }
 
-    // @subscriptionType: none | docdel | full
-    getMods(subsciptionType) {
+    let freeCount = stat.oaUseCount + stat.backCatalogUseCount
+    let unFreeCount = stat.useCount - freeCount
+    let hardTurnawayCount =  unFreeCount * hardTurnawayProp
 
-    }
-}
-
-
-class Snap {
-    constructor() {
-        this.rawDownloads =  {
-            backCatalog: 0,
-            oa: 0,
-            closed: 0
-        }
-
-        // price never changes
-        this.price = 0
-
-        // cost changes depending on subscription status
-        this.subscribed = true
-        this.cost = 0
-
-    }
-
-    getDownloadsSum(){
-        return Object.values(this.rawDownloads).reduce((a,b)=>a+b)
-    }
-
-    getClassName(){
-        return this.constructor.name
-    }
-
-
-    getDownloadsPerc(){
-        let ret = {}
-        let myDownloads = this.getDownloads()
-        Object.keys(myDownloads).forEach(k=>{
-            ret[k] = 100 * myDownloads[k] / this.getDownloadsSum()
-        })
-        return ret
-    }
-    getDownloads() {
-        console.log("Snap.getDownloads() need to be overridden")
-        return null
-    }
-
-    getDict(){
-        return {
-            downloads: this.getDownloads(),
-            price: this.price,
-            cost: this.cost,
-            subscribed: this.subscribed,
-
-            downloadsPerc: this.getDownloadsPerc(),
-            downloadsClosed: this.rawDownloads.closed,
-            downloadsSum: this.getDownloadsSum(),
-
-            costPerPurchasedUse: this.cost / this.getDownloads().purchased,
-            pricePerPurchasedUse: this.price / this.rawDownloads.closed,
-
-            isJournal: this.constructor.name === "JournalSnap",
-            isScenario: this.constructor.name === "ScenarioSnap"
-        }
-    }
-
-    addSnap(snap){
-        console.log("Snap.addSnap() need to be overridden")
-    }
-
-}
-
-
-
-
-class ScenarioSnap extends Snap {
-    constructor(){
-        super()
-        this.numDownloadsPurchased = 0
-
-        this.cost = 0
-    }
-    getDownloads(){
-
-        let ret = {
-            backCatalog: this.rawDownloads.backCatalog,
-            oa: this.rawDownloads.oa
-        }
-        let numDownloadsWithAccess = Object.values(ret).reduce((a,b)=>a+b)
-        let numPurchasable = this.getDownloadsSum() - numDownloadsWithAccess
-
-        ret.purchased = this.numDownloadsPurchased
-        ret.turnaway = numPurchasable -this.numDownloadsPurchased
-
-        return ret
-    }
-
-    // i think having an add(a, b) function might be better, so we don't have to carry state?
-    addSnap(snap) {
-        Object.keys(snap.rawDownloads).forEach(k=> {
-            this.rawDownloads[k] += snap.rawDownloads[k]
-        })
-
-
-        if (snap.subscribed){
-            this.numDownloadsPurchased += snap.rawDownloads.closed
-            this.cost += (snap.price || 0)
-        }
-
-        this.price += (snap.price || 0)
-
-    }
-}
-
-
-
-class JournalSnap extends Snap {
-    constructor(){
-        super()
-        this.subscribed = true
-    }
-    getDownloads(){
-        let ret = {
-            backCatalog: this.rawDownloads.backCatalog,
-            oa: this.rawDownloads.oa
-        }
-        let numDownloadsWithAccess = Object.values(ret).reduce((a,b)=>a+b)
-        let numPurchasable = this.getDownloadsSum() - numDownloadsWithAccess
-
-        if (this.subscribed){
-            ret.purchased = numPurchasable
-            ret.turnaway = 0
-        }
-        else {
-            ret.turnaway = numPurchasable
-            ret.purchased = 0
-        }
-        return ret
-    }
-    addSnap(snap) {
-        Object.keys(snap.rawDownloads).forEach(k=> {
-            this.rawDownloads[k] += snap.rawDownloads[k]
-        })
-        this.price += snap.price
-    }
-}
-
-
-
-
-class JournalSnapTimeline {
-    constructor(){
-        this.snaps = {}
-        this.subscribed = true
-    }
-
-    getSummarySnap(){
-        let ret = new JournalSnap()
-        Object.values(this.snaps).forEach(snap=>{
-            ret.addSnap(snap)
-        })
-        ret.subscribed = this.subscribed
-        return ret
-    }
-
-
-    getSnaps(){
-        return Object.keys(this.snaps).map(k=>{
-            let mySnap = this.snaps[k]
-            mySnap.subscribed = this.subscribed
-            mySnap.year = k
-            return mySnap
-        })
-    }
-
-    getSnapsDicts(){
-        return this.getSnaps().map(snap => snap.getDict())
-    }
-    getSummarySnapDict(){
-        return this.getSummarySnap().getDict()
-    }
-}
-
-
-
-
-class ScenarioSnapTimeline{
-    constructor(looseSnaps, hardCodedCost) {
-        this.looseSnaps = looseSnaps
-        this.hardCodedCost = hardCodedCost
-    }
-
-    getSnapsByYear(){
-        let ret = {}
-        this.looseSnaps.forEach(snap=>{
-            if (!ret[snap.year]){
-                ret[snap.year] = []
-            }
-            ret[snap.year].push(snap)
-        })
-        return ret
-    }
-
-    getSummarySnap(){
-        let ret = new ScenarioSnap()
-        this.looseSnaps.forEach(snap=>{
-            ret.addSnap(snap)
-        })
-
-        if (this.hardCodedCost){
-            ret.cost = this.hardCodedCost
-        }
-
-        return ret
-    }
-
-    getSnaps(){
-        let snapsByYear = this.getSnapsByYear()
-        let ret = {}
-        Object.keys(snapsByYear).map(year => {
-            let yearSumSnap = new ScenarioSnap()
-            snapsByYear[year].forEach(snap=>{
-                yearSumSnap.addSnap(snap)
+    let makers = {
+        oa: function() {
+            return Object.assign({}, base, {
+                name: "oa",
+                count: stat.oaUseCount,
+                prop: stat.oaUseCount / stat.useCount,
+                color: "#43a047",
+                isEquipped: true
             })
-            yearSumSnap.year = year
-            ret[year] = yearSumSnap
-        })
+        },
+        backCatalog: function() {
+            return Object.assign({},base, {
+                name: "backCatalog",
+                count: stat.backCatalogUseCount,
+                prop: stat.backCatalogUseCount / stat.useCount,
+                color: "#c0ca33",
+                isEquipped: true
+            })
+        },
+        fullSubscription: function() {
+            let ret = {
+                name: "fullSubscription",
+                color: "#ef5350"
+            }
+            if (subscription === "fullSubscription") {
+                ret = Object.assign({},ret, {
+                    price: stat.subscriptionPrice,
+                    count: unFreeCount,
+                    prop: unFreeCount - stat.useCount,
+                    pricePerCount: stat.subscriptionPrice / unFreeCount,
+                    isEquipped: true
+                })
+            }
+            return Object.assign({}, base, ret)
+        },
+        docdel: function() {
+            let ret = {
+                name: "docdel",
+                color: "#ff7043"
+            }
+            if (subscription === "docdel") {
+                ret = Object.assign({}, ret, {
+                    price: hardTurnawayCount * docDelPricePerUse,
+                    count: hardTurnawayCount,
+                    prop: hardTurnawayCount / stat.useCount,
+                    pricePerCount: docDelPricePerUse,
+                    isEquipped: true
+                })
+            }
+            return Object.assign({}, base, ret)
+        },
+        hardTurnaway: function() {
+            let ret = {
+                name: "hardTurnaway",
+                color: "#555",
+                isFulfillment: false
+            }
 
-        return Object.values(ret)
-    }
+            // docdel wipes out all hard turnaways
+            if (subscription !== "docdel") {
+                ret = Object.assign({}, ret, {
+                    count: hardTurnawayCount,
+                    prop: hardTurnawayCount / stat.useCount,
+                })
+            }
+            return Object.assign({}, base, ret)
+        },
+        softTurnaway: function() {
+            return Object.assign({}, base, {
+                name: "softTurnaway",
+                color: "#999",
+                isFulfillment: false,
+                count: (1 - hardTurnawayProp) * unFreeCount,
+                prop: ((1 - hardTurnawayProp) * unFreeCount) / stat.useCount,
 
-    getSnapsDicts(){
-        return this.getSnaps().map(snap => snap.getDict())
-    }
+            })
 
 
-    getSnapsDicts(){
-        return this.getSnaps().map(snap => snap.getDict())
-    }
-    getSummarySnapDict(){
-        return this.getSummarySnap().getDict()
-    }
+            let ret = {}
+            if (subscription !== "docdel") {
+                Object.assign(ret, {})
+            }
+            return ret
+        },
+    };
 
 
+    return Object.values(makers).map(x => x())
+    //
+    // let ret = {}
+    // Object.keys(makers).map(k=>{
+    //     ret[k] = makers[k]()
+    // })
+    // return ret
 }
 
 
 
 
-function makeJournalSnapTimeline(journal){
-    let snaps = {}
-    journal.downloads_by_year.year.forEach((year, i)=>{
-        let snap = new JournalSnap()
-        snap.rawDownloads = {
-            backCatalog: journal.downloads_by_year.back_catalog[i],
-            oa: journal.downloads_by_year.oa[i],
-            closed: journal.downloads_by_year.turnaways[i],
-        }
-        snap.price = journal.dollars_2018_subscription
-        snaps[year] = snap
-    })
-
-    let timeline = new JournalSnapTimeline()
-    timeline.snaps = snaps
-    return timeline
-}
 
 
-function makeScenarioSnapTimeline(journals, hardCodedCost) {
-    let looseSnaps = []
-    journals.forEach(journal => {
-        looseSnaps.push(...journal.timeline.getSnaps())
-    })
-    return new ScenarioSnapTimeline(looseSnaps, hardCodedCost)
-}
+
 
 
 
@@ -398,16 +154,7 @@ export const store = {
         return this.baseUrl
     },
 
-    reset(){
-        this.journals = []
-        this.resultsCount = 0
-    },
-
     getSorted: function(){
-
-
-
-
         // let fn = function(a, b){
         //     return a.windowTotals.pricePer.requestedItem - b.windowTotals.pricePer.requestedItem
         // }
@@ -423,9 +170,9 @@ export const store = {
         return Math.ceil(this.journals.length / this.pageSize)
     },
 
-    getNewScenario: function(){
-        return makeScenarioSnapTimeline(this.journals)
-    },
+    // selectMods: selectMods,
+    makeMods: makeMods,
+    getModNum: getModNum,
 
     fetchResults: function () {
 
@@ -437,22 +184,15 @@ export const store = {
             .then(resp => {
                 console.log("got journals back")
 
-                // make the baseline scenario
-                let respDeepCopy = JSON.parse(JSON.stringify(resp.data.list))
-                let journalsDeepCopy = respDeepCopy.map(journal => {
-                    journal.timeline = makeJournalSnapTimeline(journal)
-                    return journal
-                })
-                this.baselineScenario = makeScenarioSnapTimeline(
-                    journalsDeepCopy,
-                    1000000
-                )
-
-
                 this.journals = resp.data.list.map(journal => {
-                    journal.timeline = makeJournalSnapTimeline(journal)
+                    journal.statsByYear = statsByYear(
+                        journal.downloads_by_year,
+                        journal.dollars_2018_subscription
+                    )
                     return journal
                 })
+
+                // this.journalsOrig = JSON.parse(JSON.stringify(this.journals))
             })
             .catch(e => {
                 console.log("journals API error", e)
@@ -463,8 +203,64 @@ export const store = {
         return request
     },
 
+    getHardTurnaways(stat, subscription){
+
+    },
+
+
+
+
+
+
+    // utility functions
+
+    sumObjects: function(a, b){
+        let ret = {}
+        Object.keys(a).forEach(k => {
+            ret[k] = a[k] + b[k]
+        })
+        return ret
+    },
+
+    nFormat: function(num) {
+
+        if (num === 0){
+            return 0
+        }
+
+        if (num < 1) {
+            return Math.round(100*num) + "%"
+        }
+
+
+        // from http://stackoverflow.com/a/14994860/226013
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        }
+        if (num >= 1000) {
+            return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+        }
+        return num;
+    }
+
+
+
 }
 
+
+
+
+function statsByYear(apiDownloads, price){
+    return apiDownloads.year.map((year, i)=> {
+        return {
+            useCount: apiDownloads.total[i],
+            oaUseCount: apiDownloads.oa[i],
+            backCatalogUseCount: apiDownloads.back_catalog[i],
+            subscriptionPrice: price,
+            year: year
+        }
+    })
+}
 
 
 

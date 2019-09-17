@@ -1,12 +1,11 @@
 <template>
-    <div class="bar-container" style="height: 100%; width: 100%;">
-
-        <v-tooltip top v-for="(perc, name) in snap.downloadsPerc">
+    <div class="bar-container" style="height: 100%; flex-grow:1;">
+        <v-tooltip top v-for="mod in mods">
             <template v-slot:activator="{ on }">
-                <div class="download-type" v-on="on" :style="{background: color(name), height: perc+'%'}"></div>
+                <div class="mod" v-on="on" :style="{background: mod.color, height: mod.prop*100+'%'}"></div>
             </template>
             <span>
-                {{snap.year}} {{name}}: {{Math.round(perc)+'%'}} ({{ snap.downloads[name].toLocaleString() }} total)
+                {{year}} {{mod.name}}: {{Math.round(mod.prop*100)+'%'}} ({{ mod.count.toLocaleString() }} total)
             </span>
 
         </v-tooltip>
@@ -17,26 +16,13 @@
 <script>
     export default {
         name: "DownloadsBar",
-        props: ["snap"],
+        props: ["mods", "year"],
         data: () => ({
 
         }),
         methods: {
-            color(downloadType){
-                let colors = {
-                    backCatalog: "#c0ca33",
-                    oa: "#43a047",
-                    turnaway: "#555",
-                    purchased: "#ef5350",
-                    docdel: "#ff7043"
-                }
-                return colors[downloadType]
-            }
         },
         computed: {
-          isOnBasepage(){
-              return false;
-          }
         }
     }
 </script>
