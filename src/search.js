@@ -15,6 +15,15 @@ function getModNum(stat, subscription, name, k){
     return makeMods(stat, subscription).filter(x=>x.name === name)[0][k]
 }
 
+
+
+function makeHypotheticalPaidMods(stat){
+    return [
+        makeMods(stat, "fullSubscription").find(x=>x.name==="fullSubscription"),
+        makeMods(stat, "docdel").find(x=>x.name==="docdel")
+    ]
+}
+
 function makeMods(stat, subscription){
     let base = {
         name: name,
@@ -24,7 +33,8 @@ function makeMods(stat, subscription){
         pricePerCount: 0,
         color: "#000",
         isFulfillment: true,
-        isEquipped: false
+        isEquipped: false,
+        isPaid: false
     }
 
     let freeCount = stat.oaUseCount + stat.backCatalogUseCount
@@ -53,13 +63,14 @@ function makeMods(stat, subscription){
         fullSubscription: function() {
             let ret = {
                 name: "fullSubscription",
-                color: "#ef5350"
+                color: "#ef5350",
+                isPaid: true
             }
             if (subscription === "fullSubscription") {
-                ret = Object.assign({},ret, {
+                ret = Object.assign({}, ret, {
                     price: stat.subscriptionPrice,
                     count: unFreeCount,
-                    prop: unFreeCount - stat.useCount,
+                    prop: unFreeCount / stat.useCount,
                     pricePerCount: stat.subscriptionPrice / unFreeCount,
                     isEquipped: true
                 })
@@ -69,7 +80,8 @@ function makeMods(stat, subscription){
         docdel: function() {
             let ret = {
                 name: "docdel",
-                color: "#ff7043"
+                color: "#ff7043",
+                isPaid: true
             }
             if (subscription === "docdel") {
                 ret = Object.assign({}, ret, {
@@ -90,7 +102,8 @@ function makeMods(stat, subscription){
             }
 
             // docdel wipes out all hard turnaways
-            if (subscription !== "docdel") {
+            // fullsubscription does too
+            if (subscription === "free") {
                 ret = Object.assign({}, ret, {
                     count: hardTurnawayCount,
                     prop: hardTurnawayCount / stat.useCount,
@@ -99,21 +112,20 @@ function makeMods(stat, subscription){
             return Object.assign({}, base, ret)
         },
         softTurnaway: function() {
-            return Object.assign({}, base, {
+            let ret = {
                 name: "softTurnaway",
                 color: "#999",
-                isFulfillment: false,
-                count: (1 - hardTurnawayProp) * unFreeCount,
-                prop: ((1 - hardTurnawayProp) * unFreeCount) / stat.useCount,
-
-            })
-
-
-            let ret = {}
-            if (subscription !== "docdel") {
-                Object.assign(ret, {})
+                isFulfillment: false
             }
-            return ret
+
+            // full subscription wipes out all soft turnaways
+            if (subscription !== "fullSubscription") {
+                ret = Object.assign({}, ret, {
+                    count: (1 - hardTurnawayProp) * unFreeCount,
+                    prop: ((1 - hardTurnawayProp) * unFreeCount) / stat.useCount,
+                })
+            }
+            return Object.assign({}, base, ret)
         },
     };
 
@@ -173,6 +185,7 @@ export const store = {
     // selectMods: selectMods,
     makeMods: makeMods,
     getModNum: getModNum,
+    makeHypotheticalPaidMods: makeHypotheticalPaidMods,
 
     fetchResults: function () {
 
@@ -222,14 +235,23 @@ export const store = {
         return ret
     },
 
-    nFormat: function(num) {
+    nFormat: function(num, hidePercent) {
+
+        if (!num){
+            return 0
+        }
 
         if (num === 0){
             return 0
         }
 
         if (num < 1) {
-            return Math.round(100*num) + "%"
+            if (hidePercent){
+                return num.toFixed(2)
+            }
+            else {
+                return Math.round(100*num) + "%"
+            }
         }
 
 

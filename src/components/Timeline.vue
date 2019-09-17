@@ -34,10 +34,10 @@
                     </v-flex>
 
                     <v-flex class="cost py-0" xs3>
-                        {{nf(fulfilledCost)}}
+                        ${{nf(fulfilledCost)}}
                     </v-flex>
                     <v-flex class="cost-per-use py-0" sx3>
-                        {{ pricePerPaiduse.toFixed(2) }}
+                        ${{ nf(pricePerPaiduse, true) }}
                     </v-flex>
                 </v-layout>
 
@@ -47,9 +47,9 @@
                     <v-flex class="use py-0" xs6>
                         <v-layout>
                             <v-flex xs4 class="text-xs-left">
-                                <span v-if="mod.price > 0" @click="subscriptionName='free'">
-                                    [-] remove
-                                </span>
+                                <a v-if="mod.isPaid" @click="subscriptionName='free'">
+                                    -remove
+                                </a>
                             </v-flex>
                             <v-flex xs4 class="text-xs-left">{{mod.name}}</v-flex>
                             <v-flex xs4>{{ nf(mod.count) }}</v-flex>
@@ -57,24 +57,24 @@
                     </v-flex>
 
                     <v-flex class="cost py-0" xs3>
-                        {{nf(mod.price)}}
+                        ${{nf(mod.price)}}
                     </v-flex>
                     <v-flex class="cost-per-use py-0" sx3>
-                        {{mod.pricePerCount.toFixed(2) }}
+                        ${{mod.pricePerCount.toFixed(2) }}
                     </v-flex>
                 </v-layout>
 
 
 
-                <v-layout style="border-bottom: 1px solid #ccc;"></v-layout>
+                <v-layout class="py-2" style="border-bottom: 1px solid #ccc;"></v-layout>
 
 
-                <v-layout class="mod-row not-equipped" v-for="mod in modCart">
+                <v-layout class="mod-row not-equipped" v-if="mod.name !== subscriptionName" v-for="mod in hypotheticalPaidMods">
 
                     <v-flex class="use py-0" xs6>
                         <v-layout>
                             <v-flex xs4 class="text-xs-left">
-                                <a href="">+equip</a>
+                                <a @click="subscriptionName=mod.name">+select</a>
                             </v-flex>
                             <v-flex xs4 class="text-xs-left">{{mod.name}}</v-flex>
                             <v-flex xs4>{{ nf(mod.count) }}</v-flex>
@@ -82,10 +82,10 @@
                     </v-flex>
 
                     <v-flex class="cost py-0" xs3>
-                        {{nf(mod.price)}}
+                        ${{nf(mod.price)}}
                     </v-flex>
                     <v-flex class="cost-per-use py-0" sx3>
-                        {{mod.pricePerCount.toFixed(2)}}
+                        ${{mod.pricePerCount.toFixed(2)}}
                     </v-flex>
                 </v-layout>
             </v-flex>
@@ -124,7 +124,6 @@
             DownloadsBar
         },
         data: () => ({
-            subscriptionType: null,
             store: store,
             subscriptionName: "free"
         }),
@@ -166,13 +165,18 @@
             subscription(){
                 return store.makeMods(this._overallStats, this.subscriptionName)
             },
+            hypotheticalPaidMods() {
+                return this.store.makeHypotheticalPaidMods(this._overallStats)
+            },
             yearlySubscription(){
-                return this.stats.map(yearStat => {
+                let ret = this.stats.map(yearStat => {
                     return {
                         year: yearStat.year,
                         mods: store.makeMods(yearStat, this.subscriptionName)
                     }
                 })
+                console.log("yearly subscriptions", ret[0])
+                return ret
             },
             softTurnaway(){
                 return this.subscription.filter(x=>x.name==="softTurnaway")[0]
