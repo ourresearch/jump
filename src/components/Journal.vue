@@ -1,14 +1,36 @@
 <template>
     <v-container class="timeline pa-2">
+        <!--        <v-layout>-->
+        <!--            <v-flex><pre>{{ (subscription) }}</pre></v-flex>-->
+        <!--        </v-layout>-->
+
+
 <!--        <v-layout>-->
-<!--            <v-flex><pre>{{ (subscription) }}</pre></v-flex>-->
+<!--            <v-flex>-->
+<!--                {{subscriptionName}}-->
+<!--            </v-flex>-->
+
+
 <!--        </v-layout>-->
+        <v-layout>
+
+
+            <v-flex>
+                <span class="name headline">
+                    {{journal.meta.title}}
+                </span>
+                <span class="topic body-1">
+                    {{ journal.meta.subject}}
+                </span>
+            </v-flex>
+        </v-layout>
 
         <v-layout align-items-top class="text-xs-right">
             <v-flex class="fulfillment-graph text-xs-left" xs1>
                 <div style="display: flex; width:100%; height: 40%;">
-                    <downloads-bar :mods="subscription" class="pr-1" style="flex-grow:3;"></downloads-bar>
-                    <downloads-bar v-for="yearSubscription in yearlySubscription" :year="yearSubscription.year" :mods="yearSubscription.mods"></downloads-bar>
+                    <downloads-bar :mods="journal.uses" class="pr-1" style="flex-grow:3;"></downloads-bar>
+                    <downloads-bar v-for="yearSubscription in journal.yearlyUses" :year="yearSubscription.year"
+                                   :mods="yearSubscription.uses"></downloads-bar>
 
                 </div>
             </v-flex>
@@ -30,24 +52,23 @@
 
                 <v-layout class="main-row main-number">
                     <v-flex class="use py-0" xs6>
-                        {{ nf(fulfilledCount) }}
+                        {{ nf(journal.fulfilledCount) }}
                     </v-flex>
 
                     <v-flex class="cost py-0" xs3>
-                        ${{nf(fulfilledCost)}}
+                        ${{nf(journal.fulfilledCost)}}
                     </v-flex>
                     <v-flex class="cost-per-use py-0" sx3>
-                        ${{ nf(pricePerPaiduse, true) }}
+                        ${{ nf(journal.pricePerPaiduse, true) }}
                     </v-flex>
                 </v-layout>
 
 
-
-                <v-layout class="mod-row equipped" v-for="mod in subscription.filter(x=>x.isEquipped)">
+                <v-layout class="mod-row equipped" v-for="mod in journal.uses.filter(x=>x.isEquipped)">
                     <v-flex class="use py-0" xs6>
                         <v-layout>
                             <v-flex xs4 class="text-xs-left">
-                                <a v-if="mod.isPaid" @click="subscriptionName='free'">
+                                <a v-if="mod.isPaid" @click="setSubscription('free')">
                                     -remove
                                 </a>
                             </v-flex>
@@ -65,16 +86,15 @@
                 </v-layout>
 
 
-
                 <v-layout class="py-2" style=""></v-layout>
 
 
-                <v-layout class="mod-row not-equipped" v-if="mod.name !== subscriptionName" v-for="mod in hypotheticalPaidMods">
+                <v-layout class="mod-row not-equipped" v-for="mod in journal.potentialUses">
 
                     <v-flex class="use py-0" xs6>
                         <v-layout>
                             <v-flex xs4 class="text-xs-left">
-                                <a @click="subscriptionName=mod.name">+select</a>
+                                <a @click="setSubscription(mod.name)">+select</a>
                             </v-flex>
                             <v-flex xs4 class="text-xs-left">{{mod.name}}</v-flex>
                             <v-flex xs4>{{ nf(mod.count) }}</v-flex>
@@ -91,20 +111,18 @@
             </v-flex>
 
 
-
             <v-flex class="turnaway-uses py-0" xs2 style="border-left: 1px solid #999;">
                 <div class="heading">Turnaways</div>
                 <div class="main-number">
-                    {{ nf(softTurnaway.count + hardTurnaway.count) }}
+                    {{ nf(journal.getUse('softTurnaway').count + journal.getUse('hardTurnaway').count) }}
                 </div>
                 <div class="under-number">
-                    {{ nf(softTurnaway.count)}} soft
+                    {{ nf(journal.getUse('softTurnaway').count)}} soft
                 </div>
                 <div class="under-number">
-                    {{ nf(hardTurnaway.count)}} hard
+                    {{ nf(journal.getUse('hardTurnaway').count)}} hard
                 </div>
             </v-flex>
-
 
 
         </v-layout>
@@ -119,75 +137,36 @@
 
     export default {
         name: "Timeline",
-        props: ["stats"],
+        props: ["issnl"],
         components: {
             DownloadsBar
         },
         data: () => ({
             store: store,
-            subscriptionName: "free"
         }),
         methods: {
             currency(num) {
                 let round = Math.round(num * 100) / 100
                 return "$" + round.toLocaleString()
             },
-            modNum(name, k){
-                    store.getModNum(this._overallStats, this.subscriptionName, name, k)
-            },
-            nf: store.nFormat
+            nf: store.nFormat,
+            setSubscription(name){
+                    this.store.setSubscription(this.issnl, name)
+            }
 
         },
         computed: {
-
-            _overallStats(){
-                return this.stats.reduce(store.sumObjects)
+            journal() {
+                return store.getJournal(this.issnl)
             },
-            fulfilledCount(){
-                return this.subscription
-                    .filter(x=>x.isFulfillment)
-                    .map(x=>x.count)
-                    .reduce((a,b)=>a+b)
+            subscriptionName(){
+                return this.store.getSubscription(this.issnl)
             },
-            fulfilledCost(){
-                return this.subscription
-                    .filter(x=>x.isFulfillment)
-                    .map(x=>x.price)
-                    .reduce((a,b)=>a+b, 0)
-            },
-            pricePerPaiduse(){
-                let paidUses = this.subscription
-                    .filter(x=>x.price > 0)
-                    .map(x=>x.count)
-                    .reduce((a,b)=>a+b, 0)
-
-                return this.fulfilledCost / paidUses
-            },
-            subscription(){
-                return store.makeMods(this._overallStats, this.subscriptionName)
-            },
-            hypotheticalPaidMods() {
-                return this.store.makeHypotheticalPaidMods(this._overallStats)
-            },
-            yearlySubscription(){
-                let ret = this.stats.map(yearStat => {
-                    return {
-                        year: yearStat.year,
-                        mods: store.makeMods(yearStat, this.subscriptionName)
-                    }
-                })
-                console.log("yearly subscriptions", ret[0])
-                return ret
-            },
-            softTurnaway(){
-                return this.subscription.filter(x=>x.name==="softTurnaway")[0]
-            },
-            hardTurnaway(){
-                return this.subscription.filter(x=>x.name==="hardTurnaway")[0]
+            myUserSettings(){
+                return this.store.user.journals[this.issnl]
             }
-
-
-
+        },
+        watchers(){
         }
     }
 </script>
@@ -201,6 +180,7 @@
     .main-number {
         font-size: 30px;
     }
+
     .under-number {
         font-size: 12px;
     }

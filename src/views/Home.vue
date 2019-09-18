@@ -2,6 +2,14 @@
 
     <v-container class="home" fluid grid-list-lg v-if="store.loadingState=='complete'">
 
+
+                <v-layout>
+<!--                    <pre>-->
+<!--                        {{store.user}}-->
+<!--                    </pre>-->
+                </v-layout>
+
+
         <!-- running total -->
         <!--            <v-layout row style="position: fixed; top:0; left:0; right:0;background: #fff; z-index:1000;">-->
         <!--                <v-flex xs3></v-flex>-->
@@ -34,7 +42,7 @@
                     <v-layout column>
 
                         <!-- journal row -->
-                        <v-flex class="journal-row" v-for="(journal, index) in sortedJournals">
+                        <v-flex class="journal-row" v-for="(issnl, index) in store.getSortedJournalKeys()">
                             <v-container>
                                 <v-layout align-items-top>
                                     <v-flex shrink>
@@ -42,23 +50,13 @@
                                     </v-flex>
 
                                     <v-flex grow>
-                                        <v-layout>
-                                            <v-flex>
-                                                    <span class="name headline">
-                                                        {{journal.title}}
-                                                    </span>
-                                                <span class="topic body-1">
-                                                        {{ journal.subject}}
-                                                    </span>
-                                            </v-flex>
-                                        </v-layout>
 
-                                        <v-layout>
+                                        <journal :issnl="issnl"></journal>
 
 
-                                            <timeline :stats="journal.statsByYear">
-                                            </timeline>
-                                        </v-layout>
+
+
+<!--                                            <timeline :stats="journal.statsByYear"></timeline>-->
                                     </v-flex>
 
                                 </v-layout>
@@ -80,6 +78,7 @@
                         ></v-pagination>
                     </v-layout>
 
+
                 </v-container>
 
             </v-flex>
@@ -99,12 +98,14 @@
     import {store} from "../search.js"
     import DownloadsBar from "../components/DownloadsBar"
     import Timeline from "../components/Timeline"
+    import Journal from "../components/Journal"
 
     export default {
         name: 'Home',
         components: {
             DownloadsBar,
-            Timeline
+            Timeline,
+            Journal
         },
         data: () => ({
             store: store,
@@ -120,9 +121,6 @@
             },
             pageMaxIndex() {
                 return 40
-            },
-            sortedJournals() {
-                return store.getSorted()
             },
             newScenario() {
                 return store.getNewScenario()

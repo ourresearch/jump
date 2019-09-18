@@ -15,6 +15,13 @@ function getModNum(stat, subscription, name, k){
     return makeMods(stat, subscription).filter(x=>x.name === name)[0][k]
 }
 
+const sumObjects =  function(a, b){
+    let ret = {}
+    Object.keys(a).forEach(k => {
+        ret[k] = a[k] + b[k]
+    })
+    return ret
+}
 
 
 function makeHypotheticalPaidMods(stat){
@@ -22,6 +29,20 @@ function makeHypotheticalPaidMods(stat){
         makeMods(stat, "fullSubscription").find(x=>x.name==="fullSubscription"),
         makeMods(stat, "docdel").find(x=>x.name==="docdel")
     ]
+}
+function makePotentialUses(stat, subscriptionName){
+    return ["fullSubscription", "docdel"]
+        .filter(x=>x !== subscriptionName)
+        .map(potentialSubscriptionName=>{
+            // make full of this type
+            return makeMods(stat, potentialSubscriptionName)
+                .find(mod => {
+                    // only return the subscription use, not all of them.
+                    return mod.name === potentialSubscriptionName
+                })
+        })
+
+
 }
 
 function makeMods(stat, subscription){
@@ -145,8 +166,9 @@ function makeMods(stat, subscription){
 
 
 
+const fulfilledUses = function(oa, backCatalog, total, subscription){
 
-
+}
 
 
 
@@ -158,6 +180,29 @@ export const store = {
     baseUrl: "https://rickscafe-api.herokuapp.com/jump/temp",
     page: 1,
     pageSize: 10,
+
+    bar: [],
+
+    foo: {
+        journals: {
+        }
+    },
+
+    input: {
+        journals: []
+    },
+
+    user: {
+        journals: {foo: 42},
+        subscriptions: [
+            {name: "free", journals:[]},
+            {name: "fullSubscription", journals:[]},
+            {name: "docdel", journals:[]}
+        ]
+    },
+    server: {
+        journals: []
+    },
 
 
     // this is for if you are doing filtering on the server, so you are making
@@ -177,9 +222,17 @@ export const store = {
 
         return this.journals.slice(startIndex, endIndex)
     },
+    getSortedJournalKeys: function(){
+        let startIndex = (this.page - 1) * this.pageSize
+        let endIndex = (this.page * this.pageSize) - 1
+
+        return this.server.journals
+            .slice(startIndex, endIndex)
+            .map(journal => journal.meta.issnl)
+    },
 
     getNumPages: function(){
-        return Math.ceil(this.journals.length / this.pageSize)
+        return Math.ceil(this.server.journals.length / this.pageSize)
     },
 
     // selectMods: selectMods,
@@ -188,24 +241,44 @@ export const store = {
     makeHypotheticalPaidMods: makeHypotheticalPaidMods,
 
     fetchResults: function () {
-
         this.loadingState = "loading"
         let url = this.getApiUrl()
-        console.log("fetching journals from", url)
+
+
 
         let request = axios.get(url)
             .then(resp => {
                 console.log("got journals back")
 
-                this.journals = resp.data.list.map(journal => {
-                    journal.statsByYear = statsByYear(
-                        journal.downloads_by_year,
-                        journal.dollars_2018_subscription
-                    )
-                    return journal
+                // latest approach
+                this.server.journals = resp.data.list.map(journal => {
+                    return {
+                        statsByYear: statsByYear(
+                            journal.downloads_by_year,
+                            journal.dollars_2018_subscription
+                        ),
+                        meta: {
+                            title: journal.title,
+                            subject: journal.subject,
+                            issnl: journal.issn_l
+
+                        }
+                    }
+                })
+                resp.data.list.forEach(journal=>{
+                    this.setSubscription(journal.issn_l, "free")
                 })
 
-                // this.journalsOrig = JSON.parse(JSON.stringify(this.journals))
+                // this.setSubscription("0092-8674", "free")
+
+
+
+
+                // this.addFreeArr(1)
+                // this.addFreeArr(2)
+
+
+
             })
             .catch(e => {
                 console.log("journals API error", e)
@@ -216,7 +289,93 @@ export const store = {
         return request
     },
 
-    getHardTurnaways(stat, subscription){
+    getJournal(issnl){
+        return this.makeJournalFromInput(
+            this.server.journals.find(x=>x.meta.issnl===issnl),
+            this.getSubscription(issnl)
+        )
+
+    },
+
+    addFreeArr: function(x){
+        this.user.free = [...this.user.free, x]
+    },
+
+    getJournals: function(){
+        return this.input.journals.map(j=> this.makeJournalFromInput(
+            j.server,
+            this.getSubscription(j.issnl)
+        ))
+    },
+
+    setSubscription: function(issnl, subscriptionName){
+        this.user.subscriptions = this.user.subscriptions.map(sub => {
+            return {
+                name: sub.name,
+
+                // copy and dedup https://stackoverflow.com/a/27664971/226013
+                journals: [...new Set([].concat(...sub.journals, [issnl]))]
+
+                    // get rid of this issn in all the other subscription lists
+                    .filter(myIssnl => {
+                        const removeThis = (myIssnl===issnl && sub.name !== subscriptionName)
+                        return !removeThis
+                    })
+            }
+        })
+    },
+    getSubscription: function(issnl){
+
+        const mySubscription = this.user.subscriptions.find(subscription=> {
+            return subscription.journals.includes(issnl)
+        })
+        if (mySubscription) return mySubscription.name
+    },
+
+    makeJournalFromInput: (server, subscriptionName) => {
+
+        const overallUses = makeMods(
+            server.statsByYear.reduce(sumObjects),
+            subscriptionName
+        )
+        const yearlyUses = server.statsByYear.map(year=> {
+            return {
+                year: year.year,
+                uses: makeMods(year, subscriptionName)
+            }
+        })
+        const fulfilledCost = overallUses
+            .filter(x=>x.isFulfillment)
+            .map(x=>x.price)
+            .reduce((a,b)=>a+b)
+
+        const paidUsesCount = overallUses
+                .filter(x=>x.price > 0)
+                .map(x=>x.count)
+                .reduce((a,b)=>a+b, 0)
+
+        return {
+            ...
+            {
+                meta: server.meta,
+                uses: overallUses,
+                yearlyUses: yearlyUses,
+                potentialUses: makePotentialUses(
+                    server.statsByYear.reduce(sumObjects),
+                    subscriptionName
+                ),
+                fulfilledCount: overallUses
+                    .filter(x=>x.isFulfillment)
+                    .map(x=>x.count)
+                    .reduce((a,b)=>a+b),
+                fulfilledCost: fulfilledCost,
+                pricePerPaidUse: fulfilledCost / paidUsesCount,
+                getUse: name => {
+                    return overallUses.find(x=>x.name===name)
+                }
+            },
+
+        }
 
     },
 
@@ -227,13 +386,7 @@ export const store = {
 
     // utility functions
 
-    sumObjects: function(a, b){
-        let ret = {}
-        Object.keys(a).forEach(k => {
-            ret[k] = a[k] + b[k]
-        })
-        return ret
-    },
+
 
     nFormat: function(num, hidePercent) {
 
