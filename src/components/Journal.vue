@@ -1,13 +1,12 @@
 <template>
     <v-container class="timeline pa-2">
-        <!--        <v-layout>-->
-        <!--            <v-flex><pre>{{ (subscription) }}</pre></v-flex>-->
-        <!--        </v-layout>-->
 
 
 <!--        <v-layout>-->
 <!--            <v-flex>-->
-<!--                {{subscriptionName}}-->
+<!--                <pre>-->
+<!--                    {{useReport.uses}}-->
+<!--                </pre>-->
 <!--            </v-flex>-->
 
 
@@ -17,10 +16,10 @@
 
             <v-flex>
                 <span class="name headline">
-                    {{journal.meta.title}}
+                    {{journalMeta.title}}
                 </span>
                 <span class="topic body-1">
-                    {{ journal.meta.subject}}
+                    {{ journalMeta.subject}}
                 </span>
             </v-flex>
         </v-layout>
@@ -28,8 +27,8 @@
         <v-layout align-items-top class="text-xs-right">
             <v-flex class="fulfillment-graph text-xs-left" xs1>
                 <div style="display: flex; width:100%; height: 40%;">
-                    <downloads-bar :mods="journal.uses" class="pr-1" style="flex-grow:3;"></downloads-bar>
-                    <downloads-bar v-for="yearSubscription in journal.yearlyUses" :year="yearSubscription.year"
+                    <downloads-bar :mods="useReport.uses" class="pr-1" style="flex-grow:3;"></downloads-bar>
+                    <downloads-bar v-for="yearSubscription in useReport.yearlyUses" :year="yearSubscription.year"
                                    :mods="yearSubscription.uses"></downloads-bar>
 
                 </div>
@@ -52,19 +51,19 @@
 
                 <v-layout class="main-row main-number">
                     <v-flex class="use py-0" xs6>
-                        {{ nf(journal.fulfilledCount) }}
+                        {{ nf(useReport.fulfilledCount) }}
                     </v-flex>
 
                     <v-flex class="cost py-0" xs3>
-                        ${{nf(journal.fulfilledCost)}}
+                        ${{nf(useReport.fulfilledCost)}}
                     </v-flex>
                     <v-flex class="cost-per-use py-0" sx3>
-                        ${{ nf(journal.pricePerPaiduse, true) }}
+                        ${{ nf(useReport.pricePerPaiduse, true) }}
                     </v-flex>
                 </v-layout>
 
 
-                <v-layout class="mod-row equipped" v-for="mod in journal.uses.filter(x=>x.isEquipped)">
+                <v-layout class="mod-row equipped" v-for="mod in useReport.uses.filter(x=>x.isEquipped)">
                     <v-flex class="use py-0" xs6>
                         <v-layout>
                             <v-flex xs4 class="text-xs-left">
@@ -89,7 +88,7 @@
                 <v-layout class="py-2" style=""></v-layout>
 
 
-                <v-layout class="mod-row not-equipped" v-for="mod in journal.potentialUses">
+                <v-layout class="mod-row not-equipped" v-for="mod in useReport.potentialUses">
 
                     <v-flex class="use py-0" xs6>
                         <v-layout>
@@ -114,13 +113,13 @@
             <v-flex class="turnaway-uses py-0" xs2 style="border-left: 1px solid #999;">
                 <div class="heading">Turnaways</div>
                 <div class="main-number">
-                    {{ nf(journal.getUse('softTurnaway').count + journal.getUse('hardTurnaway').count) }}
+                    {{ nf(useReport.getUse('softTurnaway').count + useReport.getUse('hardTurnaway').count) }}
                 </div>
                 <div class="under-number">
-                    {{ nf(journal.getUse('softTurnaway').count)}} soft
+                    {{ nf(useReport.getUse('softTurnaway').count)}} soft
                 </div>
                 <div class="under-number">
-                    {{ nf(journal.getUse('hardTurnaway').count)}} hard
+                    {{ nf(useReport.getUse('hardTurnaway').count)}} hard
                 </div>
             </v-flex>
 
@@ -156,8 +155,11 @@
 
         },
         computed: {
-            journal() {
-                return store.getJournal(this.issnl)
+            useReport() {
+                return store.getUseReport(this.issnl)
+            },
+            journalMeta(){
+                return store.getJournalMeta(this.issnl)
             },
             subscriptionName(){
                 return this.store.getSubscription(this.issnl)

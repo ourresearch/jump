@@ -3,11 +3,11 @@
     <v-container class="home" fluid grid-list-lg v-if="store.loadingState=='complete'">
 
 
-                <v-layout>
+<!--                <v-layout>-->
 <!--                    <pre>-->
 <!--                        {{store.user}}-->
 <!--                    </pre>-->
-                </v-layout>
+<!--                </v-layout>-->
 
 
         <!-- running total -->

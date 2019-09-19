@@ -132,9 +132,6 @@
                 let round = Math.round(num * 100) / 100
                 return "$" + round.toLocaleString()
             },
-            modNum(name, k){
-                    store.getModNum(this._overallStats, this.subscriptionName, name, k)
-            },
             nf: store.nFormat
 
         },
