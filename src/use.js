@@ -150,6 +150,7 @@ function makeFulfillmentMods(stat) {
     let freeCount = stat.oaUseCount + stat.backCatalogUseCount
     let unFreeCount = stat.useCount - freeCount
     let hardTurnawayCount = unFreeCount * hardTurnawayProp
+    let softTurnawayCount = unFreeCount - hardTurnawayCount
 
     let makers = {
         oa: function () {
@@ -204,6 +205,39 @@ function makeFulfillmentMods(stat) {
             }
             return Object.assign({}, base, ret)
         },
+        hardTurnaway: function () {
+            let ret = {
+                name: "hardTurnaway",
+                color: "#555",
+                isFulfillment: false
+            }
+
+            // docdel wipes out all hard turnaways
+            // fullsubscription does too
+            if (stat.subscribedTo === "free") {
+                ret = Object.assign({}, ret, {
+                    count: hardTurnawayCount,
+                    prop: hardTurnawayCount / stat.useCount,
+                })
+            }
+            return Object.assign({}, blankMod(), ret)
+        },
+        softTurnaway: function () {
+            let ret = {
+                name: "softTurnaway",
+                color: "#999",
+                isFulfillment: false
+            }
+
+            // full subscription wipes out all soft turnaways
+            if (stat.subscribedTo !== "fullSubscription") {
+                ret = Object.assign({}, ret, {
+                    count: softTurnawayCount,
+                    prop: softTurnawayCount / stat.useCount
+                })
+            }
+            return Object.assign({}, blankMod(), ret)
+        },
     };
 
     return Object.values(makers).map(x => x())
@@ -216,6 +250,9 @@ function makeMods(stat) {
     const fulfilledUseCount = fulfillmentMods
         .map(x => x.count)
         .reduce((a, b) => a + b, 0)
+
+
+    return fulfillmentMods
 
     return [].concat(
         fulfillmentMods,

@@ -3,12 +3,12 @@
 
         <v-layout align-items-top class="text-xs-right">
 
-            <v-flex>
-                <pre class="text-xs-left">
+<!--            <v-flex>-->
+<!--                <pre class="text-xs-left">-->
 <!--                {{yearlyUses}}-->
 
-                </pre>
-            </v-flex>
+<!--                </pre>-->
+<!--            </v-flex>-->
 
             <v-flex class="fulfillment-graph text-xs-left" xs1>
                 <div style="display: flex; width:100%; height: 40%;">
@@ -28,32 +28,32 @@
             </v-flex>
 
 
-<!--            <v-flex xs9 class="fulfilled-uses mx-4 px-4">-->
-<!--                <v-layout class="heading-row">-->
-<!--                    <v-flex class="use py-0" xs6>-->
-<!--                        Fulfillments-->
-<!--                    </v-flex>-->
+            <v-flex xs9 class="fulfilled-uses mx-4 px-4">
+                <v-layout class="heading-row">
+                    <v-flex class="use py-0" xs6>
+                        Fulfillments
+                    </v-flex>
 
-<!--                    <v-flex class="cost py-0" xs3>-->
-<!--                        Costs-->
-<!--                    </v-flex>-->
-<!--                    <v-flex class="cost-per-use py-0" sx3>-->
-<!--                        Cost per paid use-->
-<!--                    </v-flex>-->
-<!--                </v-layout>-->
+                    <v-flex class="cost py-0" xs3>
+                        Costs
+                    </v-flex>
+                    <v-flex class="cost-per-use py-0" sx3>
+                        Cost per paid use
+                    </v-flex>
+                </v-layout>
 
-<!--                <v-layout class="main-row main-number">-->
-<!--                    <v-flex class="use py-0" xs6>-->
-<!--                        {{ nf(useReport.fulfilledCount) }}-->
-<!--                    </v-flex>-->
+                <v-layout class="main-row main-number">
+                    <v-flex class="use py-0" xs6>
+                        {{ nf(overallStats.fulfilledCount) }}
+                    </v-flex>
 
-<!--                    <v-flex class="cost py-0" xs3>-->
-<!--                        ${{nf(useReport.fulfilledCost)}}-->
-<!--                    </v-flex>-->
-<!--                    <v-flex class="cost-per-use py-0" sx3>-->
-<!--                        ${{ nf(useReport.pricePerPaiduse, true) }}-->
-<!--                    </v-flex>-->
-<!--                </v-layout>-->
+                    <v-flex class="cost py-0" xs3>
+                        ${{nf(overallStats.fulfilledCost)}}
+                    </v-flex>
+                    <v-flex class="cost-per-use py-0" sx3>
+                        ${{ nf(overallStats.pricePerPaidUse, true) }}
+                    </v-flex>
+                </v-layout>
 
 
 <!--                <v-layout class="mod-row equipped" v-for="mod in useReport.uses.filter(x=>x.isEquipped)">-->
@@ -100,10 +100,10 @@
 <!--                        ${{mod.pricePerCount.toFixed(2)}}-->
 <!--                    </v-flex>-->
 <!--                </v-layout>-->
-<!--            </v-flex>-->
+            </v-flex>
 
 
-<!--            <v-flex class="turnaway-uses py-0" xs2 style="border-left: 1px solid #999;">-->
+            <v-flex class="turnaway-uses py-0" xs2 style="border-left: 1px solid #999;">
 <!--                <div class="heading">Turnaways</div>-->
 <!--                <div class="main-number">-->
 <!--                    {{ nf(useReport.getUse('softTurnaway').count + useReport.getUse('hardTurnaway').count) }}-->
@@ -114,7 +114,7 @@
 <!--                <div class="under-number">-->
 <!--                    {{ nf(useReport.getUse('hardTurnaway').count)}} hard-->
 <!--                </div>-->
-<!--            </v-flex>-->
+            </v-flex>
 
 
         </v-layout>
@@ -155,6 +155,26 @@
             },
             overallUses(){
                 return use.overallUses(this.journalYears)
+            },
+            overallStats(){
+                const fulfilledCost = this.overallUses
+                    .filter(x => x.isFulfillment)
+                    .map(x => x.price)
+                    .reduce((a, b) => a + b)
+                const paidUsesCount = this.overallUses
+                    .filter(x => x.price > 0)
+                    .map(x => x.count)
+                    .reduce((a, b) => a + b, 0)
+                const fulfilledCount = this.overallUses
+                    .filter(x => x.isFulfillment)
+                    .map(x => x.count)
+                    .reduce((a, b) => a + b)
+
+                return {
+                    fulfilledCost: fulfilledCost,
+                    fulfilledCount: fulfilledCount,
+                    pricePerPaidUse: fulfilledCost / paidUsesCount
+                }
             }
 
         }
