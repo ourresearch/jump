@@ -3,7 +3,8 @@ import _ from 'lodash'
 
 import {resp} from "./journalsRespMock.js"
 
-import {subscriptionUseReport} from "./use.js"
+import {subscriptionUseReport, overallUseReport, journalYear} from "./use.js"
+
 
 
 
@@ -24,6 +25,9 @@ export const store = {
     },
     server: {
         journals: []
+    },
+    computed:{
+        journalYears: []
     },
     getApiUrl: function () {
         return this.baseUrl
@@ -66,10 +70,6 @@ export const store = {
                 // latest approach
                 this.server.journals = resp.data.list.map(journal => {
                     return {
-                        statsByYear: statsByYear(
-                            journal.downloads_by_year,
-                            journal.dollars_2018_subscription
-                        ),
                         meta: {
                             title: journal.title,
                             subject: journal.subject,
@@ -78,9 +78,29 @@ export const store = {
                         }
                     }
                 })
+
                 resp.data.list.forEach(journal => {
                     this.setSubscription(journal.issn_l, "free")
                 })
+
+                resp.data.list.forEach(apiJournal=>{
+                    const downloads = apiDownloadsByYear(apiJournal.downloads_by_year)
+                    downloads.forEach(myDownloads=>{
+
+                        const myJournalYear = journalYear()
+                        myJournalYear.useCount = myDownloads.useCount
+                        myJournalYear.oaUseCount = myDownloads.oaUseCount
+                        myJournalYear.backCatalogUseCount = myDownloads.backCatalogUseCount
+                        myJournalYear.subscriptionPrice = apiJournal.dollars_2018_subscription
+                        myJournalYear.issnl = apiJournal.issn_l
+                        myJournalYear.subscribedTo = "free"
+                        myJournalYear.year = myDownloads.year
+                        this.computed.journalYears.push(myJournalYear)
+                    })
+
+
+                })
+
 
             })
             .catch(e => {
@@ -92,12 +112,28 @@ export const store = {
         return request
     },
     getUseReport(issnl){
-        const myJournal = this.server.journals.find(x => x.meta.issnl === issnl)
-        return subscriptionUseReport(
-            myJournal.statsByYear,
-            this.getSubscription(issnl)
-        )
+        const myJournalYears = this.computed.journalYears.filter(y=>{
+            return y.issnl === issnl
+        })
+        const yearsWithSubs = myJournalYears.map(journalYear=>{
+            const ret = {...journalYear}
+            ret.subscribedTo = this.getSubscription(issnl)
+            return ret
+        })
+        return subscriptionUseReport(yearsWithSubs)
     },
+
+    getJournalYears(issnl){
+        const myJournalYears = this.computed.journalYears.filter(y=>{
+            return y.issnl === issnl
+        })
+        return myJournalYears.map(journalYear=>{
+            const ret = {...journalYear}
+            ret.subscribedTo = this.getSubscription(issnl)
+            return ret
+        })
+    },
+
 
     getJournalMeta(issnl){
         const myJournal = this.server.journals.find(x => x.meta.issnl === issnl)
@@ -105,12 +141,16 @@ export const store = {
 
     },
 
+    overallUseReport() {
+        return "foo"
 
-    getJournals: function () {
-        return this.input.journals.map(j => this.makeJournalFromInput(
-            j.server,
-            this.getSubscription(j.issnl)
-        ))
+        const allUseReports = this.server.journals.map(x=>{
+            return subscriptionUseReport(
+                x.statsByYear,
+                this.getSubscription(x.meta.issnl)
+            )
+        })
+        return overallUseReport(allUseReports)
     },
 
     setSubscription: function (issnl, subscriptionName) {
@@ -174,18 +214,19 @@ export const store = {
 
 }
 
-
-function statsByYear(apiDownloads, price) {
+function apiDownloadsByYear(apiDownloads) {
     return apiDownloads.year.map((year, i) => {
         return {
             useCount: apiDownloads.total[i],
             oaUseCount: apiDownloads.oa[i],
             backCatalogUseCount: apiDownloads.back_catalog[i],
-            subscriptionPrice: price,
             year: year
         }
     })
 }
+
+
+
 
 
 let downloads_by_year = {

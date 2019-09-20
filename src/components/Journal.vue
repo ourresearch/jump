@@ -24,6 +24,22 @@
             </v-flex>
         </v-layout>
 
+<!--        <v-layout>-->
+<!--            <v-flex>-->
+<!--                <pre>-->
+<!--                    {{useReport}}-->
+<!--                </pre>-->
+<!--            </v-flex>-->
+<!--        </v-layout>-->
+
+
+        <v-layout>
+            <v-flex>
+                <timeline :journal-years="journalYears"></timeline>
+<!--                <pre>journal years: {{journalYears}}</pre>-->
+            </v-flex>
+        </v-layout>
+
         <v-layout align-items-top class="text-xs-right">
             <v-flex class="fulfillment-graph text-xs-left" xs1>
                 <div style="display: flex; width:100%; height: 40%;">
@@ -132,13 +148,15 @@
 
 <script>
     import DownloadsBar from "../components/DownloadsBar"
+    import Timeline from "../components/Timeline"
     import {store} from "../search.js"
 
     export default {
-        name: "Timeline",
+        name: "Journal",
         props: ["issnl"],
         components: {
-            DownloadsBar
+            DownloadsBar,
+            Timeline
         },
         data: () => ({
             store: store,
@@ -155,6 +173,9 @@
 
         },
         computed: {
+            journalYears(){
+                return store.getJournalYears(this.issnl)
+            },
             useReport() {
                 return store.getUseReport(this.issnl)
             },

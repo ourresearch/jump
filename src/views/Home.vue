@@ -3,37 +3,39 @@
     <v-container class="home" fluid grid-list-lg v-if="store.loadingState=='complete'">
 
 
+         running total
+                    <v-layout row style="position: fixed; top:0; left:0; right:0;background: #fff; z-index:1000;">
+                        <v-flex xs3></v-flex>
+                        <v-flex xs9>
+<!--                            <pre>-->
+<!--                                {{overallUseReport}}-->
+<!--                            </pre>-->
+                        </v-flex>
+                    </v-layout>
+
+
+
 <!--                <v-layout>-->
 <!--                    <pre>-->
 <!--                        {{store.user}}-->
 <!--                    </pre>-->
 <!--                </v-layout>-->
 
-
-        <!-- running total -->
-        <!--            <v-layout row style="position: fixed; top:0; left:0; right:0;background: #fff; z-index:1000;">-->
-        <!--                <v-flex xs3></v-flex>-->
-        <!--                <v-flex xs9>-->
-        <!--                    <timeline :timeline="newScenario"></timeline>-->
-        <!--                </v-flex>-->
-        <!--            </v-layout>-->
-
-
         <!--- working area  -->
         <v-layout row style="padding-top:200px;">
-            <v-flex md3>
-                filters aqui
-                <v-btn @click="uncheckEverything">
-                    <div>
-                        <i class="fas fa-radiation"></i>
-                        scorched earth
-                    </div>
-                </v-btn>
-            </v-flex>
+<!--            <v-flex md3>-->
+<!--                filters aqui-->
+<!--                <v-btn @click="uncheckEverything">-->
+<!--                    <div>-->
+<!--                        <i class="fas fa-radiation"></i>-->
+<!--                        scorched earth-->
+<!--                    </div>-->
+<!--                </v-btn>-->
+<!--            </v-flex>-->
 
 
             <!--- journals list  -->
-            <v-flex md9>
+            <v-flex md12>
                 <v-container>
                     <v-layout>
                         sorting by price per requested item.
@@ -118,6 +120,9 @@
             },
             pageMinIndex() {
                 return 0
+            },
+            overallUseReport() {
+                return this.store.overallUseReport()
             },
             pageMaxIndex() {
                 return 40

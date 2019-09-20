@@ -5,18 +5,52 @@ const hardTurnawayProp = 0.1
 const sumObjects = function (a, b) {
     let ret = {}
     Object.keys(a).forEach(k => {
+
         ret[k] = a[k] + b[k]
     })
     return ret
 }
 
+const sumJournalYears = function(a,b){
+    let ret = {}
+    ret.useCount = a.useCount + b.useCount
+    ret.oaUseCount = a.oaUseCount + b.oaUseCount
+    ret.backCatalogUseCount = a.backCatalogUseCount + b.backCatalogUseCount
+    ret.subscriptionPrice = a.subscriptionPrice + b.subscriptionPrice
 
-function makePotentialUses(stat, subscriptionName) {
+    ret.year = a.year
+    ret.issnl = a.issnl
+    ret.subscribedTo = a.subscribedTo
+
+    return ret
+}
+
+
+
+const journalYear = function(){
+    return {
+        useCount: 0,
+        oaUseCount: 0,
+        backCatalogUseCount: 0,
+        subscriptionPrice: 0,
+        year: null,
+        issnl: null,
+        subscribedTo: null
+    }
+}
+
+
+
+function makePotentialUses(journalYears) {
+    const journalYearsSum = journalYears.reduce(sumJournalYears)
+
     return ["fullSubscription", "docdel"]
-        .filter(x => x !== subscriptionName)
+        .filter(x => x !== journalYearsSum.subscribedTo)
         .map(potentialSubscriptionName => {
             // make full of this type
-            return makeMods(stat, potentialSubscriptionName)
+            const newJournalYear = {...journalYearsSum}
+            newJournalYear.subscribedTo = potentialSubscriptionName
+            return makeMods(newJournalYear)
                 .find(mod => {
                     // only return the subscription use, not all of them.
                     return mod.name === potentialSubscriptionName
@@ -38,6 +72,26 @@ function blankMod() {
         isPaid: false
     }
 }
+
+const sumModLists = function(a,b){
+    const totalUsesCount = a.map(x=>x.count).reduce((a,b) => a+b) +
+        b.map(x=>x.count).reduce((a,b) => a+b)
+
+    return a.map(aMod => {
+        const bMod = b.find(x=>x.name === aMod.name)
+        const mySumCount = aMod.count + bMod.count
+        const mySumPrice = aMod.price + bMod.price
+        return Object.assign({}, aMod, {
+            count: mySumCount,
+            price: mySumPrice,
+            prop: mySumCount / totalUsesCount,
+            pricePerCount: mySumPrice / mySumCount
+        })
+    })
+
+
+}
+
 
 
 function getTurnaways(fulfilledUseCount, totalUseCount, subscriptionName) {
@@ -87,77 +141,10 @@ function getTurnaways(fulfilledUseCount, totalUseCount, subscriptionName) {
     ]
 }
 
-function makeFreeFulfillmentMods(stat) {
-    const makers = [
-        function () {
-            return Object.assign(blankMod(), {
-                name: "oa",
-                count: stat.oaUseCount,
-                prop: stat.oaUseCount / stat.useCount,
-                color: "#43a047",
-                isEquipped: true
-            })
-        },
-        function () {
-            return Object.assign(blankMod(), {
-                name: "backCatalog",
-                count: stat.backCatalogUseCount,
-                prop: stat.backCatalogUseCount / stat.useCount,
-                color: "#c0ca33",
-                isEquipped: true
-            })
-        },
-    ]
-    return makers.map(x => x())
-}
 
 
-// @todo work here
-function makePaidMods(stat, subscriptionName) {
-    const turnawayCount = stat.useCount - (stat.oaUseCount + stat.backCatalogUseCount)
-    const hardTurnawayCount = turnawayCount * hardTurnawayProp
-    // const softTurnawayCount = turnawayCount - hardTurnawayCount
 
-    const makers = [
-        function () {
-            let ret = {
-                name: "fullSubscription",
-                color: "#ef5350",
-                isPaid: true
-            }
-            if (subscriptionName === "fullSubscription") {
-                ret = Object.assign({}, ret, {
-                    price: stat.subscriptionPrice,
-                    count: turnawayCount,
-                    prop: turnawayCount / stat.useCount,
-                    pricePerCount: stat.subscriptionPrice / turnawayCount,
-                    isEquipped: true
-                })
-            }
-            return Object.assign({}, base, ret)
-        },
-        function () {
-            let ret = {
-                name: "docdel",
-                color: "#ff7043",
-                isPaid: true
-            }
-            if (subscriptionName === "docdel") {
-                ret = Object.assign({}, ret, {
-                    price: hardTurnawayCount * docDelPricePerUse,
-                    count: hardTurnawayCount,
-                    prop: hardTurnawayCount / stat.useCount,
-                    pricePerCount: docDelPricePerUse,
-                    isEquipped: true
-                })
-            }
-            return Object.assign({}, base, ret)
-        }
-    ]
-}
-
-
-function makeMods(stat, subscription) {
+function makeFulfillmentMods(stat) {
     let base = blankMod()
 
     let freeCount = stat.oaUseCount + stat.backCatalogUseCount
@@ -189,7 +176,7 @@ function makeMods(stat, subscription) {
                 color: "#ef5350",
                 isPaid: true
             }
-            if (subscription === "fullSubscription") {
+            if (stat.subscribedTo === "fullSubscription") {
                 ret = Object.assign({}, ret, {
                     price: stat.subscriptionPrice,
                     count: unFreeCount,
@@ -206,7 +193,7 @@ function makeMods(stat, subscription) {
                 color: "#ff7043",
                 isPaid: true
             }
-            if (subscription === "docdel") {
+            if (stat.subscribedTo === "docdel") {
                 ret = Object.assign({}, ret, {
                     price: hardTurnawayCount * docDelPricePerUse,
                     count: hardTurnawayCount,
@@ -219,33 +206,25 @@ function makeMods(stat, subscription) {
         },
     };
 
-    const fulfilledUses = Object.values(makers).map(x => x())
-    const fulfilledUseCount = fulfilledUses
-        .map(x => x.count)
-        .reduce((a, b) => a + b, 0)
-    const turnawayUses = getTurnaways(fulfilledUseCount, stat.useCount, subscription)
-    return [].concat(fulfilledUses, turnawayUses)
+    return Object.values(makers).map(x => x())
 
 }
 
 
+function makeMods(stat) {
+    const fulfillmentMods = makeFulfillmentMods(stat)
+    const fulfilledUseCount = fulfillmentMods
+        .map(x => x.count)
+        .reduce((a, b) => a + b, 0)
 
-
-
-
-
-const subscriptionUseReport = function (statsByYear, subscriptionName) {
-
-    const overallUses = makeMods(
-        statsByYear.reduce(sumObjects),
-        subscriptionName
+    return [].concat(
+        fulfillmentMods,
+        getTurnaways(fulfilledUseCount, stat.useCount, stat.subscribedTo)
     )
-    const yearlyUses = statsByYear.map(year => {
-        return {
-            year: year.year,
-            uses: makeMods(year, subscriptionName)
-        }
-    })
+}
+
+
+const useReport = function(yearlyUses, overallUses){
     const fulfilledCost = overallUses
         .filter(x => x.isFulfillment)
         .map(x => x.price)
@@ -259,10 +238,6 @@ const subscriptionUseReport = function (statsByYear, subscriptionName) {
     return {
             uses: overallUses,
             yearlyUses: yearlyUses,
-            potentialUses: makePotentialUses(
-                statsByYear.reduce(sumObjects),
-                subscriptionName
-            ),
             fulfilledCount: overallUses
                 .filter(x => x.isFulfillment)
                 .map(x => x.count)
@@ -276,6 +251,85 @@ const subscriptionUseReport = function (statsByYear, subscriptionName) {
     }
 }
 
+const overallUseReport = function(subscriptionUseReports){
+    const years = {}
+    const overall = []
+
+    subscriptionUseReports.forEach(useList=>{
+        useList.yearlyUses.forEach(yearObj=>{
+            if (years[yearObj.year]) {
+                years[yearObj.year].push(yearObj.uses)
+            }
+            else {
+                years[yearObj.year] = []
+            }
+        })
+        overall.push(useList.uses)
+
+    })
+    const yearlyUses = Object.entries(years).map(entry=>{
+        return {
+            year: entry[0],
+            uses: entry[1].reduce(sumModLists)
+        }
+    })
+    const overallUses = overall.reduce(sumModLists)
+
+    const ret = useReport(yearlyUses, overallUses)
+
+    console.log("overall use report", ret)
+    return ret
+}
 
 
-export {subscriptionUseReport}
+const yearlyUses = function(journalYears){
+    return journalYears.map(myJournalYear => {
+        return {
+            year: myJournalYear.year,
+            uses: makeMods(myJournalYear)
+        }
+    })
+}
+
+const overallUses = function(journalYears){
+    return makeMods(journalYears.reduce(sumJournalYears))
+}
+
+
+
+
+
+
+const subscriptionUseReport = function (journalYears) {
+    const yearlyUses = journalYears.map(year => {
+        return {
+            year: year.year,
+            uses: makeMods(year)
+        }
+    })
+    const overallUses = makeMods(
+        journalYears.reduce(sumJournalYears)
+    )
+    return Object.assign(
+        {},
+        useReport(yearlyUses, overallUses),
+        {
+            potentialUses: makePotentialUses(journalYears)
+        }
+    )
+
+}
+
+
+
+
+
+
+export {
+    subscriptionUseReport,
+    overallUseReport,
+    journalYear,
+    yearlyUses,
+    overallUses,
+    makePotentialUses
+}
