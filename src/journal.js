@@ -13,7 +13,7 @@ export default class Journal {
         this.meta = apiData.meta
         this.subscriptionName = subscriptionName || "free"
         this.usageByTypeByYear = apiData.usageByTypeByYear
-        this.fullSubscriptionPrice = apiData.fullSubscriptionPrice
+        this.fullSubscriptionPrice = apiData.fullSubscriptionPrice || 0
     }
 
     subscribe(newSubscriptionName){

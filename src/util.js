@@ -18,7 +18,7 @@ const currency = function (num, roundToDollars) {
 }
 
 
-const nFormat = function (num) {
+const nFormat = function (num, printReallyLongNumbers) {
 
     if (!num) {
         return 0
@@ -30,7 +30,7 @@ const nFormat = function (num) {
 
 
     // from http://stackoverflow.com/a/14994860/226013
-    if (num >= 1000000) {
+    if (num >= 1000000 && !printReallyLongNumbers) {
         return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
     } else {
         return num.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')

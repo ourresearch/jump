@@ -1,11 +1,46 @@
 <template>
 
-    <v-container class="home" v-if="api.loadingState==='complete'">
+    <v-container  fluid class="home pa-0" v-if="api.loadingState==='complete'">
         <div style="position: fixed; top:0; left:0; right:0;background: #fff; z-index:1000;">
-            <v-container>
+            <v-container fluid>
                 <v-layout>
-                    <v-flex xs12>
-                        <usage-report :yearly-snaps="yearlySummarySnaps" overview="true"></usage-report>
+                    <v-flex class="fulfillment-graph text-xs-left" xs1>
+                        <div style="display: flex; width:100%; height: 100%; min-height: 50px;">
+                            <downloads-bar
+                                    :snap="overallSnap"
+                                    class="pr-1"
+                                    style="flex-grow:3;">
+                            </downloads-bar>
+
+                            <downloads-bar
+                                    v-for="snap in yearlySummarySnaps"
+                                    :year="snap.year"
+                                    style="flex-grow: 1;"
+                                    :snap="snap"></downloads-bar>
+                        </div>
+                    </v-flex>
+                    <v-flex xs3>
+                        <div class="text-xs-right">
+                            <div class="body-1">Instant fulfillments</div>
+                            <div class="headline">{{nf(overallSnap.getFulfilledCount(), true)}}</div>
+                            <div class="headline">{{nf(percentFulfillmentsChange), true}}%</div>
+
+                        </div>
+                    </v-flex>
+                    <v-flex xs3>
+                        <div class="text-xs-right">
+                            <div class="body-1">Cost</div>
+                            <div class="headline">{{currency(overallSnap.getCost(), true)}}</div>
+                            <div class="headline">{{nf(percentCostChange), true}}%</div>
+
+                        </div>
+                    </v-flex>
+                    <v-flex xs3>
+                        <div class="text-xs-right">
+                            <div class="body-1">Cost per paid usage</div>
+                            <div class="headline">{{currency(overallSnap.getCostPerPaidUse())}}</div>
+                            <div class="headline">{{currency(pricePerPaidUseChange)}}</div>
+                        </div>
                     </v-flex>
 
                 </v-layout>
@@ -13,23 +48,31 @@
         </div>
 
 
-        <!--                        <v-layout>-->
-        <!--                            <pre>-->
-        <!--                                {{ }}-->
-        <!--                            </pre>-->
-        <!--                        </v-layout>-->
+
+
+        <!--- Summary area  -->
+        <v-layout row style="padding-top:200px; border-bottom: 5px solid #333; background: #fff;">
+            <v-container fluid>
+                <v-layout>
+                    <v-flex xs6>
+                        <h3 class="display-1">Working scenario </h3>
+                        <usage-report style="min-height: 200px;" :yearly-snaps="yearlySummarySnaps" overview="true"></usage-report>
+                    </v-flex>
+
+                    <v-flex xs6>
+                        <h3 class="display-1">Big Deal scenario </h3>
+                        <usage-report style="min-height: 200px;" :yearly-snaps="bigDealYearlySummarySnaps" overview="true"></usage-report>
+                    </v-flex>
+
+                </v-layout>
+            </v-container>
+        </v-layout>
+
+
 
         <!--- working area  -->
-        <v-layout row style="padding-top:200px;">
-            <!--            <v-flex md3>-->
-            <!--                filters aqui-->
-            <!--                <v-btn @click="uncheckEverything">-->
-            <!--                    <div>-->
-            <!--                        <i class="fas fa-radiation"></i>-->
-            <!--                        scorched earth-->
-            <!--                    </div>-->
-            <!--                </v-btn>-->
-            <!--            </v-flex>-->
+        <v-layout>
+
 
 
             <!--- journals list  -->
@@ -67,7 +110,10 @@
 
                                 <!-- journal USAGE section -->
                                 <v-layout>
-                                    <usage-report :yearly-snaps="journal.getSubscriptionSnaps()"></usage-report>
+                                    <v-flex xs6>
+                                        <usage-report :yearly-snaps="journal.getSubscriptionSnaps()"></usage-report>
+
+                                    </v-flex>
                                 </v-layout>
 
 
@@ -98,7 +144,7 @@
                                         </v-flex>
                                     </v-layout>
                                     <v-layout>
-                                        <v-flex xs3 class="mx-2" style="cursor:pointer;" @click="journal.subscribe(useType.name)">
+                                        <v-flex xs3 class="mx-2" style="cursor:pointer;" @click="journal.subscribe('free')">
                                             <span style="cursor:pointer;" @click="journal.subscribe('free')">
                                                 <i class="far fa-circle" v-if="!journal.isSubscribedTo('free')"></i>
                                                 <i class="fas fa-check-circle" v-if="journal.isSubscribedTo('free')"></i>
@@ -152,6 +198,21 @@
     import {currency, nFormat} from "../util";
 
 
+    const makeYearlySummarySnaps = function(journalList){
+            const years = ["2020", "2021", "2022", "2023", "2024"]
+            const ret = {}
+            years.forEach(y => ret[y] = new SummarySnap())
+
+            journalList.forEach(journal => {
+                journal.getSubscriptionSnaps().forEach(snap => {
+                    ret[snap.year].addSnap(snap)
+                })
+            })
+            return Object.values(ret)
+    }
+
+
+
     export default {
         name: 'Home',
         components: {
@@ -165,7 +226,9 @@
             sortBy: "default",
             journalsFromApi: [],
             journals: [],
+            bigDealJournals: [],
             api: api,
+            bigDealCost: 1000000
 
         }),
         computed: {
@@ -176,16 +239,32 @@
             },
 
             yearlySummarySnaps() {
-                const years = ["2020", "2021", "2022", "2023", "2024"]
-                const ret = {}
-                years.forEach(y => ret[y] = new SummarySnap())
+                return makeYearlySummarySnaps(this.journals)
+            },
 
-                this.journals.forEach(journal => {
-                    journal.getSubscriptionSnaps().forEach(snap => {
-                        ret[snap.year].addSnap(snap)
-                    })
-                })
-                return Object.values(ret)
+            bigDealYearlySummarySnaps(){
+                return makeYearlySummarySnaps(this.bigDealJournals)
+            },
+
+            bigDealOverallSnap(){
+                return new SummarySnap(this.bigDealYearlySummarySnaps)
+            },
+
+            overallSnap(){
+                return new SummarySnap(this.yearlySummarySnaps)
+            },
+            percentFulfillmentsChange(){
+                return (this.overallSnap.getFulfilledCount() / this.bigDealOverallSnap.getFulfilledCount()) * 100
+            },
+            percentCostChange(){
+                return (this.overallSnap.getCost() / this.bigDealCost) * 100
+            },
+            pricePerPaidUseChange(){
+                const bigDealCostPerPaidUse = this.bigDealCost / this.bigDealOverallSnap.getPaidUsesCount()
+
+                return bigDealCostPerPaidUse
+
+                // return this.bigDealOverallSnap.getCostPerPaidUse() - this.overallSnap.getCostPerPaidUse()
             }
         },
         methods: {
@@ -198,6 +277,11 @@
                     this.journalsFromApi = resp
                     this.journals = resp.map(x => {
                         let myJournal = new Journal(x, "free")
+                        return myJournal
+
+                    })
+                    this.bigDealJournals = resp.map(x => {
+                        let myJournal = new Journal(x, "fullSubscription")
                         return myJournal
 
                     })

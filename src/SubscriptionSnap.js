@@ -16,6 +16,10 @@ export default class SubscriptionSnap extends BaseSnap{
 
 
     getRawUses() {
+        if (isNaN(this.subscriptionPrice)){
+            console.log("we have a NaN subscription price", this.apiData, this.subscriptionPrice, this.subscriptionPrice)
+            throw("wtf there is no subscription price")
+        }
         return makeMods(this.apiData, this.subscriptionName, this.subscriptionPrice)
     }
 

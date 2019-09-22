@@ -147,48 +147,6 @@ function makeModsBase(journalYear, subscriptionName, subscriptionCost) {
     let softTurnawayCount = unFreeCount - hardTurnawayCount
 
     let makers = {
-        oa: function () {
-            return Object.assign({}, blankMod(), {
-                name: "oa",
-                count: journalYear.oaUseCount,
-                color: "#43a047",
-            })
-        },
-        backCatalog: function () {
-            return Object.assign({}, blankMod(), {
-                name: "backCatalog",
-                count: journalYear.backCatalogUseCount,
-                color: "#c0ca33",
-            })
-        },
-        fullSubscription: function () {
-            let ret = {
-                name: "fullSubscription",
-                color: "#ef5350",
-                isPaid: true
-            }
-            if (subscriptionName === "fullSubscription") {
-                ret = Object.assign({}, ret, {
-                    cost: subscriptionCost,
-                    count: unFreeCount,
-                })
-            }
-            return Object.assign({}, blankMod(), ret)
-        },
-        docdel: function () {
-            let ret = {
-                name: "docdel",
-                color: "#ff7043",
-                isPaid: true
-            }
-            if (subscriptionName === "docdel") {
-                ret = Object.assign({}, ret, {
-                    cost: hardTurnawayCount * docDelCostPerUse,
-                    count: hardTurnawayCount,
-                })
-            }
-            return Object.assign({}, blankMod(), ret)
-        },
         hardTurnaway: function () {
             let ret = {
                 name: "hardTurnaway",
@@ -220,6 +178,50 @@ function makeModsBase(journalYear, subscriptionName, subscriptionCost) {
             }
             return Object.assign({}, blankMod(), ret)
         },
+        fullSubscription: function () {
+            let ret = {
+                name: "fullSubscription",
+                color: "#a6cee3",
+                isPaid: true
+            }
+            if (subscriptionName === "fullSubscription") {
+                ret = Object.assign({}, ret, {
+                    cost: subscriptionCost,
+                    count: unFreeCount,
+                })
+            }
+            return Object.assign({}, blankMod(), ret)
+        },
+        docdel: function () {
+            let ret = {
+                name: "docdel",
+                color: "#1f78b4",
+                isPaid: true
+            }
+            if (subscriptionName === "docdel") {
+                ret = Object.assign({}, ret, {
+                    cost: hardTurnawayCount * docDelCostPerUse,
+                    count: hardTurnawayCount,
+                })
+            }
+            return Object.assign({}, blankMod(), ret)
+        },
+        backCatalog: function () {
+            return Object.assign({}, blankMod(), {
+                name: "backCatalog",
+                count: journalYear.backCatalogUseCount,
+                color: "#b2df8a",
+            })
+        },
+        oa: function () {
+            return Object.assign({}, blankMod(), {
+                name: "oa",
+                count: journalYear.oaUseCount,
+                color: "#33a02c",
+            })
+        },
+
+
     };
     const ret = {}
     Object.keys(makers).forEach(usageName => (
