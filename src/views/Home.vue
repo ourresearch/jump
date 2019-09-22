@@ -51,7 +51,7 @@
 
 
         <!--- Summary area  -->
-        <v-layout row style="padding-top:200px; border-bottom: 5px solid #333; background: #fff;">
+        <v-layout row style="padding-top:200px; background: #fff;">
             <v-container fluid>
                 <v-layout>
                     <v-flex xs6>
@@ -69,8 +69,22 @@
         </v-layout>
 
 
-
         <!--- working area  -->
+        <v-layout class="journal-controls pa-3" style="background: #ccc;">
+            <v-flex xs4>
+                <v-select
+                        :items="journalSortKeys"
+                        v-model="selectedJournalSortKey"
+                        label="Sort journals by"
+                        @change="sort"
+                        outline
+                ></v-select>
+
+            </v-flex>
+
+        </v-layout>
+
+
         <v-layout>
 
 
@@ -103,6 +117,7 @@
                                                 {{journal.meta.issnl}}
                                                 {{ journal.meta.subject}}
                                             </div>
+                                            <div>best cppu: {{journal.getBestCostPerPaidUse()}}</div>
 
                                         </div>
                                     </v-flex>
@@ -169,7 +184,7 @@
                             class="ma-4"
                             v-model="currentPage"
                             :length="Math.ceil(journalsFromApi.length / pageSize)"
-                            :total-visible="12"
+                            :total-visible="20"
                     ></v-pagination>
                 </v-layout>
 
@@ -228,7 +243,13 @@
             journals: [],
             bigDealJournals: [],
             api: api,
-            bigDealCost: 1000000
+            bigDealCost: 1000000,
+            selectedJournalSortKey: "getBestCostPerPaidUse",
+            journalSortKeys: [
+                {text: "Best Cost Per Paid Use (CPPA)", value: "getBestCostPerPaidUse"},
+                {text: "Total usage (count)", value: "getUseCount"},
+                {text: "Hard turnaways (count)", value: "getHardTurnawayCount"},
+            ]
 
         }),
         computed: {
@@ -269,7 +290,20 @@
         },
         methods: {
             nf: nFormat,
-            currency: currency
+            currency: currency,
+            sort: function(){
+                const sorter = (a,b) => {
+                    const fnName = this.selectedJournalSortKey
+                    let ret = b[fnName]() - a[fnName]()
+                    if (fnName==='getBestCostPerPaidUse'){
+                        ret = -ret
+                    }
+                    return ret
+
+                }
+                console.log("sorting journals", this.selectedJournalSortKey, sorter)
+                this.journals.sort(sorter)
+            }
         },
         mounted() {
             api.fetchJournals()
@@ -285,9 +319,13 @@
                         return myJournal
 
                     })
-                })
 
+                    this.sort()
+                })
+        },
+        watch: {
         }
+
     }
 </script>
 

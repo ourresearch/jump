@@ -57,6 +57,10 @@ class BaseSnap {
         return this.getCost() / this.getPaidUsesCount()
     }
 
+    getHardTurnawayCount(){
+        return this.getRawUses().hardTurnaway.count
+    }
+
     getEquippedUses() {
         const ret = {}
         Object.entries(this.getUses()).forEach(([k, v]) => {

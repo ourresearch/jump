@@ -33,6 +33,19 @@ export default class Journal {
         return new SummarySnap(this.getSubscriptionSnaps())
     }
 
+    getBestCostPerPaidUse(){
+        const costs = this.getHypotheticalSubscriptionMods()
+            .map(x=>x.costPerCount)
+        return Math.min(...costs)
+    }
+    getUseCount(){
+        return this.getSummary().getCount()
+    }
+    getHardTurnawayCount(){
+        return this.getSummary().getHardTurnawayCount()
+    }
+
+
     getHypotheticalSubscriptionMods(){
         return ["fullSubscription", "docdel"]
             .map(newSubscriptionName => {
