@@ -19,6 +19,9 @@ export default class Journal {
     subscribe(newSubscriptionName){
         this.subscriptionName = newSubscriptionName
     }
+    isSubscribedTo(name){
+        return this.subscriptionName === name
+    }
 
     getSubscriptionSnaps(){
         return this.usageByTypeByYear.map(usageYear=>{
@@ -32,7 +35,6 @@ export default class Journal {
 
     getHypotheticalSubscriptionMods(){
         return ["fullSubscription", "docdel"]
-            .filter(x => x !== this.subscriptionName)
             .map(newSubscriptionName => {
                 // make a new journal with this subscription
                 const hypotheticalJournal = new Journal(this.apiData, newSubscriptionName)

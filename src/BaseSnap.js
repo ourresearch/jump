@@ -3,7 +3,7 @@ import _ from 'lodash'
 
 
 
-const docDelPricePerUse = 25
+const docDelCostPerUse = 25
 const hardTurnawayProp = 0.1
 
 
@@ -15,7 +15,7 @@ class BaseSnap {
     getUses() {
         return this._addSummaryStats(
             this.getRawUses(),
-            this.getTotalCount()
+            this.getCount()
         )
     }
 
@@ -31,13 +31,13 @@ class BaseSnap {
             .reduce((a, b) => a + b, 0)
     }
 
-    getTotalCost() {
+    getCost() {
         return Object.values(this.getRawUses())
-            .map(x => x.price)
+            .map(x => x.cost)
             .reduce((a, b) => a + b, 0)
     }
 
-    getTotalCount(){
+    getCount(){
         return Object.values(this.getRawUses())
             .map(x=>x.count)
             .reduce((a,b)=>a+b, 0)
@@ -45,7 +45,7 @@ class BaseSnap {
 
     getPaidUsesCount() {
         return Object.values(this.getRawUses())
-            .filter(x => x.price > 0)
+            .filter(x => x.cost > 0)
             .map(x => x.count)
             .reduce((a, b) => a + b, 0)
     }
@@ -54,7 +54,7 @@ class BaseSnap {
         if (!this.getPaidUsesCount()) {
             return 0
         }
-        return this.getTotalCost() / this.getPaidUsesCount()
+        return this.getCost() / this.getPaidUsesCount()
     }
 
     getEquippedUses() {
@@ -75,7 +75,7 @@ class BaseSnap {
         const ret = {...modsDict}
         Object.keys(ret).forEach(k => {
             ret[k].prop = ret[k].count / totalCount
-            ret[k].pricePerCount = ret[k].price / ret[k].count
+            ret[k].costPerCount = ret[k].cost / ret[k].count
         })
         return ret
     }
@@ -87,7 +87,7 @@ class BaseSnap {
 function blankMod() {
     return {
         name: name,
-        price: 0,
+        cost: 0,
         count: 0,
         color: "#000",
         isFulfillment: true,
@@ -119,42 +119,27 @@ function makeBlankMods() {
 const memo = {}
 
 
-const makeMods = function(journalYear, subscriptionName, subscriptionPrice){
+const makeMods = function(journalYear, subscriptionName, subscriptionCost){
     const key = [
         journalYear.useCount,
         journalYear.oaUseCount,
         journalYear.backCatalogUseCount,
         subscriptionName,
-        subscriptionPrice,
+        subscriptionCost,
         ].join()
 
 
     if (memo[key]) return memo[key]
 
-    const resp = makeModsBase(journalYear, subscriptionName, subscriptionPrice)
+    const resp = makeModsBase(journalYear, subscriptionName, subscriptionCost)
     memo[key] = resp
     return resp
 
 }
 
 
-// const makeMods = _.memoize(
-//     makeModsBase,
-//     function(journalYear, subscriptionName, subscriptionPrice){
-//         let key = [
-//             journalYear.useCount,
-//             journalYear.oaUseCount,
-//             journalYear.backCatalogUseCount,
-//             journalYear.year,
-//             subscriptionName,
-//             subscriptionPrice,
-//             ].join()
-//         return key
-//
-//     })
 
-function makeModsBase(journalYear, subscriptionName, subscriptionPrice) {
-    let base = blankMod()
+function makeModsBase(journalYear, subscriptionName, subscriptionCost) {
 
     let freeCount = journalYear.oaUseCount + journalYear.backCatalogUseCount
     let unFreeCount = journalYear.useCount - freeCount
@@ -163,14 +148,14 @@ function makeModsBase(journalYear, subscriptionName, subscriptionPrice) {
 
     let makers = {
         oa: function () {
-            return Object.assign({}, base, {
+            return Object.assign({}, blankMod(), {
                 name: "oa",
                 count: journalYear.oaUseCount,
                 color: "#43a047",
             })
         },
         backCatalog: function () {
-            return Object.assign({}, base, {
+            return Object.assign({}, blankMod(), {
                 name: "backCatalog",
                 count: journalYear.backCatalogUseCount,
                 color: "#c0ca33",
@@ -184,11 +169,11 @@ function makeModsBase(journalYear, subscriptionName, subscriptionPrice) {
             }
             if (subscriptionName === "fullSubscription") {
                 ret = Object.assign({}, ret, {
-                    price: subscriptionPrice,
+                    cost: subscriptionCost,
                     count: unFreeCount,
                 })
             }
-            return Object.assign({}, base, ret)
+            return Object.assign({}, blankMod(), ret)
         },
         docdel: function () {
             let ret = {
@@ -198,11 +183,11 @@ function makeModsBase(journalYear, subscriptionName, subscriptionPrice) {
             }
             if (subscriptionName === "docdel") {
                 ret = Object.assign({}, ret, {
-                    price: hardTurnawayCount * docDelPricePerUse,
+                    cost: hardTurnawayCount * docDelCostPerUse,
                     count: hardTurnawayCount,
                 })
             }
-            return Object.assign({}, base, ret)
+            return Object.assign({}, blankMod(), ret)
         },
         hardTurnaway: function () {
             let ret = {

@@ -1,5 +1,5 @@
 <template>
-    <v-container class="timeline pa-2">
+    <v-container fluid class="timeline pa-2">
 
         <v-layout align-items-top class="text-xs-right">
 
@@ -19,85 +19,106 @@
                             style="flex-grow:3;">
                     </downloads-bar>
 
-                        <downloads-bar
-                                v-for="snap in yearlySnaps"
-                                :year="snap.year"
-                                style="flex-grow: 1;"
-                                :snap="snap"></downloads-bar>
-
-
+                    <downloads-bar
+                            v-for="snap in yearlySnaps"
+                            :year="snap.year"
+                            style="flex-grow: 1;"
+                            :snap="snap"></downloads-bar>
                 </div>
             </v-flex>
 
 
-            <v-flex xs9 class="fulfilled-uses mx-4 px-4">
-                <v-layout class="heading-row">
-                    <v-flex class="use py-0" xs6>
-                        Fulfillments
-                    </v-flex>
+            <v-flex xs11>
+                <usage-type-row
+                        name="total"
+                        :count="overallSnap.getCount()"
+                        :cost="overallSnap.getCost()"
+                        :cost-per-paid-use="overallSnap.getCostPerPaidUse()"
+                ></usage-type-row>
 
-                    <v-flex class="cost py-0" xs3>
-                        Costs
-                    </v-flex>
-                    <v-flex class="cost-per-use py-0" sx3>
-                        Cost per paid use
-                    </v-flex>
-                </v-layout>
+                <usage-type-row
+                        v-for="usageType in overallSnap.getUses()"
+                        v-if="usageType.count > 0.5"
+                        :name="usageType.name"
+                        :count="usageType.count"
+                        :cost="usageType.cost"
+                        :cost-per-paid-use="usageType.costPerCount"
+                ></usage-type-row>
 
-                <v-layout class="main-row main-number">
-                    <v-flex class="use py-0" xs6>
-                        {{ nf(overallSnap.getFulfilledCount()) }}
-                    </v-flex>
-
-                    <v-flex class="cost py-0" xs3>
-                        ${{nf(overallSnap.getTotalCost())}}
-                    </v-flex>
-                    <v-flex class="cost-per-use py-0" sx3>
-                        ${{ nf(overallSnap.getCostPerPaidUse(), true) }}
-                    </v-flex>
-                </v-layout>
-
-
-                <v-layout class="mod-row equipped" v-for="mod in overallSnap.getFulfillments()">
-                    <v-flex class="use py-0" xs6>
-                        <v-layout>
-                            <v-flex xs4 class="text-xs-left">
-                                <a v-if="mod.isPaid" @click="$emit('clearSubscriptions')">
-                                    -remove
-                                </a>
-                            </v-flex>
-                            <v-flex xs4 class="text-xs-left">{{mod.name}}</v-flex>
-                            <v-flex xs4>{{ nf(mod.count) }}</v-flex>
-                        </v-layout>
-                    </v-flex>
-
-                    <v-flex class="cost py-0" xs3>
-                        <span v-if="mod.price > 0">
-                            ${{nf(mod.price)}}
-                        </span>
-                    </v-flex>
-                    <v-flex class="cost-per-use py-0" sx3>
-                        <span v-if="mod.price > 0">
-                            ${{mod.pricePerCount.toFixed(2) }}
-                        </span>
-                    </v-flex>
-                </v-layout>
 
             </v-flex>
 
 
-            <v-flex class="turnaway-uses py-0" xs2 style="border-left: 1px solid #999;">
-                <div class="heading">Turnaways</div>
-                <div class="main-number">
-                    {{ nf(turnawayCounts.total) }}
-                </div>
-                <div class="under-number">
-                    {{ nf(turnawayCounts.soft)}} soft
-                </div>
-                <div class="under-number">
-                    {{ nf(turnawayCounts.hard)}} hard
-                </div>
-            </v-flex>
+
+
+<!--            <v-flex xs9 class="fulfilled-uses mx-4 px-4">-->
+<!--                <v-layout class="heading-row">-->
+<!--                    <v-flex class="use py-0" xs6>-->
+<!--                        Fulfillments-->
+<!--                    </v-flex>-->
+
+<!--                    <v-flex class="cost py-0" xs3>-->
+<!--                        Costs-->
+<!--                    </v-flex>-->
+<!--                    <v-flex class="cost-per-use py-0" sx3>-->
+<!--                        Cost per paid use-->
+<!--                    </v-flex>-->
+<!--                </v-layout>-->
+
+<!--                <v-layout class="main-row main-number">-->
+<!--                    <v-flex class="use py-0" xs6>-->
+<!--                        {{ nf(overallSnap.getFulfilledCount()) }}-->
+<!--                    </v-flex>-->
+
+<!--                    <v-flex class="cost py-0" xs3>-->
+<!--                        ${{nf(overallSnap.getTotalCost())}}-->
+<!--                    </v-flex>-->
+<!--                    <v-flex class="cost-per-use py-0" sx3>-->
+<!--                        ${{ nf(overallSnap.getCostPerPaidUse(), true) }}-->
+<!--                    </v-flex>-->
+<!--                </v-layout>-->
+
+
+<!--                <v-layout class="mod-row equipped" v-for="mod in overallSnap.getFulfillments()">-->
+<!--                    <v-flex class="use py-0" xs6>-->
+<!--                        <v-layout>-->
+<!--                            <v-flex xs4 class="text-xs-left">-->
+<!--                                <a v-if="mod.isPaid" @click="$emit('clearSubscriptions')">-->
+<!--                                    -remove-->
+<!--                                </a>-->
+<!--                            </v-flex>-->
+<!--                            <v-flex xs4 class="text-xs-left">{{mod.name}}</v-flex>-->
+<!--                            <v-flex xs4>{{ nf(mod.count) }}</v-flex>-->
+<!--                        </v-layout>-->
+<!--                    </v-flex>-->
+
+<!--                    <v-flex class="cost py-0" xs3>-->
+<!--                        <span v-if="mod.price > 0">-->
+<!--                            ${{nf(mod.price)}}-->
+<!--                        </span>-->
+<!--                    </v-flex>-->
+<!--                    <v-flex class="cost-per-use py-0" sx3>-->
+<!--                        <span v-if="mod.price > 0">-->
+<!--                            ${{mod.pricePerCount.toFixed(2) }}-->
+<!--                        </span>-->
+<!--                    </v-flex>-->
+<!--                </v-layout>-->
+
+<!--            </v-flex>-->
+
+
+<!--            <v-flex class="turnaway-uses py-0" xs2 style="border-left: 1px solid #999;">-->
+<!--                <div class="heading">Turnaways</div>-->
+<!--                <div class="main-number">-->
+<!--                    {{ nf(turnawayCounts.total) }}-->
+<!--                </div>-->
+<!--                <div class="under-number">-->
+<!--                    {{ nf(turnawayCounts.soft)}} soft-->
+<!--                </div>-->
+<!--                <div class="under-number">-->
+<!--                    {{ nf(turnawayCounts.hard)}} hard-->
+<!--                </div>-->
+<!--            </v-flex>-->
 
 
         </v-layout>
@@ -108,6 +129,7 @@
 
 <script>
     import DownloadsBar from "../components/DownloadsBar"
+    import UsageTypeRow from "../components/UsageTypeRow"
     import {store} from "../search.js"
     import SummarySnap from "../SummarySnap"
 
@@ -115,7 +137,8 @@
         name: "UsageReport",
         props: ["yearlySnaps", "overview"],
         components: {
-            DownloadsBar
+            DownloadsBar,
+            UsageTypeRow
         },
         data: () => ({
             store: store,
@@ -146,26 +169,7 @@
 
             overallSnap(){
                 return new SummarySnap(this.yearlySnaps)
-            },
-            turnawayCounts(){
-                const soft = this.overallSnap.getUses().softTurnaway
-                const hard = this.overallSnap.getUses().hardTurnaway
-
-                return {
-                    soft: soft.count,
-                    hard: hard.count,
-                    total: soft.count + hard.count
-                }
             }
-        },
-        mounted(){
-            // if (this.overview){
-            //     console.log("overview usagereport mounted. yearlySnaps", this.yearlySnaps)
-            // }
-            // else{
-            //     console.log("journal usagereport mounted. yearlySnaps", this.yearlySnaps)
-            //
-            // }
         }
     }
 </script>

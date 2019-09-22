@@ -19,10 +19,6 @@ export default class SubscriptionSnap extends BaseSnap{
         return makeMods(this.apiData, this.subscriptionName, this.subscriptionPrice)
     }
 
-    subscribe(name, price) {
-        this.subscriptionName = name
-        this.subscriptionPrice = price || 0
-    }
 
 
 

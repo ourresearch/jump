@@ -20,7 +20,7 @@ export default class SummarySnap extends BaseSnap{
             Object.keys(myUses).forEach(k => {
 
                 ret[k].count += myUses[k].count
-                ret[k].price += myUses[k].price
+                ret[k].cost += myUses[k].cost
             })
         })
 
