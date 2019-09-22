@@ -5,7 +5,7 @@
             <v-container>
                 <v-layout>
                     <v-flex xs12>
-                        <usage-report :yearly-snaps="yearlySummarySnaps"></usage-report>
+                        <usage-report :yearly-snaps="yearlySummarySnaps" overview="true"></usage-report>
                     </v-flex>
 
                 </v-layout>
@@ -13,11 +13,11 @@
         </div>
 
 
-        <!--                <v-layout>-->
-        <!--                    <pre>-->
-        <!--                        {{store.user}}-->
-        <!--                    </pre>-->
-        <!--                </v-layout>-->
+<!--                        <v-layout>-->
+<!--                            <pre>-->
+<!--                                {{ }}-->
+<!--                            </pre>-->
+<!--                        </v-layout>-->
 
         <!--- working area  -->
         <v-layout row style="padding-top:200px;">
@@ -114,11 +114,12 @@
 
 
 
+
     export default {
         name: 'Home',
         components: {
             DownloadsBar,
-            UsageReport,
+            UsageReport
         },
         data: () => ({
             store: store,
@@ -127,7 +128,7 @@
             sortBy: "default",
             journalsFromApi: [],
             journals: [],
-            api: api
+            api: api,
 
         }),
         computed: {

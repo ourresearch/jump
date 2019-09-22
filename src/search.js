@@ -3,7 +3,6 @@ import _ from 'lodash'
 
 import {resp} from "./journalsRespMock.js"
 
-import {subscriptionUseReport, overallUseReport, journalYear} from "./use.js"
 
 
 // from https://stackoverflow.com/a/7616484/226013
@@ -40,7 +39,6 @@ export const store = {
         journals: []
     },
     computed:{
-        journalYears: []
     },
     getApiUrl: function () {
         return this.baseUrl
@@ -98,23 +96,6 @@ export const store = {
 
                 })
 
-                resp.data.list.forEach(apiJournal=>{
-                    const downloads = apiDownloadsByYear(apiJournal.downloads_by_year)
-                    downloads.forEach(myDownloads=>{
-
-                        const myJournalYear = journalYear()
-                        myJournalYear.useCount = myDownloads.useCount
-                        myJournalYear.oaUseCount = myDownloads.oaUseCount
-                        myJournalYear.backCatalogUseCount = myDownloads.backCatalogUseCount
-                        myJournalYear.subscriptionPrice = apiJournal.dollars_2018_subscription
-                        myJournalYear.issnl = apiJournal.issn_l
-                        myJournalYear.subscribedTo = "free"
-                        myJournalYear.year = myDownloads.year
-                        this.computed.journalYears.push(myJournalYear)
-                    })
-
-
-                })
 
 
             })
@@ -126,40 +107,8 @@ export const store = {
             })
         return request
     },
-    getUseReport(issnl){
-        const myJournalYears = this.computed.journalYears.filter(y=>{
-            return y.issnl === issnl
-        })
-        const yearsWithSubs = myJournalYears.map(journalYear=>{
-            const ret = {...journalYear}
-            ret.subscribedTo = this.getSubscription(issnl)
-            return ret
-        })
-        return subscriptionUseReport(yearsWithSubs)
-    },
 
-    getJournalYear(issnl){
 
-        const myJournalYears = this.computed.journalYears.filter(y=>{
-            return y.issnl === issnl
-        })
-        return myJournalYears.map(journalYear=>{
-            const ret = {...journalYear}
-            ret.subscribedTo = this.user.subDict[issnl]
-            ret._subHash = this.user.subHash
-            return ret
-        })
-    },
-
-    getAllJournalYears(){
-
-        return this.computed.journalYears.map(journalYear=>{
-            const ret = {...journalYear}
-            ret.subscribedTo = this.getSubscription(journalYear.issnl)
-            ret._subHash = this.user.subHash
-            return ret
-        })
-    },
 
 
     getJournalMeta(issnl){

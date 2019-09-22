@@ -109,12 +109,11 @@
 <script>
     import DownloadsBar from "../components/DownloadsBar"
     import {store} from "../search.js"
-    import * as use from "../use.js"
     import SummarySnap from "../SummarySnap"
 
     export default {
         name: "UsageReport",
-        props: ["yearlySnaps"],
+        props: ["yearlySnaps", "overview"],
         components: {
             DownloadsBar
         },
@@ -160,7 +159,13 @@
             }
         },
         mounted(){
-            console.log("usagereport mounted. yearlySnaps", this.yearlySnaps)
+            if (this.overview){
+                console.log("overview usagereport mounted. yearlySnaps", this.yearlySnaps)
+            }
+            else{
+                console.log("journal usagereport mounted. yearlySnaps", this.yearlySnaps)
+
+            }
         }
     }
 </script>

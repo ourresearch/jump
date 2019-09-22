@@ -28,19 +28,19 @@ class BaseSnap {
         return Object.values(this.getRawUses())
             .filter(x => x.isFulfillment)
             .map(x => x.count)
-            .reduce((a, b) => a + b)
+            .reduce((a, b) => a + b, 0)
     }
 
     getTotalCost() {
         return Object.values(this.getRawUses())
             .map(x => x.price)
-            .reduce((a, b) => a + b)
+            .reduce((a, b) => a + b, 0)
     }
 
     getTotalCount(){
         return Object.values(this.getRawUses())
             .map(x=>x.count)
-            .reduce((a,b)=>a+b)
+            .reduce((a,b)=>a+b, 0)
     }
 
     getPaidUsesCount() {
@@ -100,12 +100,58 @@ function makeBlankMods() {
         oaUseCount: 0,
         backCatalogUseCount: 0,
         useCount: 0,
+        year: null
     }
-    return makeMods(blankJournalYear, "free", 0)
+
+    const ret = {}
+    const newMods = makeMods(blankJournalYear, "free", 0)
+
+    Object.entries(newMods).forEach(([k,v])=>{
+        ret[k] = {...v}
+    })
+
+    return ret
 }
 
-const makeMods = _.memoize(makeModsBase)
 
+
+
+const memo = {}
+
+
+const makeMods = function(journalYear, subscriptionName, subscriptionPrice){
+    const key = [
+        journalYear.useCount,
+        journalYear.oaUseCount,
+        journalYear.backCatalogUseCount,
+        subscriptionName,
+        subscriptionPrice,
+        ].join()
+
+
+    if (memo[key]) return memo[key]
+
+    const resp = makeModsBase(journalYear, subscriptionName, subscriptionPrice)
+    memo[key] = resp
+    return resp
+
+}
+
+
+// const makeMods = _.memoize(
+//     makeModsBase,
+//     function(journalYear, subscriptionName, subscriptionPrice){
+//         let key = [
+//             journalYear.useCount,
+//             journalYear.oaUseCount,
+//             journalYear.backCatalogUseCount,
+//             journalYear.year,
+//             subscriptionName,
+//             subscriptionPrice,
+//             ].join()
+//         return key
+//
+//     })
 
 function makeModsBase(journalYear, subscriptionName, subscriptionPrice) {
     let base = blankMod()
@@ -200,8 +246,28 @@ function makeModsBase(journalYear, subscriptionName, subscriptionPrice) {
 
 
 
+
+function makePotentialUses(journalYears) {
+    const journalYearsSum = journalYears.reduce(sumJournalYears)
+
+    return ["fullSubscription", "docdel"]
+        .filter(x => x !== journalYearsSum.subscribedTo)
+        .map(potentialSubscriptionName => {
+            // make full of this type
+            const newJournalYear = {...journalYearsSum}
+            newJournalYear.subscribedTo = potentialSubscriptionName
+            return makeMods(newJournalYear)
+                .find(mod => {
+                    // only return the subscription use, not all of them.
+                    return mod.name === potentialSubscriptionName
+                })
+        })
+}
+
+
 export {
     makeBlankMods,
     makeMods,
-    BaseSnap
+    BaseSnap,
+    memo
 }

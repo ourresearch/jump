@@ -13,17 +13,18 @@ export default class SummarySnap extends BaseSnap{
 
 
     getRawUses() {
-        const mods = makeBlankMods()
+        const ret = makeBlankMods()
 
         this.snaps.forEach(snap => {
-            const myUses = snap.getUses()
+            const myUses = snap.getRawUses()
             Object.keys(myUses).forEach(k => {
-                mods[k].count += myUses[k].count
-                mods[k].price += myUses[k].price
+
+                ret[k].count += myUses[k].count
+                ret[k].price += myUses[k].price
             })
         })
 
-        return mods
+        return ret
     }
 }
 

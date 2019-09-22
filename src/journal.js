@@ -1,4 +1,3 @@
-import UsageReport from "./usageReport.js"
 import SubscriptionSnap from "./SubscriptionSnap"
 
 
@@ -33,16 +32,6 @@ export default class Journal {
         return ret
     }
 
-
-    getUsageReport(){
-        const ret = new UsageReport()
-
-        this.usageByTypeByYear.forEach(usageYear=>{
-            ret.setYearSnapFromApiData(usageYear.year, usageYear, this.subscriptionName)
-            ret.fullSubscriptionPrice = this.fullSubscriptionPrice
-        })
-        return ret
-    }
 
 }
 
