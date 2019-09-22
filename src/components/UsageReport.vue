@@ -159,13 +159,13 @@
             }
         },
         mounted(){
-            if (this.overview){
-                console.log("overview usagereport mounted. yearlySnaps", this.yearlySnaps)
-            }
-            else{
-                console.log("journal usagereport mounted. yearlySnaps", this.yearlySnaps)
-
-            }
+            // if (this.overview){
+            //     console.log("overview usagereport mounted. yearlySnaps", this.yearlySnaps)
+            // }
+            // else{
+            //     console.log("journal usagereport mounted. yearlySnaps", this.yearlySnaps)
+            //
+            // }
         }
     }
 </script>

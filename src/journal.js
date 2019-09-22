@@ -1,4 +1,6 @@
 import SubscriptionSnap from "./SubscriptionSnap"
+import SummarySnap from "./SummarySnap"
+import {makeMods} from "./BaseSnap";
 
 
 
@@ -7,7 +9,7 @@ import SubscriptionSnap from "./SubscriptionSnap"
 export default class Journal {
     constructor(apiData, subscriptionName) {
 
-
+        this.apiData = apiData
         this.meta = apiData.meta
         this.subscriptionName = subscriptionName || "free"
         this.usageByTypeByYear = apiData.usageByTypeByYear
@@ -24,12 +26,21 @@ export default class Journal {
         })
     }
 
-    getSubscriptionSnapsDict(){
-        let ret = {}
-        return this.usageByTypeByYear.forEach(usageYear=>{
-            ret[usageYear.year] = new SubscriptionSnap(usageYear, this.subscriptionName, this.fullSubscriptionPrice)
-        })
-        return ret
+    getSummary(){
+        return new SummarySnap(this.getSubscriptionSnaps())
+    }
+
+    getHypotheticalSubscriptionMods(){
+        return ["fullSubscription", "docdel"]
+            .filter(x => x !== this.subscriptionName)
+            .map(newSubscriptionName => {
+                // make a new journal with this subscription
+                const hypotheticalJournal = new Journal(this.apiData, newSubscriptionName)
+                const hypotheticalUses = hypotheticalJournal.getSummary().getUses()
+
+                return hypotheticalUses[newSubscriptionName]
+
+            })
     }
 
 
@@ -37,3 +48,20 @@ export default class Journal {
 
 
 
+
+function makePotentialUses(journalYears) {
+    const journalYearsSum = journalYears.reduce(sumJournalYears)
+
+    return ["fullSubscription", "docdel"]
+        .filter(x => x !== journalYearsSum.subscribedTo)
+        .map(potentialSubscriptionName => {
+            // make full of this type
+            const newJournalYear = {...journalYearsSum}
+            newJournalYear.subscribedTo = potentialSubscriptionName
+            return makeMods(newJournalYear)
+                .find(mod => {
+                    // only return the subscription use, not all of them.
+                    return mod.name === potentialSubscriptionName
+                })
+        })
+}

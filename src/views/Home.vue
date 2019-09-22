@@ -66,6 +66,9 @@
                                         <v-layout>
                                             <usage-report :yearly-snaps="journal.getSubscriptionSnaps()"></usage-report>
                                         </v-layout>
+                                        <v-layout>
+                                            <pre>{{journal.getHypotheticalSubscriptionMods()}}</pre>
+                                        </v-layout>
 
                                     </v-flex>
 
@@ -124,7 +127,7 @@
         data: () => ({
             store: store,
             currentPage: 1,
-            pageSize: 3,
+            pageSize: 30,
             sortBy: "default",
             journalsFromApi: [],
             journals: [],

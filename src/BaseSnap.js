@@ -247,23 +247,6 @@ function makeModsBase(journalYear, subscriptionName, subscriptionPrice) {
 
 
 
-function makePotentialUses(journalYears) {
-    const journalYearsSum = journalYears.reduce(sumJournalYears)
-
-    return ["fullSubscription", "docdel"]
-        .filter(x => x !== journalYearsSum.subscribedTo)
-        .map(potentialSubscriptionName => {
-            // make full of this type
-            const newJournalYear = {...journalYearsSum}
-            newJournalYear.subscribedTo = potentialSubscriptionName
-            return makeMods(newJournalYear)
-                .find(mod => {
-                    // only return the subscription use, not all of them.
-                    return mod.name === potentialSubscriptionName
-                })
-        })
-}
-
 
 export {
     makeBlankMods,
