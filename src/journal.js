@@ -20,7 +20,6 @@ export default class Journal {
     }
 
     getSubscriptionSnaps(){
-        console.log("Journal getting subscriptionsnap",this.usageByTypeByYear)
         return this.usageByTypeByYear.map(usageYear=>{
             return new SubscriptionSnap(usageYear, this.subscriptionName, this.fullSubscriptionPrice)
         })

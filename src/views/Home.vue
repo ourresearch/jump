@@ -1,17 +1,16 @@
 <template>
 
-    <v-container class="home" fluid grid-list-lg v-if="api.loadingState==='complete'">
-        <v-layout row style="position: fixed; top:0; left:0; right:0;background: #fff; z-index:1000;">
-            <v-flex xs3></v-flex>
-            <v-flex xs9>
-                <!--                            <timeline :journal-years="journalYears"></timeline>-->
+    <v-container class="home"  v-if="api.loadingState==='complete'">
+        <div  style="position: fixed; top:0; left:0; right:0;background: #fff; z-index:1000;">
+            <v-container>
+                <v-layout>
+                    <v-flex xs12>
+                        <usage-report :yearly-snaps="yearlySummarySnaps"></usage-report>
+                    </v-flex>
 
-
-                <!--                            <pre>-->
-                <!--                                {{overallUses.map(x=>[x.name, x.count])}}-->
-                <!--                            </pre>-->
-            </v-flex>
-        </v-layout>
+                </v-layout>
+            </v-container>
+        </div>
 
 
         <!--                <v-layout>-->
@@ -35,7 +34,6 @@
 
             <!--- journals list  -->
             <v-flex md12>
-                <v-container>
                     <v-layout>
                         sorting by price per requested item.
                     </v-layout>
@@ -44,7 +42,6 @@
 
                         <!-- journal row -->
                         <v-flex class="journal-row" v-for="journal in journalsForPage">
-                            <v-container>
                                 <v-layout align-items-top>
                                     <v-flex shrink>
                                         <v-checkbox class="pa-0 mt-1"></v-checkbox>
@@ -75,7 +72,6 @@
                                 </v-layout>
 
 
-                            </v-container>
 
 
                         </v-flex>
@@ -92,7 +88,6 @@
                     </v-layout>
 
 
-                </v-container>
 
             </v-flex>
 
@@ -142,7 +137,7 @@
                 return this.journals.slice(startIndex, endIndex)
             },
 
-            yearlySummariesDict(){
+            yearlySummarySnaps(){
                 const years = ["2020","2021","2022","2023","2024"]
                 const ret = {}
                 years.forEach(y=>ret[y] = new SummarySnap())
@@ -152,7 +147,7 @@
                         ret[snap.year].addSnap(snap)
                     })
                 })
-                return ret
+                return Object.values(ret)
             }
         },
         methods: {
@@ -162,7 +157,7 @@
                 .then(resp => {
                     this.journalsFromApi = resp
                     this.journals = resp.map(x => {
-                        let myJournal = new Journal(x, "fullSubscription")
+                        let myJournal = new Journal(x, "free")
                         return myJournal
 
                     })

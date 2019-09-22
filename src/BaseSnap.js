@@ -1,3 +1,8 @@
+import _ from 'lodash'
+
+
+
+
 const docDelPricePerUse = 25
 const hardTurnawayProp = 0.1
 
@@ -7,26 +12,39 @@ class BaseSnap {
     constructor() {
     }
 
-
     getUses() {
-        throw "BaseSnap.getUses needs to be overridden"
+        return this._addSummaryStats(
+            this.getRawUses(),
+            this.getTotalCount()
+        )
+    }
+
+    getRawUses() {
+        throw "BaseSnap.getRawUses() must be overridden"
+
     }
 
     getFulfilledCount() {
-        return Object.values(this.getUses())
+        return Object.values(this.getRawUses())
             .filter(x => x.isFulfillment)
             .map(x => x.count)
             .reduce((a, b) => a + b)
     }
 
     getTotalCost() {
-        return Object.values(this.getUses())
-            .map(x => x.count)
+        return Object.values(this.getRawUses())
+            .map(x => x.price)
             .reduce((a, b) => a + b)
     }
 
+    getTotalCount(){
+        return Object.values(this.getRawUses())
+            .map(x=>x.count)
+            .reduce((a,b)=>a+b)
+    }
+
     getPaidUsesCount() {
-        return Object.values(this.getUses())
+        return Object.values(this.getRawUses())
             .filter(x => x.price > 0)
             .map(x => x.count)
             .reduce((a, b) => a + b, 0)
@@ -36,13 +54,28 @@ class BaseSnap {
         if (!this.getPaidUsesCount()) {
             return 0
         }
-        return this.getFulfilledCount() / this.getPaidUsesCount()
+        return this.getTotalCost() / this.getPaidUsesCount()
     }
 
     getEquippedUses() {
         const ret = {}
         Object.entries(this.getUses()).forEach(([k, v]) => {
             if (v.count > 0.1) ret[k] = v
+        })
+        return ret
+    }
+
+    getFulfillments(){
+        return Object.values(this.getUses()).filter(use=>{
+            return use.isFulfillment && use.count > 0.5
+        })
+    }
+
+    _addSummaryStats(modsDict, totalCount) {
+        const ret = {...modsDict}
+        Object.keys(ret).forEach(k => {
+            ret[k].prop = ret[k].count / totalCount
+            ret[k].pricePerCount = ret[k].price / ret[k].count
         })
         return ret
     }
@@ -71,8 +104,10 @@ function makeBlankMods() {
     return makeMods(blankJournalYear, "free", 0)
 }
 
+const makeMods = _.memoize(makeModsBase)
 
-function makeMods(journalYear, subscriptionName, subscriptionPrice) {
+
+function makeModsBase(journalYear, subscriptionName, subscriptionPrice) {
     let base = blankMod()
 
     let freeCount = journalYear.oaUseCount + journalYear.backCatalogUseCount

@@ -5,13 +5,14 @@
 
 <!--            <v-flex>-->
 <!--                <pre class="text-xs-left">-->
-<!--                {{yearlyUses}}-->
+<!--                {{yearlySnaps[0].getUses()}}-->
 
 <!--                </pre>-->
 <!--            </v-flex>-->
 
+
             <v-flex class="fulfillment-graph text-xs-left" xs1>
-                <div style="display: flex; width:100%; height: 40%; min-height: 50px;">
+                <div style="display: flex; width:100%; height: 100%; min-height: 50px;">
                     <downloads-bar
                             :snap="overallSnap"
                             class="pr-1"
@@ -19,8 +20,8 @@
                     </downloads-bar>
 
                         <downloads-bar
-                                v-for="(snap, year) in yearlySnaps"
-                                :year="year"
+                                v-for="snap in yearlySnaps"
+                                :year="snap.year"
                                 style="flex-grow: 1;"
                                 :snap="snap"></downloads-bar>
 
@@ -57,7 +58,7 @@
                 </v-layout>
 
 
-                <v-layout class="mod-row equipped" v-for="mod in overallSnap.getEquippedUses()">
+                <v-layout class="mod-row equipped" v-for="mod in overallSnap.getFulfillments()">
                     <v-flex class="use py-0" xs6>
                         <v-layout>
                             <v-flex xs4 class="text-xs-left">
@@ -71,10 +72,14 @@
                     </v-flex>
 
                     <v-flex class="cost py-0" xs3>
-                        ${{nf(mod.price)}}
+                        <span v-if="mod.price > 0">
+                            ${{nf(mod.price)}}
+                        </span>
                     </v-flex>
                     <v-flex class="cost-per-use py-0" sx3>
-                        ${{mod.pricePerCount.toFixed(2) }}
+                        <span v-if="mod.price > 0">
+                            ${{mod.pricePerCount.toFixed(2) }}
+                        </span>
                     </v-flex>
                 </v-layout>
 

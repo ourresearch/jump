@@ -28,6 +28,7 @@
         },
         computed: {
             useTypes(){
+
                 return this.snap.getUses()
             }
         }
