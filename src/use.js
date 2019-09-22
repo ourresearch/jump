@@ -12,11 +12,18 @@ const sumObjects = function (a, b) {
 }
 
 const sumJournalYears = function(a,b){
-    let ret = {}
+    let ret = journalYear()
     ret.useCount = a.useCount + b.useCount
     ret.oaUseCount = a.oaUseCount + b.oaUseCount
     ret.backCatalogUseCount = a.backCatalogUseCount + b.backCatalogUseCount
-    ret.subscriptionPrice = a.subscriptionPrice + b.subscriptionPrice
+
+
+    if (a.subscriptionPrice) {
+        ret.subscriptionPrice += a.subscriptionPrice
+    }
+    if (b.subscriptionPrice) {
+        ret.subscriptionPrice += b.subscriptionPrice
+    }
 
     ret.year = a.year
     ret.issnl = a.issnl
@@ -73,6 +80,17 @@ function blankMod() {
     }
 }
 
+// function sumMods(a, b){
+//     if (a.name !== b.name){
+//         throw(["can't sum two mods of different type!", a, b])
+//     }
+//     const ret = blankMod()
+//
+//     ret.price = a.price + b.price
+//     ret.count = a.count + b.count
+//     ret.pricePerCount = ret.price / ret.count
+
+
 const sumModLists = function(a,b){
     const totalUsesCount = a.map(x=>x.count).reduce((a,b) => a+b) +
         b.map(x=>x.count).reduce((a,b) => a+b)
@@ -94,61 +112,13 @@ const sumModLists = function(a,b){
 
 
 
-function getTurnaways(fulfilledUseCount, totalUseCount, subscriptionName) {
-
-    const turnawayCount = totalUseCount - fulfilledUseCount
-    const hardTurnawayCount = turnawayCount * hardTurnawayProp
-    const softTurnawayCount = turnawayCount - hardTurnawayCount
-
-    const defs = {
-        hardTurnaway: function () {
-            let ret = {
-                name: "hardTurnaway",
-                color: "#555",
-                isFulfillment: false
-            }
-
-            // docdel wipes out all hard turnaways
-            // fullsubscription does too
-            if (subscriptionName === "free") {
-                ret = Object.assign({}, ret, {
-                    count: hardTurnawayCount,
-                    prop: hardTurnawayCount / totalUseCount,
-                })
-            }
-            return Object.assign({}, blankMod(), ret)
-        },
-        softTurnaway: function () {
-            let ret = {
-                name: "softTurnaway",
-                color: "#999",
-                isFulfillment: false
-            }
-
-            // full subscription wipes out all soft turnaways
-            if (subscriptionName !== "fullSubscription") {
-                ret = Object.assign({}, ret, {
-                    count: softTurnawayCount,
-                    prop: softTurnawayCount / totalUseCount
-                })
-            }
-            return Object.assign({}, blankMod(), ret)
-        },
-    }
-
-    return [
-        defs.hardTurnaway(), defs.softTurnaway()
-    ]
-}
 
 
-
-
-function makeFulfillmentMods(stat) {
+function makeMods(journalYear) {
     let base = blankMod()
 
-    let freeCount = stat.oaUseCount + stat.backCatalogUseCount
-    let unFreeCount = stat.useCount - freeCount
+    let freeCount = journalYear.oaUseCount + journalYear.backCatalogUseCount
+    let unFreeCount = journalYear.useCount - freeCount
     let hardTurnawayCount = unFreeCount * hardTurnawayProp
     let softTurnawayCount = unFreeCount - hardTurnawayCount
 
@@ -156,8 +126,8 @@ function makeFulfillmentMods(stat) {
         oa: function () {
             return Object.assign({}, base, {
                 name: "oa",
-                count: stat.oaUseCount,
-                prop: stat.oaUseCount / stat.useCount,
+                count: journalYear.oaUseCount,
+                prop: journalYear.oaUseCount / journalYear.useCount,
                 color: "#43a047",
                 isEquipped: true
             })
@@ -165,8 +135,8 @@ function makeFulfillmentMods(stat) {
         backCatalog: function () {
             return Object.assign({}, base, {
                 name: "backCatalog",
-                count: stat.backCatalogUseCount,
-                prop: stat.backCatalogUseCount / stat.useCount,
+                count: journalYear.backCatalogUseCount,
+                prop: journalYear.backCatalogUseCount / journalYear.useCount,
                 color: "#c0ca33",
                 isEquipped: true
             })
@@ -177,12 +147,12 @@ function makeFulfillmentMods(stat) {
                 color: "#ef5350",
                 isPaid: true
             }
-            if (stat.subscribedTo === "fullSubscription") {
+            if (journalYear.subscribedTo === "fullSubscription") {
                 ret = Object.assign({}, ret, {
-                    price: stat.subscriptionPrice,
+                    price: journalYear.subscriptionPrice,
                     count: unFreeCount,
-                    prop: unFreeCount / stat.useCount,
-                    pricePerCount: stat.subscriptionPrice / unFreeCount,
+                    prop: unFreeCount / journalYear.useCount,
+                    pricePerCount: journalYear.subscriptionPrice / unFreeCount,
                     isEquipped: true
                 })
             }
@@ -194,11 +164,11 @@ function makeFulfillmentMods(stat) {
                 color: "#ff7043",
                 isPaid: true
             }
-            if (stat.subscribedTo === "docdel") {
+            if (journalYear.subscribedTo === "docdel") {
                 ret = Object.assign({}, ret, {
                     price: hardTurnawayCount * docDelPricePerUse,
                     count: hardTurnawayCount,
-                    prop: hardTurnawayCount / stat.useCount,
+                    prop: hardTurnawayCount / journalYear.useCount,
                     pricePerCount: docDelPricePerUse,
                     isEquipped: true
                 })
@@ -214,10 +184,10 @@ function makeFulfillmentMods(stat) {
 
             // docdel wipes out all hard turnaways
             // fullsubscription does too
-            if (stat.subscribedTo === "free") {
+            if (journalYear.subscribedTo === "free") {
                 ret = Object.assign({}, ret, {
                     count: hardTurnawayCount,
-                    prop: hardTurnawayCount / stat.useCount,
+                    prop: hardTurnawayCount / journalYear.useCount,
                 })
             }
             return Object.assign({}, blankMod(), ret)
@@ -230,10 +200,10 @@ function makeFulfillmentMods(stat) {
             }
 
             // full subscription wipes out all soft turnaways
-            if (stat.subscribedTo !== "fullSubscription") {
+            if (journalYear.subscribedTo !== "fullSubscription") {
                 ret = Object.assign({}, ret, {
                     count: softTurnawayCount,
-                    prop: softTurnawayCount / stat.useCount
+                    prop: softTurnawayCount / journalYear.useCount
                 })
             }
             return Object.assign({}, blankMod(), ret)
@@ -245,20 +215,6 @@ function makeFulfillmentMods(stat) {
 }
 
 
-function makeMods(stat) {
-    const fulfillmentMods = makeFulfillmentMods(stat)
-    const fulfilledUseCount = fulfillmentMods
-        .map(x => x.count)
-        .reduce((a, b) => a + b, 0)
-
-
-    return fulfillmentMods
-
-    return [].concat(
-        fulfillmentMods,
-        getTurnaways(fulfilledUseCount, stat.useCount, stat.subscribedTo)
-    )
-}
 
 
 const useReport = function(yearlyUses, overallUses){
@@ -329,7 +285,13 @@ const yearlyUses = function(journalYears){
 }
 
 const overallUses = function(journalYears){
-    return makeMods(journalYears.reduce(sumJournalYears))
+    console.log("overallUses", journalYears.length)
+    console.log("all years with not free", journalYears.filter(x=>x.subscribedTo !== "free"))
+    console.log("journal years reduced", journalYears.reduce(sumJournalYears))
+
+    const ret = makeMods(journalYears.reduce(sumJournalYears))
+    console.log("returning le mods", ret)
+    return ret
 }
 
 

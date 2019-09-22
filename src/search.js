@@ -6,6 +6,17 @@ import {resp} from "./journalsRespMock.js"
 import {subscriptionUseReport, overallUseReport, journalYear} from "./use.js"
 
 
+// from https://stackoverflow.com/a/7616484/226013
+const hashCode = function(str) {
+  var hash = 0, i, chr;
+  if (str.length === 0) return hash;
+  for (i = 0; i < str.length; i++) {
+    chr   = str.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
 
 
 export const store = {
@@ -21,7 +32,9 @@ export const store = {
             {name: "free", journals: []},
             {name: "fullSubscription", journals: []},
             {name: "docdel", journals: []}
-        ]
+        ],
+        subDict: {},
+        subHash: 0
     },
     server: {
         journals: []
@@ -81,6 +94,8 @@ export const store = {
 
                 resp.data.list.forEach(journal => {
                     this.setSubscription(journal.issn_l, "free")
+
+
                 })
 
                 resp.data.list.forEach(apiJournal=>{
@@ -123,13 +138,25 @@ export const store = {
         return subscriptionUseReport(yearsWithSubs)
     },
 
-    getJournalYears(issnl){
+    getJournalYear(issnl){
+
         const myJournalYears = this.computed.journalYears.filter(y=>{
             return y.issnl === issnl
         })
         return myJournalYears.map(journalYear=>{
             const ret = {...journalYear}
-            ret.subscribedTo = this.getSubscription(issnl)
+            ret.subscribedTo = this.user.subDict[issnl]
+            ret._subHash = this.user.subHash
+            return ret
+        })
+    },
+
+    getAllJournalYears(){
+
+        return this.computed.journalYears.map(journalYear=>{
+            const ret = {...journalYear}
+            ret.subscribedTo = this.getSubscription(journalYear.issnl)
+            ret._subHash = this.user.subHash
             return ret
         })
     },
@@ -141,40 +168,37 @@ export const store = {
 
     },
 
-    overallUseReport() {
-        return "foo"
-
-        const allUseReports = this.server.journals.map(x=>{
-            return subscriptionUseReport(
-                x.statsByYear,
-                this.getSubscription(x.meta.issnl)
-            )
-        })
-        return overallUseReport(allUseReports)
-    },
 
     setSubscription: function (issnl, subscriptionName) {
-        this.user.subscriptions = this.user.subscriptions.map(sub => {
-            return {
-                name: sub.name,
 
-                // copy and dedup https://stackoverflow.com/a/27664971/226013
-                journals: [...new Set([].concat(...sub.journals, [issnl]))]
+        this.user.subDict[issnl] = subscriptionName
+        this.user.subHash = hashCode(JSON.stringify(this.user.subDict))
 
-                // get rid of this issn in all the other subscription lists
-                    .filter(myIssnl => {
-                        const removeThis = (myIssnl === issnl && sub.name !== subscriptionName)
-                        return !removeThis
-                    })
-            }
-        })
+
+        // this.user.subscriptions = this.user.subscriptions.map(sub => {
+        //     return {
+        //         name: sub.name,
+        //
+        //         // copy and dedup https://stackoverflow.com/a/27664971/226013
+        //         journals: [...new Set([].concat(...sub.journals, [issnl]))]
+        //
+        //         // get rid of this issn in all the other subscription lists
+        //             .filter(myIssnl => {
+        //                 const removeThis = (myIssnl === issnl && sub.name !== subscriptionName)
+        //                 return !removeThis
+        //             })
+        //     }
+        // })
     },
     getSubscription: function (issnl) {
+        return this.user.subDict[issnl]
 
-        const mySubscription = this.user.subscriptions.find(subscription => {
-            return subscription.journals.includes(issnl)
-        })
-        if (mySubscription) return mySubscription.name
+
+
+        // const mySubscription = this.user.subscriptions.find(subscription => {
+        //     return subscription.journals.includes(issnl)
+        // })
+        // if (mySubscription) return mySubscription.name
     },
 
 
@@ -184,8 +208,13 @@ export const store = {
 
     nFormat: function (num, hidePercent) {
 
+
         if (!num) {
             return 0
+        }
+
+        if (hidePercent){
+            return num.toFixed(2)
         }
 
         if (num === 0) {
@@ -193,11 +222,7 @@ export const store = {
         }
 
         if (num < 1) {
-            if (hidePercent) {
-                return num.toFixed(2)
-            } else {
-                return Math.round(100 * num) + "%"
-            }
+            return Math.round(100 * num) + "%"
         }
 
 
