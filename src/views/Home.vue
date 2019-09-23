@@ -76,7 +76,6 @@
                         :items="journalSortKeys"
                         v-model="selectedJournalSortKey"
                         label="Sort journals by"
-                        @change="sort"
                         outline
                 ></v-select>
 
@@ -254,9 +253,20 @@
         }),
         computed: {
             journalsForPage() {
+                const ret = [...this.journals]
+                    const sorter = (a,b) => {
+                        const fnName = this.selectedJournalSortKey
+                        let ret = b[fnName]() - a[fnName]()
+                        if (fnName==='getBestCostPerPaidUse'){
+                            ret = -ret
+                    }
+                    return ret
+                }
+                ret.sort(sorter)
+
                 let startIndex = (this.currentPage - 1) * this.pageSize
                 let endIndex = (this.currentPage * this.pageSize) - 1
-                return this.journals.slice(startIndex, endIndex)
+                return ret.slice(startIndex, endIndex)
             },
 
             yearlySummarySnaps() {
