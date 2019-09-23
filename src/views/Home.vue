@@ -56,9 +56,6 @@
         <v-layout v-if="true" row style="padding-top:200px; background: #fff;">
             <v-container fluid>
                 <v-layout>
-                    <v-flex><pre>{{subscriptions}}</pre></v-flex>
-                </v-layout>
-                <v-layout>
                     <v-flex xs6>
                         <h3 class="display-1">Working scenario </h3>
                         <usage-report style="min-height: 200px;" :yearly-snaps="yearlySummarySnaps" overview="true"></usage-report>
