@@ -1,6 +1,11 @@
+import _ from 'lodash'
+
+
 import SubscriptionSnap from "./SubscriptionSnap"
 import SummarySnap from "./SummarySnap"
 import {makeMods} from "./BaseSnap";
+
+
 
 
 
@@ -14,24 +19,51 @@ export default class Journal {
         this.subscriptionName = subscriptionName || "free"
         this.usageByTypeByYear = apiData.usageByTypeByYear
         this.fullSubscriptionPrice = apiData.fullSubscriptionPrice || 0
+
+
+        // testing caching thing
+        // this.subscriptionSnaps = this.usageByTypeByYear.map(usageYear=>{
+        //     return new SubscriptionSnap(usageYear, this.subscriptionName, this.fullSubscriptionPrice)
+        // })
+        // this.summary = new SummarySnap(this.subscriptionSnaps)
+
     }
 
-    subscribe(newSubscriptionName){
-        this.subscriptionName = newSubscriptionName
-    }
-    isSubscribedTo(name){
-        return this.subscriptionName === name
-    }
 
     getSubscriptionSnaps(){
+        // return this.subscriptionSnaps
+
+
         return this.usageByTypeByYear.map(usageYear=>{
             return new SubscriptionSnap(usageYear, this.subscriptionName, this.fullSubscriptionPrice)
         })
     }
 
     getSummary(){
+        // return this.summary
+
         return new SummarySnap(this.getSubscriptionSnaps())
     }
+
+
+
+
+    subscribe(newSubscriptionName){
+        this.subscriptionName = newSubscriptionName
+
+        // testing caching thing
+        // this.subscriptionSnaps = this.usageByTypeByYear.map(usageYear=>{
+        //     return new SubscriptionSnap(usageYear, this.subscriptionName, this.fullSubscriptionPrice)
+        // })
+        // this.summary =  new SummarySnap(this.subscriptionSnaps)
+    }
+
+
+
+    isSubscribedTo(name){
+        return this.subscriptionName === name
+    }
+
 
     getBestCostPerPaidUse(){
         const costs = this.getHypotheticalSubscriptionMods()
@@ -63,20 +95,3 @@ export default class Journal {
 
 
 
-
-function makePotentialUses(journalYears) {
-    const journalYearsSum = journalYears.reduce(sumJournalYears)
-
-    return ["fullSubscription", "docdel"]
-        .filter(x => x !== journalYearsSum.subscribedTo)
-        .map(potentialSubscriptionName => {
-            // make full of this type
-            const newJournalYear = {...journalYearsSum}
-            newJournalYear.subscribedTo = potentialSubscriptionName
-            return makeMods(newJournalYear)
-                .find(mod => {
-                    // only return the subscription use, not all of them.
-                    return mod.name === potentialSubscriptionName
-                })
-        })
-}

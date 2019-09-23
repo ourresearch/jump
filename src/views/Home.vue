@@ -1,7 +1,7 @@
 <template>
 
     <v-container  fluid class="home pa-0" v-if="api.loadingState==='complete'">
-        <div style="position: fixed; top:0; left:0; right:0;background: #fff; z-index:1000;">
+        <div v-if="true" style="position: fixed; top:0; left:0; right:0;background: #fff; z-index:1000;">
             <v-container fluid>
                 <v-layout>
                     <v-flex class="fulfillment-graph text-xs-left" xs1>
@@ -51,7 +51,7 @@
 
 
         <!--- Summary area  -->
-        <v-layout row style="padding-top:200px; background: #fff;">
+        <v-layout v-if="true" row style="padding-top:200px; background: #fff;">
             <v-container fluid>
                 <v-layout>
                     <v-flex xs6>
@@ -236,7 +236,7 @@
         data: () => ({
             store: store,
             currentPage: 1,
-            pageSize: 30,
+            pageSize: 20,
             sortBy: "default",
             journalsFromApi: [],
             journals: [],
