@@ -1,52 +1,11 @@
 <template>
-    <v-container class="timeline pa-2">
-
-
-<!--        <v-layout>-->
-<!--            <v-flex>-->
-<!--                <pre>-->
-<!--                    {{useReport.uses}}-->
-<!--                </pre>-->
-<!--            </v-flex>-->
-
-
-<!--        </v-layout>-->
-        <v-layout>
-
-
-            <v-flex>
-                <span class="name headline">
-                    {{journalMeta.title}}
-                </span>
-                <span class="topic body-1">
-                    {{ journalMeta.subject}}
-                </span>
-            </v-flex>
-        </v-layout>
-
-<!--        <v-layout>-->
-<!--            <v-flex>-->
-<!--                <pre>-->
-<!--                    {{useReport}}-->
-<!--                </pre>-->
-<!--            </v-flex>-->
-<!--        </v-layout>-->
-
-
-        <v-layout>
-            <v-flex>
-                <timeline :journal-years="journalYears"></timeline>
-<!--                <pre>journal years: {{journalYears}}</pre>-->
-            </v-flex>
-        </v-layout>
-
-
+    <v-container class="journal pa-2">
 
     </v-container>
 </template>
 
 <script>
-    import Timeline from "../components/Timeline"
+    import DownloadsBar from "../components/DownloadsBar"
     import {store} from "../search.js"
 
     export default {
@@ -54,7 +13,6 @@
         props: ["issnl"],
         components: {
             DownloadsBar,
-            Timeline
         },
         data: () => ({
             store: store,
