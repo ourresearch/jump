@@ -1,6 +1,8 @@
 <template>
 
     <v-container  fluid class="home pa-0" v-if="api.loadingState==='complete'">
+        <div class="loading"  style="position: fixed; top:0; left:0; right:0;background: orangered; z-index:10000;" v-if="isLoading">loading</div>
+
         <div v-if="true" style="position: fixed; top:0; left:0; right:0;background: #fff; z-index:1000;">
             <v-container fluid>
                 <v-layout>
@@ -53,6 +55,9 @@
         <!--- Summary area  -->
         <v-layout v-if="true" row style="padding-top:200px; background: #fff;">
             <v-container fluid>
+                <v-layout>
+                    <v-flex><pre>{{subscriptions}}</pre></v-flex>
+                </v-layout>
                 <v-layout>
                     <v-flex xs6>
                         <h3 class="display-1">Working scenario </h3>
@@ -139,10 +144,10 @@
                                         <h3 class="subheading">Subscriptions</h3>
                                     </v-layout>
                                     <v-layout v-for="useType in journal.getHypotheticalSubscriptionMods()">
-                                        <v-flex xs3 class="mx-2" style="cursor:pointer;" @click="journal.subscribe(useType.name)">
+                                        <v-flex xs3 class="mx-2" style="cursor:pointer;" @click="subscribe(journal.meta.issnl, useType.name)">
                                             <span>
-                                                <i class="far fa-circle" v-if="!journal.isSubscribedTo(useType.name)"></i>
-                                                <i class="fas fa-check-circle" v-if="journal.isSubscribedTo(useType.name)"></i>
+                                                <i class="far fa-circle" v-if="!hasSubscription(journal.meta.issnl, useType.name)"></i>
+                                                <i class="fas fa-check-circle" v-if="hasSubscription(journal.meta.issnl, useType.name)"></i>
                                             </span>
 
                                             {{useType.name}}
@@ -158,10 +163,10 @@
                                         </v-flex>
                                     </v-layout>
                                     <v-layout>
-                                        <v-flex xs3 class="mx-2" style="cursor:pointer;" @click="journal.subscribe('free')">
-                                            <span style="cursor:pointer;" @click="journal.subscribe('free')">
-                                                <i class="far fa-circle" v-if="!journal.isSubscribedTo('free')"></i>
-                                                <i class="fas fa-check-circle" v-if="journal.isSubscribedTo('free')"></i>
+                                        <v-flex xs3 class="mx-2" style="cursor:pointer;" @click="subscribe(journal.meta.issnl, 'free')">
+                                            <span style="cursor:pointer;" @click="subscribe('free')">
+                                                <i class="far fa-circle" v-if="!hasSubscription(journal.meta.issnl, 'free')"></i>
+                                                <i class="fas fa-check-circle" v-if="hasSubscription(journal.meta.issnl, 'free')"></i>
                                             </span>
                                             Free
                                         </v-flex>
@@ -242,13 +247,15 @@
             journals: [],
             bigDealJournals: [],
             api: api,
+            isLoading: false,
             bigDealCost: 1000000,
             selectedJournalSortKey: "getBestCostPerPaidUse",
             journalSortKeys: [
                 {text: "Best Cost Per Paid Use (CPPA)", value: "getBestCostPerPaidUse"},
                 {text: "Total usage (count)", value: "getUseCount"},
                 {text: "Hard turnaways (count)", value: "getHardTurnawayCount"},
-            ]
+            ],
+            subscriptions: {},
 
         }),
         computed: {
@@ -311,8 +318,40 @@
                     return ret
 
                 }
-                console.log("sorting journals", this.selectedJournalSortKey, sorter)
                 this.journals.sort(sorter)
+            },
+            getSubscription(issnl){
+                if (this.subscriptions[issnl]) return  this.subscriptions[issnl]
+                return "free"
+            },
+            hasSubscription(issnl, nameToCheck){
+                const issnlSubscription = this.getSubscription(issnl)
+
+                return issnlSubscription === nameToCheck
+            },
+            setJournals(){
+                this.journals = this.journalsFromApi.map(x => {
+                        let myJournal = new Journal(x, this.getSubscription(x.meta.issnl))
+                        return myJournal
+
+                    })
+                this.isLoading = false
+            },
+            subscribe(issnl, newSubscriptionName){
+                console.log("subscribe!", newSubscriptionName)
+                this.isLoading = true;
+                this.subscriptions[issnl] = newSubscriptionName
+
+                let that = this
+                // setTimeout(function(){
+                //     that.isLoading = false
+                //     console.log("no more loading...")
+                // },1000)
+                setTimeout(function(){
+                    that.setJournals()
+
+                })
+
             }
         },
         mounted() {

@@ -22,41 +22,41 @@ export default class Journal {
 
 
         // testing caching thing
-        // this.subscriptionSnaps = this.usageByTypeByYear.map(usageYear=>{
-        //     return new SubscriptionSnap(usageYear, this.subscriptionName, this.fullSubscriptionPrice)
-        // })
-        // this.summary = new SummarySnap(this.subscriptionSnaps)
+        this.subscriptionSnaps = this.usageByTypeByYear.map(usageYear=>{
+            return new SubscriptionSnap(usageYear, this.subscriptionName, this.fullSubscriptionPrice)
+        })
+        this.summary = new SummarySnap(this.subscriptionSnaps)
 
     }
 
 
     getSubscriptionSnaps(){
-        // return this.subscriptionSnaps
+        return this.subscriptionSnaps
 
-
-        return this.usageByTypeByYear.map(usageYear=>{
-            return new SubscriptionSnap(usageYear, this.subscriptionName, this.fullSubscriptionPrice)
-        })
+        //
+        // return this.usageByTypeByYear.map(usageYear=>{
+        //     return new SubscriptionSnap(usageYear, this.subscriptionName, this.fullSubscriptionPrice)
+        // })
     }
 
     getSummary(){
-        // return this.summary
+        return this.summary
 
-        return new SummarySnap(this.getSubscriptionSnaps())
+        // return new SummarySnap(this.getSubscriptionSnaps())
     }
 
 
 
 
-    subscribe(newSubscriptionName){
-        this.subscriptionName = newSubscriptionName
-
-        // testing caching thing
-        // this.subscriptionSnaps = this.usageByTypeByYear.map(usageYear=>{
-        //     return new SubscriptionSnap(usageYear, this.subscriptionName, this.fullSubscriptionPrice)
-        // })
-        // this.summary =  new SummarySnap(this.subscriptionSnaps)
-    }
+    // subscribe(newSubscriptionName){
+    //     this.subscriptionName = newSubscriptionName
+    //
+    //     testing caching thing
+    //     this.subscriptionSnaps = this.usageByTypeByYear.map(usageYear=>{
+    //         return new SubscriptionSnap(usageYear, this.subscriptionName, this.fullSubscriptionPrice)
+    //     })
+    //     this.summary =  new SummarySnap(this.subscriptionSnaps)
+    // }
 
 
 
@@ -78,7 +78,10 @@ export default class Journal {
     }
 
 
+
     getHypotheticalSubscriptionMods(){
+        // return this.hypotheticalSubscriptionMods
+
         return ["fullSubscription", "docdel"]
             .map(newSubscriptionName => {
                 // make a new journal with this subscription
