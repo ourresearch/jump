@@ -46,7 +46,9 @@ const makeJournal = function (apiData, selectedSubscriptionName) {
         },
         sortKeys: {
             hardTurnawayCount: mySelectedSubscription.usage.hardTurnaway,
-            bestCostPerPaidUse: bestCostPerPaidUse
+            bestCostPerPaidUse: bestCostPerPaidUse,
+            title: apiData.meta.title
+
         }
 
 

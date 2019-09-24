@@ -115,6 +115,7 @@
                 {text: "Best Cost Per Paid Use", value: "bestCostPerPaidUse"},
                 {text: "Total usage", value: "getUseCount"},
                 {text: "Hard turnaways", value: "hardTurnawayCount"},
+                {text: "Title", value: "title"},
             ],
             journalsDict:{},
             journalsToPrint: [],
@@ -224,13 +225,18 @@
 
             },
             printJournalsDict(){
-                console.log("printing journals dict!")
                 const sortKey = this.selectedJournalSortKey
+                console.log("printing journals dict!", sortKey)
                 const sortFn = function(a,b){
-                    let ret = b.sortKeys[sortKey] - a.sortKeys[sortKey]
-                    if (sortKey==='bestCostPerPaidUse'){
-                        ret = -ret
+                    let ret = 0
+                    a
+                    if (a.sortKeys[sortKey] <  b.sortKeys[sortKey]) {
+                        ret = -1
                     }
+                    else {
+                        ret = 1
+                    }
+
                     return ret
                 }
 

@@ -29,7 +29,6 @@
                 <!-- journal USAGE section -->
                 <v-layout>
                     <v-flex xs6>
-                        <h2>journal</h2>
                         <usage-table :subscription="data.subscriptions.selected.overall"></usage-table>
 
                     </v-flex>
