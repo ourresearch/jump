@@ -4,19 +4,10 @@
             <v-container fluid>
                 <v-layout>
                     <v-flex class="fulfillment-graph text-xs-left" xs1>
-                        <div style="display: flex; width:100%; height: 100%; min-height: 50px;">
-                            <downloads-bar
-                                    :snap="overallSnap"
-                                    class="pr-1"
-                                    style="flex-grow:3;">
-                            </downloads-bar>
-
-                            <downloads-bar
-                                    v-for="snap in yearlySummarySnaps"
-                                    :year="snap.year"
-                                    style="flex-grow: 1;"
-                                    :snap="snap"></downloads-bar>
-                        </div>
+                        <downloads-chart
+                                :overall-use-counts="overallSnap"
+                                :yearly-use-counts="yearlySummarySnaps"
+                        ></downloads-chart>
                     </v-flex>
                     <v-flex xs3>
                         <div class="text-xs-right">
@@ -73,14 +64,23 @@
 
 <script>
     import DownloadsBar from "../components/DownloadsBar"
+    import DownloadsChart from "../components/DownloadsChart"
     import UsageReport from "../components/UsageReport"
-    import {currency, nFormat} from "../util";
+    import {currency, nFormat, sumObjects} from "../util";
+
+
+
+
+
+
+
 
     export default {
         name: "Journal",
         props: ["yearlySummarySnaps", "overallSnap", "bigDealYearlySummarySnaps", "bigDealOverallSnap"],
         components: {
             DownloadsBar,
+            DownloadsChart,
             UsageReport
         },
         data: () => ({
@@ -91,6 +91,20 @@
             currency: currency,
         },
         computed: {
+            yearlyUseCounts(){
+
+            },
+            bigDealYearlyUseCounts(){
+
+            },
+            overallUseCounts(){
+                return
+            },
+            bigDealOverallUseCounts(){
+
+            },
+
+
             percentFulfillmentsChange(){
                 return (this.overallSnap.getFulfilledCount() / this.bigDealOverallSnap.getFulfilledCount()) * 100
             },

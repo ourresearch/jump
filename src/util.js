@@ -1,3 +1,21 @@
+
+
+const sumObjects = function(a,b) {
+    const ret = {}
+    const allKeys = [...new Set([]
+        .concat( Object.keys(a))
+        .concat(Object.keys(b)))]
+
+    allKeys.forEach(k=>{
+        ret[k] = 0
+        if (a[k]) ret[k] += a[k]
+        if (b[k]) ret[k] += b[k]
+    })
+
+    return ret
+}
+
+
 // from https://stackoverflow.com/a/7616484/226013
 const hashCode = function (str) {
     var hash = 0, i, chr;
@@ -46,5 +64,6 @@ const nFormat = function (num, printReallyLongNumbers) {
 export {
     nFormat,
     currency,
-    hashCode
+    hashCode,
+    sumObjects
 }

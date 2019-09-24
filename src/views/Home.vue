@@ -18,113 +18,27 @@
 
 
         <!--- working area  -->
+        <!--- sort controls  -->
         <v-layout class="journal-controls pa-3" style="background: #ccc;">
             <v-flex xs4>
                 <v-select
                         :items="journalSortKeys"
                         v-model="selectedJournalSortKey"
                         label="Sort journals by"
+                        @change="printJournalsDict"
                         outline
                 ></v-select>
-
             </v-flex>
-
         </v-layout>
 
 
+        <!--- journals list  -->
         <v-layout>
-
-
-
-            <!--- journals list  -->
             <v-flex md12>
-                <v-layout>
-                    sorting by price per requested item.
-                </v-layout>
-
-                <v-layout column>
-
-                    <!-- journal row -->
-                    <v-flex class="journal-row py-3" v-for="journal in journalsForPage">
-                        <v-layout align-items-top>
-                            <v-flex shrink>
-                                <v-checkbox class="pa-0 mt-1"></v-checkbox>
-                            </v-flex>
-
-                            <v-flex grow>
-
-                                <!-- journal META section -->
-                                <v-layout>
-                                    <v-flex>
-                                        <div>
-                                            <div class="name headline">
-                                                {{journal.meta.title}}
-                                            </div>
-                                            <div class="topic body-1">
-                                                {{journal.meta.issnl}}
-                                                {{ journal.meta.subject}}
-                                            </div>
-                                            <div>best cppu: {{journal.getBestCostPerPaidUse()}}</div>
-
-                                        </div>
-                                    </v-flex>
-                                </v-layout>
-
-                                <!-- journal USAGE section -->
-                                <v-layout>
-                                    <v-flex xs6>
-                                        <usage-report :yearly-snaps="journal.getSubscriptionSnaps()"></usage-report>
-
-                                    </v-flex>
-                                </v-layout>
-
-
-
-
-                                <!-- journal SUBSCRIPTION section -->
-                                <div class="pa-2 mt-2">
-                                    <v-layout>
-                                        <h3 class="subheading">Subscriptions</h3>
-                                    </v-layout>
-                                    <v-layout v-for="useType in journal.getHypotheticalSubscriptionMods()">
-                                        <v-flex xs3 class="mx-2" style="cursor:pointer;" @click="subscribe(journal.meta.issnl, useType.name)">
-                                            <span>
-                                                <i class="far fa-circle" v-if="!hasSubscription(journal.meta.issnl, useType.name)"></i>
-                                                <i class="fas fa-check-circle" v-if="hasSubscription(journal.meta.issnl, useType.name)"></i>
-                                            </span>
-
-                                            {{useType.name}}
-                                        </v-flex>
-                                        <v-flex xs1 class="mx-2">
-                                            {{nf(useType.count)}}
-                                        </v-flex>
-                                        <v-flex xs1 v-if="useType.cost" class="mx-2">
-                                            {{currency(useType.cost, true)}}
-                                        </v-flex>
-                                        <v-flex xs1 v-if="useType.costPerCount" class="px-2">
-                                            {{currency(useType.costPerCount)}}
-                                        </v-flex>
-                                    </v-layout>
-                                    <v-layout>
-                                        <v-flex xs3 class="mx-2" style="cursor:pointer;" @click="subscribe(journal.meta.issnl, 'free')">
-                                            <span style="cursor:pointer;" @click="subscribe('free')">
-                                                <i class="far fa-circle" v-if="!hasSubscription(journal.meta.issnl, 'free')"></i>
-                                                <i class="fas fa-check-circle" v-if="hasSubscription(journal.meta.issnl, 'free')"></i>
-                                            </span>
-                                            Free
-                                        </v-flex>
-                                    </v-layout>
-
-                                </div>
-
-                            </v-flex>
-
-                        </v-layout>
-
-
+                <v-layout column class="journals-list">
+                    <v-flex v-for="journalData in journalsToPrint">
+                        <journal-row @subscribe="subscribe" :data="journalData"></journal-row>
                     </v-flex>
-
-
                 </v-layout>
                 <v-layout>
                     <v-pagination
@@ -134,17 +48,9 @@
                             :total-visible="20"
                     ></v-pagination>
                 </v-layout>
-
-
             </v-flex>
-
-
         </v-layout>
-
-
     </v-container>
-
-
 </template>
 
 
@@ -155,24 +61,32 @@
     import DownloadsBar from "../components/DownloadsBar"
     import UsageReport from "../components/UsageReport"
     import Journal from "../journal.js"
+    import JournalRow from "../components/JournalRow"
     import ScenarioComparison from "../components/ScenarioComparison"
 
     import SummarySnap from "../SummarySnap"
     import {currency, nFormat} from "../util";
+    import {makeJournal} from "../subscription";
     import {makeScenarioComparison} from "../scenario";
 
 
     const makeYearlySummarySnaps = function(journalList){
-            const years = ["2020", "2021", "2022", "2023", "2024"]
-            const ret = {}
-            years.forEach(y => ret[y] = new SummarySnap())
+        const years = ["2020", "2021", "2022", "2023", "2024"]
+        const ret = {}
 
-            journalList.forEach(journal => {
-                journal.getSubscriptionSnaps().forEach(snap => {
-                    ret[snap.year].addSnap(snap)
-                })
+        years.forEach(y=>ret[y] = [])
+
+        journalList.forEach(journal => {
+            journal.getSubscriptionSnaps().forEach(snap => {
+                ret[snap.year].push(snap)
             })
-            return Object.values(ret)
+        })
+
+        return Object.entries(ret).forEach((k, v)=>{
+            ret[k] = new SummarySnap(v)
+            ret[k].year = k
+        })
+
     }
 
 
@@ -182,12 +96,13 @@
         components: {
             DownloadsBar,
             UsageReport,
-            ScenarioComparison
+            ScenarioComparison,
+            JournalRow
         },
         data: () => ({
             store: store,
             currentPage: 1,
-            pageSize: 3,
+            pageSize: 20,
             sortBy: "default",
             journalsFromApi: [],
             journals: [],
@@ -195,18 +110,20 @@
             api: api,
             isLoading: false,
             bigDealCost: 1000000,
-            selectedJournalSortKey: "getBestCostPerPaidUse",
+            selectedJournalSortKey: "getUseCount",
             journalSortKeys: [
-                {text: "Best Cost Per Paid Use (CPPA)", value: "getBestCostPerPaidUse"},
-                {text: "Total usage (count)", value: "getUseCount"},
-                {text: "Hard turnaways (count)", value: "getHardTurnawayCount"},
+                {text: "Best Cost Per Paid Use", value: "bestCostPerPaidUse"},
+                {text: "Total usage", value: "getUseCount"},
+                {text: "Hard turnaways", value: "hardTurnawayCount"},
             ],
-            subscriptions: {},
-            scenarioComparison: {}
+            journalsDict:{},
+            journalsToPrint: [],
+            apiJournals: {}
 
         }),
         computed: {
             journalsForPage() {
+                return []
                 const ret = [...this.journals]
                     const sorter = (a,b) => {
                         const fnName = this.selectedJournalSortKey
@@ -238,6 +155,14 @@
             overallSnap(){
                 return new SummarySnap(this.yearlySummarySnaps)
             },
+
+            pageStartIndex(){
+                return (this.currentPage - 1) * this.pageSize
+            },
+            pageEndIndex(){
+                return (this.currentPage * this.pageSize) - 1
+            }
+
 
         },
         methods: {
@@ -272,39 +197,78 @@
                     })
                 this.isLoading = false
             },
-            subscribe(issnl, newSubscriptionName){
-                console.log("subscribe!", newSubscriptionName)
-                this.isLoading = true;
-                this.subscriptions[issnl] = newSubscriptionName
+            subscribe(args){
+                console.log("subscribe!", args.issnl, args.subscriptionName)
+                const myApiData = this.apiJournals[args.issnl]
+                this.journalsDict[args.issnl] = makeJournal(
+                    myApiData,
+                    args.subscriptionName
+                )
 
-                let that = this
+                this.printJournalsDict()
+
+
+
+                // this.isLoading = true;
+                // this.subscriptions[issnl] = newSubscriptionName
+                //
+                // let that = this
+                // // setTimeout(function(){
+                // //     that.isLoading = false
+                // //     console.log("no more loading...")
+                // // },1000)
                 // setTimeout(function(){
-                //     that.isLoading = false
-                //     console.log("no more loading...")
-                // },1000)
-                setTimeout(function(){
-                    that.setJournals()
+                //     that.setJournals()
+                //
+                // })
 
-                })
+            },
+            printJournalsDict(){
+                console.log("printing journals dict!")
+                const sortKey = this.selectedJournalSortKey
+                const sortFn = function(a,b){
+                    let ret = b.sortKeys[sortKey] - a.sortKeys[sortKey]
+                    if (sortKey==='bestCostPerPaidUse'){
+                        ret = -ret
+                    }
+                    return ret
+                }
 
+                this.journalsToPrint = Object.values(this.journalsDict)
+                    .sort(sortFn)
+                    .slice(this.pageStartIndex, this.pageEndIndex)
             }
         },
         mounted() {
             api.fetchJournals()
                 .then(resp => {
-                    this.journalsFromApi = resp
-                    this.journals = resp.map(x => {
-                        let myJournal = new Journal(x, "free")
-                        return myJournal
+                    resp.forEach(apiJournalData=>{
+                        const myIssnl = apiJournalData.meta.issnl
 
-                    })
-                    this.bigDealJournals = resp.map(x => {
-                        let myJournal = new Journal(x, "fullSubscription")
-                        return myJournal
-
+                        this.apiJournals[myIssnl] = apiJournalData
+                        this.journalsDict[myIssnl] = makeJournal(
+                            apiJournalData,
+                            "fullSubscription"
+                        )
                     })
 
-                    this.sort()
+                    this.printJournalsDict()
+
+
+
+                    // this.journalsFromApi = resp
+                    // this.journals = resp.map(x => {
+                    //     let myJournal = new Journal(x, "free")
+                    //     return myJournal
+                    //
+                    // })
+                    // this.bigDealJournals = resp.map(x => {
+                    //     let myJournal = new Journal(x, "fullSubscription")
+                    //     return myJournal
+                    //
+                    // })
+                    //
+                    // this.sort()
                 })
         },
         watch: {

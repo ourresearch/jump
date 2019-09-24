@@ -1,4 +1,6 @@
 import axios from 'axios'
+import _ from "lodash";
+import {makeSubscriptions} from "./subscription";
 
 
 export const api = {
@@ -12,7 +14,12 @@ export const api = {
         let request = axios.get(url)
             .then(resp => {
                 console.log("got journals back")
+
+
                 return resp.data.list.map(journal => {
+                    const downloadsByYear = apiDownloadsByYear(journal.downloads_by_year)
+                    const downloads = apiDownloads(journal.downloads_by_year)
+
                     return {
                         meta: {
                             title: journal.title,
@@ -20,8 +27,13 @@ export const api = {
                             issnl: journal.issn_l
 
                         },
-                        usageByTypeByYear: apiDownloadsByYear(journal.downloads_by_year),
-                        fullSubscriptionPrice: journal.dollars_2018_subscription
+                        subscriptions: makeSubscriptions(downloads, journal.dollars_2018_subscription*5),
+                        subscriptionsByYear: downloadsByYear.map(yearInfo=>{
+                            return {
+                                year: yearInfo.year,
+                                subscriptions: makeSubscriptions(yearInfo, journal.dollars_2018_subscription)
+                            }
+                        })
                     }
                 })
             })
@@ -47,6 +59,14 @@ function apiDownloadsByYear(apiDownloads) {
             year: year
         }
     })
+}
+
+const apiDownloads = function(api_downloads){
+    return {
+        useCount: _.sum(api_downloads.total),
+        oaUseCount: _.sum(api_downloads.oa),
+        backCatalogUseCount: _.sum(api_downloads.back_catalog),
+    }
 }
 
 let downloads_by_year = {
