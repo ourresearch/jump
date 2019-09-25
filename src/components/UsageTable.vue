@@ -1,5 +1,5 @@
 <template>
-    <v-container fluid class="scenario-comparison">
+    <v-container fluid>
         <usage-type-row
                 v-for="stat in usageStats"
                 v-if="stat.count > 0.5"

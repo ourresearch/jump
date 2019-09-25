@@ -50,19 +50,6 @@ const makeJournal = function (apiData, selectedSubscriptionName) {
             title: apiData.meta.title
 
         }
-
-
-        //
-        // subscriptionName: subscriptionName,
-        //
-        // usageYears: usageYears,  // array of usageStat dicts
-        // usageSums: Object.values(usageYears).reduce(sumObjects), // dict like {oa: 22, docdel: 0, ...}
-        // usageStats: usageStats,
-        //
-        // fullSubscriptionCost: fullSubscriptionCost,
-        // docdelCost: docdelCost,
-        // myCost: myCost,
-        // costPerPaidUse: myCost / usageStats.paidUseCount
     }
 }
 
@@ -116,6 +103,39 @@ class BaseSubscription {
     }
 }
 
+class AccumulatorSubscription extends BaseSubscription {
+    constructor(subscriptions){
+        super()
+
+        this.costsByType = {
+            fullSubscription: 0,
+            docdel: 0,
+            free: 0
+        }
+
+        subscriptions.forEach(sub=>{
+            this.addSubscriptionObj(sub)
+        })
+    }
+
+    addSubscriptionObj(subscription){
+        Object.entries(subscription.usage).forEach(([k,v])=>{
+            this.usage[k] += v
+        })
+
+
+        this.costsByType[subscription.name] += subscription.cost
+        // console.log(
+        //     "costs by type",
+        //     subscription.name,
+        //     subscription.cost,
+        //     this.costsByType
+        //
+        //     )
+        this.cost = _.sum(Object.values(this.costsByType))
+    }
+}
+
 class FullSubscription extends BaseSubscription {
     constructor(apiUsageStats, cost) {
         super()
@@ -128,11 +148,11 @@ class FullSubscription extends BaseSubscription {
             hardTurnaway: 0,
             fullSubscription: nonFree,
             docdel: 0,
-            oa: apiUsageStats.oaUseCount,
-            backCatalog: apiUsageStats.backCatalogUseCount
+            oa: apiUsageStats.oaUseCount || 0,
+            backCatalog: apiUsageStats.backCatalogUseCount || 0
         }
 
-        this.cost = cost
+        this.cost = cost || 0
         this.name = "fullSubscription"
     }
 
@@ -152,11 +172,11 @@ class DocdelSubscription extends BaseSubscription {
             hardTurnaway: 0,
             fullSubscription: 0,
             docdel: turnaway * hardTurnawayProp,
-            backCatalog: myFullSubscription.backCatalog,
-            oa: myFullSubscription.oaUseCount
+            backCatalog: myFullSubscription.usage.backCatalog || 0,
+            oa: myFullSubscription.usage.oa || 0
         }
         this.name = "docdel"
-        this.cost = docDelCostPerUse * hardTurnawayCount
+        this.cost = (docDelCostPerUse * hardTurnawayCount) || 0
         this.year = myFullSubscription.year
     }
 
@@ -177,11 +197,11 @@ class FreeSubscription extends BaseSubscription {
             hardTurnaway: hardTurnawayCount,
             fullSubscription: 0,
             docdel: 0,
-            backCatalog: myFullSubscription.usage.backCatalog,
-            oa: myFullSubscription.usage.oaUseCount
+            backCatalog: myFullSubscription.usage.backCatalog || 0,
+            oa: myFullSubscription.usage.oa || 0
         }
         this.name = "free"
-        this.cost = docDelCostPerUse * hardTurnawayCount
+        this.cost = 0
         this.year = myFullSubscription.year
     }
 
@@ -208,20 +228,11 @@ const makeSubscriptions = function (apiUsageStats, cost, year) {
 }
 
 
-const idea = "usage comes from a subscription. so by applying this subscription, you are getting this usage," +
-    "including the usage by year, and including the usage details report stuff (which can be reused by the " +
-    "sumup on hte top of page" +
-
-    "also: there is an order to how things need to change:" +
-    "1: get a ChangeSubscription event with an issnl and a name" +
-    "2: changeSubscription(issnl, name)" +
-    "3: this.journalsDict[issnl] = makeJournal(apiData[issnl], newSubscriptionName)" +
-    "4: this.journalsToPrint = Object.values(this.journalsDict).sort(sortFn).slice(startIndex, endIndex) "
-
 
 export {
     makeSubscriptions,
-    makeJournal
+    makeJournal,
+    AccumulatorSubscription
 }
 
 

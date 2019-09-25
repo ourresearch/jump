@@ -7,10 +7,7 @@
 
 
         <scenario-comparison
-                :yearly-summary-snaps="yearlySummarySnaps"
-                :overall-snap="overallSnap"
-                :big-deal-yearly-summary-snaps="bigDealYearlySummarySnaps"
-                :big-deal-overall-snap="bigDealOverallSnap"
+                :data="scenarioComparison"
         ></scenario-comparison>
 
 
@@ -67,27 +64,9 @@
     import SummarySnap from "../SummarySnap"
     import {currency, nFormat} from "../util";
     import {makeJournal} from "../subscription";
-    import {makeScenarioComparison} from "../scenario";
+    import {makeScenario, makeScenarioComparison} from "../scenario";
 
 
-    const makeYearlySummarySnaps = function(journalList){
-        const years = ["2020", "2021", "2022", "2023", "2024"]
-        const ret = {}
-
-        years.forEach(y=>ret[y] = [])
-
-        journalList.forEach(journal => {
-            journal.getSubscriptionSnaps().forEach(snap => {
-                ret[snap.year].push(snap)
-            })
-        })
-
-        return Object.entries(ret).forEach((k, v)=>{
-            ret[k] = new SummarySnap(v)
-            ret[k].year = k
-        })
-
-    }
 
 
 
@@ -109,7 +88,6 @@
             bigDealJournals: [],
             api: api,
             isLoading: false,
-            bigDealCost: 1000000,
             selectedJournalSortKey: "getUseCount",
             journalSortKeys: [
                 {text: "Best Cost Per Paid Use", value: "bestCostPerPaidUse"},
@@ -118,44 +96,14 @@
                 {text: "Title", value: "title"},
             ],
             journalsDict:{},
+            bigDealCost: 1000000,
             journalsToPrint: [],
-            apiJournals: {}
+            apiJournals: {},
+            scenarioComparison: {},
+            oldScenario: {}
 
         }),
         computed: {
-            journalsForPage() {
-                return []
-                const ret = [...this.journals]
-                    const sorter = (a,b) => {
-                        const fnName = this.selectedJournalSortKey
-                        let ret = b[fnName]() - a[fnName]()
-                        if (fnName==='getBestCostPerPaidUse'){
-                            ret = -ret
-                    }
-                    return ret
-                }
-                ret.sort(sorter)
-
-                let startIndex = (this.currentPage - 1) * this.pageSize
-                let endIndex = (this.currentPage * this.pageSize) - 1
-                return ret.slice(startIndex, endIndex)
-            },
-
-            yearlySummarySnaps() {
-                return makeYearlySummarySnaps(this.journals)
-            },
-
-            bigDealYearlySummarySnaps(){
-                return makeYearlySummarySnaps(this.bigDealJournals)
-            },
-
-            bigDealOverallSnap(){
-                return new SummarySnap(this.bigDealYearlySummarySnaps)
-            },
-
-            overallSnap(){
-                return new SummarySnap(this.yearlySummarySnaps)
-            },
 
             pageStartIndex(){
                 return (this.currentPage - 1) * this.pageSize
@@ -169,35 +117,21 @@
         methods: {
             nf: nFormat,
             currency: currency,
-            sort: function(){
-                const sorter = (a,b) => {
-                    const fnName = this.selectedJournalSortKey
-                    let ret = b[fnName]() - a[fnName]()
-                    if (fnName==='getBestCostPerPaidUse'){
-                        ret = -ret
-                    }
-                    return ret
-
-                }
-                this.journals.sort(sorter)
-            },
             getSubscription(issnl){
                 if (this.subscriptions[issnl]) return  this.subscriptions[issnl]
                 return "free"
             },
-            hasSubscription(issnl, nameToCheck){
-                const issnlSubscription = this.getSubscription(issnl)
 
-                return issnlSubscription === nameToCheck
+            printScenarioComparison(){
+                this.scenarioComparison = makeScenarioComparison(
+                    makeScenario(
+                        Object.values(this.journalsDict),
+                        0
+                    ),
+                    this.oldScenario
+                )
             },
-            setJournals(){
-                this.journals = this.journalsFromApi.map(x => {
-                        let myJournal = new Journal(x, this.getSubscription(x.meta.issnl))
-                        return myJournal
 
-                    })
-                this.isLoading = false
-            },
             subscribe(args){
                 console.log("subscribe!", args.issnl, args.subscriptionName)
                 const myApiData = this.apiJournals[args.issnl]
@@ -207,6 +141,7 @@
                 )
 
                 this.printJournalsDict()
+                this.printScenarioComparison()
 
 
 
@@ -236,10 +171,8 @@
                     else {
                         ret = 1
                     }
-
                     return ret
                 }
-
                 this.journalsToPrint = Object.values(this.journalsDict)
                     .sort(sortFn)
                     .slice(this.pageStartIndex, this.pageEndIndex)
@@ -258,23 +191,13 @@
                         )
                     })
 
+                    this.oldScenario = makeScenario(
+                        Object.values(this.journalsDict),
+                        this.bigDealCost
+                    )
+
                     this.printJournalsDict()
-
-
-
-                    // this.journalsFromApi = resp
-                    // this.journals = resp.map(x => {
-                    //     let myJournal = new Journal(x, "free")
-                    //     return myJournal
-                    //
-                    // })
-                    // this.bigDealJournals = resp.map(x => {
-                    //     let myJournal = new Journal(x, "fullSubscription")
-                    //     return myJournal
-                    //
-                    // })
-                    //
-                    // this.sort()
+                    this.printScenarioComparison()
                 })
         },
         watch: {

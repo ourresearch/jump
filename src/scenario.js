@@ -1,16 +1,23 @@
+import {AccumulatorSubscription} from "./subscription";
 
 
+const makeScenario = function(journalsList, presetCost){
 
+    const subscriptions = journalsList.map(x=>x.subscriptions.selected.overall)
 
-const makeScenario = function(){
     return {
-        hi: "jason"
+        journals: journalsList,
+        presetCost: presetCost,
+        subscriptions: {
+            overall: new AccumulatorSubscription(subscriptions)
+        }
     }
 }
 
-const makeScenarioComparison = function(){
+const makeScenarioComparison = function(newScenario, oldScenario){
     return {
-        hi: "jason"
+        newScenario: newScenario,
+        oldScenario: oldScenario
     }
 
 }

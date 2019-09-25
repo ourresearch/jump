@@ -16,7 +16,6 @@
                                 {{data.meta.title}}
                                 <span class="body-1">({{data.subscriptions.selected.name}})</span>
                             </div>
-                            <div>best cppa: {{data.sortKeys.bestCostPerPaidUse}}</div>
                             <div class="topic body-1">
                                 {{data.meta.issnl}}
                                 {{ data.meta.subject}}
