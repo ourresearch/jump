@@ -59,12 +59,12 @@
                                 </span>
                             </v-flex>
                             <v-flex>
-                                <usage-type-row
+                                <usage-table-row
                                         :name="stat.name"
                                         :count="stat.count"
                                         :cost="stat.cost"
                                         :cost-per-paid-use="stat.costPerCount"
-                                ></usage-type-row>
+                                ></usage-table-row>
                             </v-flex>
                         </v-layout>
                     </v-flex>
@@ -82,7 +82,7 @@
 
 <script>
     import UsageTable from "../components/UsageTable"
-    import UsageTypeRow from "../components/UsageTypeRow"
+    import UsageTableRow from "../components/UsageTableRow"
     import DownloadsChart from "../components/DownloadsChart"
 
     import {currency, nFormat} from "../util";
@@ -92,7 +92,7 @@
         props: ["data"],
         components: {
             UsageTable,
-            UsageTypeRow,
+            UsageTableRow,
             DownloadsChart
         },
         data: () => ({}),

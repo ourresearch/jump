@@ -1,26 +1,27 @@
 <template>
     <v-container fluid class="body-1 pa-0">
-        <usage-type-row
+        <usage-table-row
                 v-for="stat in usageStats"
                 :name="stat.name"
                 :count="stat.count"
                 :cost="stat.cost"
+                :percentage="stat.percentage"
                 :cost-per-paid-use="stat.costPerCount"
-        ></usage-type-row>
+        ></usage-table-row>
 
     </v-container>
 </template>
 
 <script>
     import {currency, nFormat} from "../util";
-    import UsageTypeRow from "../components/UsageTypeRow"
+    import UsageTableRow from "../components/UsageTableRow"
 
 
     export default {
         name: "UsageTable",
         props: ["subscription"],
         components: {
-            UsageTypeRow
+            UsageTableRow
         },
         data: () => ({
         }),

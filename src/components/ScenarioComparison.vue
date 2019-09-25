@@ -42,7 +42,7 @@
 
 
         <!--- Summary area  -->
-        <v-layout v-if="true" row style="padding-top:200px; background: #fff;">
+        <v-layout v-if="true" row style="padding-top:100px; background: #fff;">
             <v-container fluid>
                 <v-layout>
                     <v-flex xs6>

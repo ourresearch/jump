@@ -8,6 +8,9 @@
         <v-flex xs2 class="mx-2">
             {{nf(count)}}
         </v-flex>
+        <v-flex xs1>
+            {{nf(percentage)}}%
+        </v-flex>
         <v-flex xs2 v-if="cost" class="mx-2">
             {{currency(cost, true)}}
         </v-flex>
@@ -25,18 +28,13 @@
     import {nFormat, currency} from "../util"
 
     export default {
-        name: "UsageTypeRow",
+        name: "UsageTableRow",
         props: [
             "name",
-
-            // data
             "count",
             "cost",
             "costPerPaidUse",
-
-            // presentation
-            "isHypothetical",
-            "isHeadingRow"
+            "percentage",
         ],
         components: {},
         data: () => ({}),

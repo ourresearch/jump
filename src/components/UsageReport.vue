@@ -22,21 +22,21 @@
 
 
             <v-flex xs10>
-                <usage-type-row
+                <usage-table-row
                         name="total"
                         :count="overallSnap.getCount()"
                         :cost="overallSnap.getCost()"
                         :cost-per-paid-use="overallSnap.getCostPerPaidUse()"
-                ></usage-type-row>
+                ></usage-table-row>
 
-                <usage-type-row
+                <usage-table-row
                         v-for="usageType in overallSnap.getUses()"
                         v-if="usageType.count > 0.5"
                         :name="usageType.name"
                         :count="usageType.count"
                         :cost="usageType.cost"
                         :cost-per-paid-use="usageType.costPerCount"
-                ></usage-type-row>
+                ></usage-table-row>
 
 
             </v-flex>
@@ -51,7 +51,7 @@
 
 <script>
     import DownloadsBar from "../components/DownloadsBar"
-    import UsageTypeRow from "../components/UsageTypeRow"
+    import UsageTableRow from "../components/UsageTableRow"
     import {store} from "../search.js"
     import SummarySnap from "../SummarySnap"
 
@@ -60,7 +60,7 @@
         props: ["yearlySnaps", "overview"],
         components: {
             DownloadsBar,
-            UsageTypeRow
+            UsageTableRow
         },
         data: () => ({
             store: store,
