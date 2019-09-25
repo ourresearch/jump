@@ -2,7 +2,7 @@
     <v-layout align-items-top class="text-xs-right">
 
 
-        <v-flex xs4 class="mx-2">
+        <v-flex xs2 class="mx-2 text-xs-left">
             {{name}}
         </v-flex>
         <v-flex xs2 class="mx-2">

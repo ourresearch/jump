@@ -75,6 +75,16 @@ class BaseSubscription {
             backCatalog: 4,
             oa: 5,
         }
+
+        // from http://colorbrewer2.org/#type=qualitative&scheme=Set2&n=3
+        this.usageColors = {
+            hardTurnaway: "#af4448",
+            softTurnaway: "#ffa4a2",
+            docdel: "#0069c0",
+            fullSubscription: "#64b5f6",
+            backCatalog: "#76d275",
+            oa: "#43a047",
+        }
     }
 
     costPerPaidUse() {
@@ -102,6 +112,7 @@ class BaseSubscription {
             return {
                 name: k,
                 count: v,
+                color: this.usageColors[k],
                 percentage: 100 * v / useCount,
                 cost: costForThisUseType,
                 costPerCount: (costForThisUseType / v) || 0 // fix division by 0

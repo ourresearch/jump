@@ -1,5 +1,5 @@
 <template>
-    <v-container fluid class="body-1">
+    <v-container fluid class="body-1 pa-0">
         <usage-type-row
                 v-for="stat in usageStats"
                 :name="stat.name"

@@ -1,5 +1,5 @@
 <template>
-    <v-container class="journal pa-2">
+    <v-container class="journal py-5">
 
         <v-layout align-items-top>
             <v-flex shrink>
@@ -10,6 +10,7 @@
 
                 <!-- journal META section -->
                 <v-layout>
+
                     <v-flex>
                         <div>
                             <div class="name headline">
@@ -27,6 +28,12 @@
 
                 <!-- journal USAGE section -->
                 <v-layout>
+                    <v-flex shrink class="pr-2">
+                        <downloads-chart
+                                :yearly-subscriptions="data.subscriptions.selected.byYear"></downloads-chart>
+                    </v-flex>
+
+
                     <v-flex xs6>
                         <usage-table :subscription="data.subscriptions.selected.overall"></usage-table>
 
@@ -35,60 +42,34 @@
 
 
                 <!-- journal SUBSCRIPTION section -->
-                <div class="pa-2 mt-2">
-                    <v-layout>
-                        <h3 class="subheading">Subscriptions</h3>
-                    </v-layout>
-                    <v-layout v-for="stat in data.subscriptions.possible.overallUsageStats">
-                        <v-flex xs3>
-                            <span @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: stat.name})">
-                                subscribe
-                            </span>
-                        </v-flex>
-                        <v-flex>
-                            <usage-type-row
-                                    :name="stat.name"
-                                    :count="stat.count"
-                                    :cost="stat.cost"
-                                    :cost-per-paid-use="stat.costPerCount"
-                            ></usage-type-row>
-                        </v-flex>
+                <v-layout class="pa-2 mt-2">
+                    <v-flex xs6>
+                        <v-layout>
+                            <h3 class="subheading">Subscriptions</h3>
+                        </v-layout>
+                        <v-layout
+                                style="cursor: pointer;"
+                                 @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: stat.name})"
+                                v-for="stat in data.subscriptions.possible.overallUsageStats">
+                            <v-flex shrink>
+                                <span>
+                                    <i v-if="stat.name !== data.subscriptions.selected.name" class="far fa-circle"></i>
+                                    <i v-if="stat.name === data.subscriptions.selected.name" class="fas fa-check-circle"></i>
+                                </span>
+                            </v-flex>
+                            <v-flex>
+                                <usage-type-row
+                                        :name="stat.name"
+                                        :count="stat.count"
+                                        :cost="stat.cost"
+                                        :cost-per-paid-use="stat.costPerCount"
+                                ></usage-type-row>
+                            </v-flex>
+                        </v-layout>
+                    </v-flex>
+                    <v-flex xs6></v-flex>
 
-
-<!--                        <v-flex xs3 class="mx-2" style="cursor:pointer;"-->
-<!--                                @click="subscribe(data.meta.issnl, useType.name)">-->
-<!--                                            <span>-->
-<!--                                                <i class="far fa-circle"-->
-<!--                                                   v-if="!hasSubscription(data.meta.issnl, useType.name)"></i>-->
-<!--                                                <i class="fas fa-check-circle"-->
-<!--                                                   v-if="hasSubscription(data.meta.issnl, useType.name)"></i>-->
-<!--                                            </span>-->
-
-<!--                            {{useType.name}}-->
-<!--                        </v-flex>-->
-<!--                        <v-flex xs1 class="mx-2">-->
-<!--                            {{nf(useType.count)}}-->
-<!--                        </v-flex>-->
-<!--                        <v-flex xs1 v-if="useType.cost" class="mx-2">-->
-<!--                            {{currency(useType.cost, true)}}-->
-<!--                        </v-flex>-->
-<!--                        <v-flex xs1 v-if="useType.costPerCount" class="px-2">-->
-<!--                            {{currency(useType.costPerCount)}}-->
-<!--                        </v-flex>-->
-                    </v-layout>
-<!--                    <v-layout>-->
-<!--                        <v-flex xs3 class="mx-2" style="cursor:pointer;" @click="subscribe(data.meta.issnl, 'free')">-->
-<!--                                            <span style="cursor:pointer;" @click="subscribe('free')">-->
-<!--                                                <i class="far fa-circle"-->
-<!--                                                   v-if="!hasSubscription(data.meta.issnl, 'free')"></i>-->
-<!--                                                <i class="fas fa-check-circle"-->
-<!--                                                   v-if="hasSubscription(data.meta.issnl, 'free')"></i>-->
-<!--                                            </span>-->
-<!--                            Free-->
-<!--                        </v-flex>-->
-<!--                    </v-layout>-->
-
-                </div>
+                </v-layout>
 
             </v-flex>
 
@@ -99,9 +80,9 @@
 </template>
 
 <script>
-    import DownloadsBar from "../components/DownloadsBar"
     import UsageTable from "../components/UsageTable"
     import UsageTypeRow from "../components/UsageTypeRow"
+    import DownloadsChart from "../components/DownloadsChart"
 
     import {currency, nFormat} from "../util";
 
@@ -109,9 +90,9 @@
         name: "JournalRow",
         props: ["data"],
         components: {
-            DownloadsBar,
             UsageTable,
-            UsageTypeRow
+            UsageTypeRow,
+            DownloadsChart
         },
         data: () => ({}),
         methods: {

@@ -46,14 +46,42 @@
             <v-container fluid>
                 <v-layout>
                     <v-flex xs6>
-                        <h3 class="display-1">Working scenario </h3>
-                        <usage-table :subscription="data.newScenario.subscriptions.overall"></usage-table>
-<!--                        <pre>{{data.newScenario.subscriptions.overall.usageStats()}}</pre>-->
+                        <v-layout>
+                            <v-flex>
+                                <h3 class="display-1">Working scenario </h3>
+                            </v-flex>
+                        </v-layout>
+                        <v-layout>
+                            <v-flex shrink class="pr-2">
+                                <downloads-chart :yearly-subscriptions="data.newScenario.subscriptions.byYear"></downloads-chart>
+                            </v-flex>
+                            <v-flex>
+                                <usage-table
+                                        :subscription="data.newScenario.subscriptions.overall">
+                                </usage-table>
+                            </v-flex>
+                        </v-layout>
                     </v-flex>
 
+
+
                     <v-flex xs6>
-                        <h3 class="display-1">Big Deal scenario </h3>
-                        <usage-table :subscription="data.oldScenario.subscriptions.overall"></usage-table>
+                        <v-layout>
+                            <v-flex>
+                                <h3 class="display-1">Big Deal scenario </h3>
+                            </v-flex>
+                        </v-layout>
+                        <v-layout>
+                            <v-flex shrink class="pr-2">
+                                <downloads-chart :yearly-subscriptions="data.oldScenario.subscriptions.byYear"></downloads-chart>
+
+                            </v-flex>
+                            <v-flex>
+                                <usage-table
+                                        :subscription="data.oldScenario.subscriptions.overall">
+                                </usage-table>
+                            </v-flex>
+                        </v-layout>
 
 
 <!--                        <usage-table :subscription="data.oldScenario.subscriptions.overall"></usage-table>-->
