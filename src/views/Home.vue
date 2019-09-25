@@ -140,6 +140,7 @@
                     args.subscriptionName
                 )
 
+
                 this.printJournalsDict()
                 this.printScenarioComparison()
 
@@ -190,6 +191,7 @@
                             "fullSubscription"
                         )
                     })
+
 
                     this.oldScenario = makeScenario(
                         Object.values(this.journalsDict),

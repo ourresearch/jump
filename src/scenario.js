@@ -1,16 +1,36 @@
-import {AccumulatorSubscription} from "./subscription";
+import _ from "lodash";
+import {SubscriptionPackage} from "./subscription";
 
 
 const makeScenario = function(journalsList, presetCost){
 
-    const subscriptions = journalsList.map(x=>x.subscriptions.selected.overall)
+
+
+    const allYearSubscriptions = [].concat(...journalsList.map(x=>x.subscriptions.selected.byYear))
+
+    const subscriptionsDictByYear = _.groupBy(allYearSubscriptions, function(sub){
+        return sub.year
+    })
+
+    const subscriptionYears = Object.entries(subscriptionsDictByYear).map(([year, subscriptionsList])=>{
+        return new SubscriptionPackage(subscriptionsList, year)
+    })
+
+    const overallSubscription = new SubscriptionPackage(subscriptionYears)
+
+
+
+
+
 
     return {
         journals: journalsList,
         presetCost: presetCost,
         subscriptions: {
-            overall: new AccumulatorSubscription(subscriptions)
+            overall: overallSubscription,
+            byYear: subscriptionYears,
         }
+
     }
 }
 
