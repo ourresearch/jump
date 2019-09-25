@@ -38,6 +38,8 @@ const currency = function (num, roundToDollars) {
 
 const nFormat = function (num, printReallyLongNumbers) {
 
+    printReallyLongNumbers = true
+
     if (!num) {
         return 0
     }

@@ -1,8 +1,7 @@
 <template>
-    <v-container fluid>
+    <v-container fluid class="body-1">
         <usage-type-row
                 v-for="stat in usageStats"
-                v-if="stat.count > 0.5"
                 :name="stat.name"
                 :count="stat.count"
                 :cost="stat.cost"

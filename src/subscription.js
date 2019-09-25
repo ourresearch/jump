@@ -67,6 +67,14 @@ class BaseSubscription {
         this.cost = 0
         this.name = null
         this.year = null
+        this.usageSortOrder = {
+            hardTurnaway: 0,
+            softTurnaway: 1,
+            docdel: 2,
+            fullSubscription: 3,
+            backCatalog: 4,
+            oa: 5,
+        }
     }
 
     costPerPaidUse() {
@@ -89,7 +97,7 @@ class BaseSubscription {
 
     usageStats() {
         const useCount = this.useCount()
-        return Object.entries(this.usage).map(([k, v]) => {
+        const ret = Object.entries(this.usage).map(([k, v]) => {
             const costForThisUseType = this.getCostForUsageType(k)
             return {
                 name: k,
@@ -99,6 +107,13 @@ class BaseSubscription {
                 costPerCount: (costForThisUseType / v) || 0 // fix division by 0
             }
         })
+
+        ret.sort((a, b)=>{
+            return this.usageSortOrder[a.name] - this.usageSortOrder[b.name]
+        })
+
+        return ret
+
     }
 
     addSubscriptionObj(subscription){

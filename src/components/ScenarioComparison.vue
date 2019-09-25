@@ -47,12 +47,13 @@
                 <v-layout>
                     <v-flex xs6>
                         <h3 class="display-1">Working scenario </h3>
-                        <pre>{{data.newScenario.subscriptions.overall.usageStats()}}</pre>
+                        <usage-table :subscription="data.newScenario.subscriptions.overall"></usage-table>
+<!--                        <pre>{{data.newScenario.subscriptions.overall.usageStats()}}</pre>-->
                     </v-flex>
 
                     <v-flex xs6>
                         <h3 class="display-1">Big Deal scenario </h3>
-                        <pre>{{data.oldScenario.subscriptions.overall.usageStats()}}</pre>
+                        <usage-table :subscription="data.oldScenario.subscriptions.overall"></usage-table>
 
 
 <!--                        <usage-table :subscription="data.oldScenario.subscriptions.overall"></usage-table>-->
