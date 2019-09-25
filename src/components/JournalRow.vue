@@ -48,7 +48,8 @@
                             <h3 class="subheading">Subscriptions</h3>
                         </v-layout>
                         <v-layout
-                                style="cursor: pointer;"
+                                class="subscription-row"
+                                :class="{selected: stat.name === data.subscriptions.selected.name}"
                                  @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: stat.name})"
                                 v-for="stat in data.subscriptions.possible.overallUsageStats">
                             <v-flex shrink>
@@ -110,6 +111,19 @@
 </script>
 
 <style scoped lang="scss">
+    .subscription-row {
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 5px;
+        border: 1px solid transparent;
+        &:hover {
+            background: #f2f2f2;
+        }
+        &.selected {
+            background: #ddd;
+            border: 1px solid #ddd;
+        }
+    }
 
 
 </style>

@@ -104,6 +104,12 @@ class BaseSubscription {
     getCostForUsageType(useType){
         return (this.name === useType) ? this.cost : 0
     }
+    getTurnawaysCount(){
+        return this.usage.hardTurnaway + this.usage.softTurnaway
+    }
+    getFulfilledUsesCount(){
+        return this.useCount() - this.getTurnawaysCount()
+    }
 
     usageStats() {
         const useCount = this.useCount()

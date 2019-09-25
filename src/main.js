@@ -12,6 +12,7 @@ import VueScrollTo from 'vue-scrollto'
 import VueAnalytics from 'vue-analytics'
 import VueMoment from 'vue-moment'
 
+
 import 'vuetify/dist/vuetify.min.css'
 
 
@@ -24,6 +25,7 @@ Vue.use(VueAnalytics, {
   router
 })
 Vue.use(VueMoment);
+
 
 
 

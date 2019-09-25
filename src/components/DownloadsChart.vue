@@ -34,7 +34,6 @@
         computed: {
         },
         mounted(){
-            console.log("mounting downloads chart", this.yearlySubscriptions)
         }
     }
 </script>
