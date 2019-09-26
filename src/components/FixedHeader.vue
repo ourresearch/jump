@@ -1,6 +1,8 @@
 <template>
     <v-container fluid class="scenario-comparison">
-
+        <v-layout>
+            i am the fixed header
+        </v-layout>
 
 
     </v-container>
@@ -12,7 +14,7 @@
 
     export default {
         name: "Journal",
-        props: [],
+        props: ["oldScenario", "newScenario", "filters"],
         components: {
             DownloadsBar,
         },

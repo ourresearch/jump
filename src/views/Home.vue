@@ -52,16 +52,12 @@
 
 
 <script>
-    import {store} from "../search.js"
     import {api} from "../api.js"
 
     import DownloadsBar from "../components/DownloadsBar"
-    import UsageReport from "../components/UsageReport"
-    import Journal from "../journal.js"
     import JournalRow from "../components/JournalRow"
     import ScenarioComparison from "../components/ScenarioComparison"
 
-    import SummarySnap from "../SummarySnap"
     import {currency, nFormat} from "../util";
     import {makeJournal} from "../subscription";
     import {makeScenario, makeScenarioComparison} from "../scenario";
@@ -74,12 +70,10 @@
         name: 'Home',
         components: {
             DownloadsBar,
-            UsageReport,
             ScenarioComparison,
             JournalRow
         },
         data: () => ({
-            store: store,
             currentPage: 1,
             pageSize: 20,
             sortBy: "default",

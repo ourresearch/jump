@@ -1,48 +1,12 @@
 <template>
-    <v-container v-scroll="onScroll" v-if="data.oldScenario" fluid class="scenario-comparison">
-        <h3>scenario comparison</h3>
-
-
-        <div :style="headerStyle">
-            <v-container fluid>
-                <v-layout>
-                    <v-flex class="fulfillment-graph" shrink>
-                        <downloads-chart
-                                :yearly-subscriptions="data.newScenario.subscriptions.byYear">
-                        </downloads-chart>
-
-                    </v-flex>
-                    <v-flex xs3>
-                        <div class="text-xs-right">
-                            <div class="body-1">Instant fulfillments</div>
-                            <div class="headline">{{nf(data.newScenario.subscriptions.overall.getFulfilledUsesCount())}}</div>
-<!--                            <div class="headline">{{nf(percentFulfillmentsChange), true}}%</div>-->
-
-                        </div>
-                    </v-flex>
-                    <v-flex xs3>
-                        <div class="text-xs-right">
-                            <div class="body-1">Cost</div>
-                            <div class="headline">{{currency(data.newScenario.subscriptions.overall.cost, true)}}</div>
-<!--                            <div class="headline">{{// nf(percentCostChange), true}}%</div>-->
-
-                        </div>
-                    </v-flex>
-                    <v-flex xs3>
-                        <div class="text-xs-right">
-                            <div class="body-1">Cost per paid usage</div>
-                            <div class="headline">{{currency(data.newScenario.subscriptions.overall.costPerPaidUse())}}</div>
-<!--                            <div class="headline">{{currency(pricePerPaidUseChange)}}</div>-->
-                        </div>
-                    </v-flex>
-
-                </v-layout>
-            </v-container>
-        </div>
-
+    <v-container :style="{position: 'relative', 'padding-bottom': fixedHeaderHeight+'px', 'padding-top':0, background: '#fff'}"
+                 v-scroll="onScroll"
+                 v-if="data.oldScenario"
+                 fluid
+                 class="scenario-comparison">
 
         <!--- Summary area  -->
-        <v-layout v-if="true" row style="padding-top:100px; background: #fff;">
+        <v-layout v-if="true" row :style="{height: summaryAreaHeight+'px'}">
             <v-container fluid>
                 <v-layout>
                     <v-flex xs6>
@@ -90,8 +54,54 @@
                     </v-flex>
 
                 </v-layout>
+                <div class="pt-5 mt-5">
+                    <h3 class="display-1 text-xs-center">Scenario comparison</h3>
+                </div>
             </v-container>
         </v-layout>
+
+
+        <!-- fixed-position header area -->
+        <div :style="headerStyle">
+            <v-container fluid>
+                <v-layout>
+                    <v-flex class="fulfillment-graph" shrink>
+                        <downloads-chart
+                                :yearly-subscriptions="data.newScenario.subscriptions.byYear">
+                        </downloads-chart>
+
+                    </v-flex>
+                    <v-flex xs3>
+                        <div class="text-xs-right">
+                            <div class="body-1">Instant fulfillments</div>
+                            <div class="headline">
+                                {{nf(data.newScenario.subscriptions.overall.getFulfilledUsesCount())}}
+                            </div>
+                            <!--                            <div class="headline">{{nf(percentFulfillmentsChange), true}}%</div>-->
+
+                        </div>
+                    </v-flex>
+                    <v-flex xs3>
+                        <div class="text-xs-right">
+                            <div class="body-1">Cost</div>
+                            <div class="headline">{{currency(data.newScenario.subscriptions.overall.cost, true)}}</div>
+                            <!--                            <div class="headline">{{// nf(percentCostChange), true}}%</div>-->
+
+                        </div>
+                    </v-flex>
+                    <v-flex xs3>
+                        <div class="text-xs-right">
+                            <div class="body-1">Cost per paid usage</div>
+                            <div class="headline">
+                                {{currency(data.newScenario.subscriptions.overall.costPerPaidUse())}}
+                            </div>
+                            <!--                            <div class="headline">{{currency(pricePerPaidUseChange)}}</div>-->
+                        </div>
+                    </v-flex>
+
+                </v-layout>
+            </v-container>
+        </div>
 
 
     </v-container>
@@ -100,7 +110,6 @@
 <script>
     import DownloadsBar from "../components/DownloadsBar"
     import DownloadsChart from "../components/DownloadsChart"
-    import UsageReport from "../components/UsageReport"
     import UsageTable from "../components/UsageTable"
     import {currency, nFormat, sumObjects} from "../util";
 
@@ -111,34 +120,45 @@
         components: {
             DownloadsBar,
             DownloadsChart,
-            UsageReport,
             UsageTable
         },
         data: () => ({
-            scrollY: 0
+            scrollY: 0,
+            summaryAreaHeight: 350,
+            fixedHeaderHeight: 120,
         }),
         methods: {
             nf: nFormat,
             currency: currency,
-            onScroll(e){
+            onScroll(e) {
                 this.scrollY = window.scrollY
             }
         },
         computed: {
-            headerStyle(){
-                const ret = {
-                    position: "fixed",
-                    top: 0,
+            headerStyle() {
+                const base = {
+                    position: "absolute",
+                    bottom: 0,
                     left: 0,
                     right: 0,
+                    height: this.fixedHeaderHeight+'px',
                     background: "#fff",
-                    "z-index": 1000,
-                }
-                if (this.scrollY > 10) {
-                    ret['box-shadow'] = "0 1px 10px 1px rgba(0, 0, 0, .3)"
                 }
 
-                return ret
+                const fixedPos = {
+                    position: "fixed",
+                    top: 0,
+                    bottom: "auto",
+                    "z-index": 1000,
+                    "box-shadow": "0 1px 10px 1px rgba(0, 0, 0, .3)"
+                }
+                if (this.scrollY > this.summaryAreaHeight) {
+                    return Object.assign({}, base, fixedPos)
+                }
+                else {
+                    return base
+                }
+
 
             }
 
