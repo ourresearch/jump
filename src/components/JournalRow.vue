@@ -1,12 +1,6 @@
 <template>
-    <v-container class="journal py-5">
+    <v-container fluid class="journal pa-0">
 
-        <v-layout align-items-top>
-            <v-flex shrink>
-                <v-checkbox class="pa-0 mt-1"></v-checkbox>
-            </v-flex>
-
-            <v-flex grow>
 
                 <!-- journal META section -->
                 <v-layout>
@@ -72,9 +66,6 @@
 
                 </v-layout>
 
-            </v-flex>
-
-        </v-layout>
 
 
     </v-container>
