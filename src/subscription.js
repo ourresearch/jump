@@ -7,53 +7,6 @@ const docDelCostPerUse = 25
 const hardTurnawayProp = 0.1
 
 
-const makeJournal = function (apiData, selectedSubscriptionName) {
-
-    const selectSubscription = function (subscriptionsList) {
-        return subscriptionsList.find(mySub => {
-            return mySub.name === selectedSubscriptionName
-        })
-    }
-
-    // for each year, get the subscription type i have selected
-    const yearSubscriptionsSelected = apiData.subscriptionsByYear.map(myYear => {
-        const mySelectedSub = selectSubscription(myYear.subscriptions)
-        mySelectedSub.year = myYear.year
-        return mySelectedSub
-    })
-    const mySelectedSubscription = selectSubscription(apiData.subscriptions)
-    const bestCostPerPaidUse = Math.min(...apiData.subscriptions.map(sub => {
-        return sub.costPerPaidUse()
-    }))
-
-    return {
-        meta: apiData.meta,
-        subscriptions: {
-            selected: {
-                name: selectedSubscriptionName,
-                overall: mySelectedSubscription,
-                byYear: yearSubscriptionsSelected
-            },
-            possible: {
-                overall: apiData.subscriptions,
-                overallUsageStats: apiData.subscriptions.map(sub => {
-                    return sub.selfStat()
-                })
-
-                // we never need all possible subscriptions by year
-                // byYear: apiData.subscriptionsByYear
-            }
-        },
-        sortKeys: {
-            hardTurnawayCount: mySelectedSubscription.usage.hardTurnaway,
-            bestCostPerPaidUse: bestCostPerPaidUse,
-            title: apiData.meta.title
-
-        }
-    }
-}
-
-
 
 class BaseSubscription {
     constructor() {
@@ -89,7 +42,7 @@ class BaseSubscription {
     }
 
     costPerPaidUse() {
-        return this.cost / this.paidUseCount()
+        return (this.cost / this.paidUseCount()) || 0
     }
 
     paidUseCount() {
@@ -262,6 +215,10 @@ class DocdelSubscription extends BaseSubscription {
         const usageStats = this.usageStats()
         return usageStats.find(x => x.name === this.name)
     }
+
+    costPerPaidUse() {
+        return docDelCostPerUse
+    }
 }
 
 class FreeSubscription extends BaseSubscription {
@@ -326,7 +283,6 @@ const makeSubscriptions = function (apiUsageStats, cost, year) {
 
 export {
     makeSubscriptions,
-    makeJournal,
     SubscriptionPackage
 }
 

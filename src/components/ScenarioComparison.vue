@@ -61,47 +61,6 @@
         </v-layout>
 
 
-        <!-- fixed-position header area -->
-        <div :style="headerStyle">
-            <v-container fluid>
-                <v-layout>
-                    <v-flex class="fulfillment-graph" shrink>
-                        <downloads-chart
-                                :yearly-subscriptions="data.newScenario.subscriptions.byYear">
-                        </downloads-chart>
-
-                    </v-flex>
-                    <v-flex xs3>
-                        <div class="text-xs-right">
-                            <div class="body-1">Instant fulfillments</div>
-                            <div class="headline">
-                                {{nf(data.newScenario.subscriptions.overall.getFulfilledUsesCount())}}
-                            </div>
-                            <!--                            <div class="headline">{{nf(percentFulfillmentsChange), true}}%</div>-->
-
-                        </div>
-                    </v-flex>
-                    <v-flex xs3>
-                        <div class="text-xs-right">
-                            <div class="body-1">Cost</div>
-                            <div class="headline">{{currency(data.newScenario.subscriptions.overall.cost, true)}}</div>
-                            <!--                            <div class="headline">{{// nf(percentCostChange), true}}%</div>-->
-
-                        </div>
-                    </v-flex>
-                    <v-flex xs3>
-                        <div class="text-xs-right">
-                            <div class="body-1">Cost per paid usage</div>
-                            <div class="headline">
-                                {{currency(data.newScenario.subscriptions.overall.costPerPaidUse())}}
-                            </div>
-                            <!--                            <div class="headline">{{currency(pricePerPaidUseChange)}}</div>-->
-                        </div>
-                    </v-flex>
-
-                </v-layout>
-            </v-container>
-        </div>
 
 
     </v-container>

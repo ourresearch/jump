@@ -7,6 +7,7 @@
 
                     <v-flex>
                         <div>
+                            <div>CPPA: {{ data.sortKeys.bestCostPerPaidUse }}</div>
                             <div class="name headline">
                                 {{data.meta.title}}
                                 <span class="body-1">({{data.subscriptions.selected.name}})</span>

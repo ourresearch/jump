@@ -13,7 +13,6 @@ export const api = {
         const url = this.baseUrl
         let request = axios.get(url)
             .then(resp => {
-                console.log("got journals back")
 
 
                 return resp.data.list.map(journal => {

@@ -10,73 +10,136 @@
                 :data="scenarioComparison"
         ></scenario-comparison>
 
-        <v-layout><pre>{{selectedIssnls}}</pre></v-layout>
 
-        <!--- working area  -->
-        <!--- sort controls  -->
-        <v-toolbar align-center class="toolbar pa-3" style="background: #ccc;">
-            <v-flex shrink>
-                <v-btn outline @click="selectAll">
-                    Select all
-                </v-btn>
-            </v-flex>
-            <v-flex shrink>
-                <v-menu offset-y>
-                    <template v-slot:activator="{ on }">
-                        <v-btn
-                                color="primary"
-                                dark
-                                v-on="on"
-                        >
-                            Change subscription
+
+
+
+
+        <!-- fixed-position header area -->
+        <div class="fixed-header-wrapper">
+            <div class="fixed-header">
+
+                <v-container fluid v-if="newScenario.subscriptions">
+                    <v-layout>
+                        <v-flex class="fulfillment-graph" shrink>
+                            <downloads-chart
+                                    :yearly-subscriptions="newScenario.subscriptions.byYear">
+                            </downloads-chart>
+
+                        </v-flex>
+                        <v-flex xs3>
+                            <div class="text-xs-right">
+                                <div class="body-1">Instant fulfillments</div>
+                                <div class="headline">
+                                    {{nf(newScenario.subscriptions.overall.getFulfilledUsesCount())}}
+                                </div>
+                                <!--                            <div class="headline">{{nf(percentFulfillmentsChange), true}}%</div>-->
+
+                            </div>
+                        </v-flex>
+                        <v-flex xs3>
+                            <div class="text-xs-right">
+                                <div class="body-1">Cost</div>
+                                <div class="headline">{{currency(newScenario.subscriptions.overall.cost, true)}}</div>
+                                <!--                            <div class="headline">{{// nf(percentCostChange), true}}%</div>-->
+
+                            </div>
+                        </v-flex>
+                        <v-flex xs3>
+                            <div class="text-xs-right">
+                                <div class="body-1">Cost per paid usage</div>
+                                <div class="headline">
+                                    {{currency(newScenario.subscriptions.overall.costPerPaidUse())}}
+                                </div>
+                                <!--                            <div class="headline">{{currency(pricePerPaidUseChange)}}</div>-->
+                            </div>
+                        </v-flex>
+
+                    </v-layout>
+                </v-container>
+
+
+                <!-- toolbar for sort and subscribe -->
+                <v-toolbar align-center class="toolbar pa-3" style="background: #ccc;">
+                    <v-flex shrink>
+                        <v-btn icon @click="selectAll" v-if="isNoneSelected">
+                            <v-icon>check_box_outline_blank</v-icon>
                         </v-btn>
-                    </template>
-                    <v-list>
-                        <v-list-tile
-                                v-for="(subscriptionName, index) in subscriptionNames"
-                                :key="index"
-                                @click="subscribeSelected(subscriptionName)"
-                        >
-                            <v-list-tile-title>{{ subscriptionName }}</v-list-tile-title>
-                        </v-list-tile>
-                    </v-list>
-                </v-menu>
-            </v-flex>
-
-
-            <v-flex grow></v-flex>
-
-            <v-flex shrink class="paging">
-                <v-layout align-center>
-                    <v-flex class="number">1-100 of 2200</v-flex>
-                    <v-flex class="pr-4 pl-2">
-                        <v-layout>
-                            <v-flex>
-                                <v-btn @click="changePage" flat icon class="ma-0">
-                                    <i class="fas fa-angle-left"></i>
+                        <v-btn icon @click="unselectAll" v-if="isAllSelected">
+                            <v-icon>check_box</v-icon>
+                        </v-btn>
+                        <v-btn icon @click="unselectAll" v-if="isPartSelected">
+                            <v-icon>indeterminate_check_box</v-icon>
+                        </v-btn>
+                        <span class="num" style="min-width: 2em; display:inline-block;text-align:right;">
+                            {{this.selectedJournals.length}}
+                        </span>
+                         selected
+                    </v-flex>
+                    <v-flex shrink v-if="this.selectedJournals.length">
+                        <v-menu offset-y>
+                            <template v-slot:activator="{ on }">
+                                <v-btn
+                                        flat
+                                        outline
+                                        v-on="on"
+                                >
+                                    Change subscription
                                 </v-btn>
-                            </v-flex>
-                            <v-flex>
-                                <v-btn @click="changePage" flat icon class="ma-0">
-                                    <i class="fas fa-angle-right"></i>
-                                </v-btn>
-
-                            </v-flex>
-                        </v-layout>
+                            </template>
+                            <v-list>
+                                <v-list-tile
+                                        v-for="(subscriptionName, index) in subscriptionNames"
+                                        :key="index"
+                                        @click="subscribeSelected(subscriptionName)"
+                                >
+                                    <v-list-tile-title>{{ subscriptionName }}</v-list-tile-title>
+                                </v-list-tile>
+                            </v-list>
+                        </v-menu>
                     </v-flex>
 
-                </v-layout>
-            </v-flex>
-            <v-flex shrink xs2>
-                <v-select
-                        :items="journalSortKeys"
-                        v-model="selectedJournalSortKey"
-                        label="Sort journals by"
-                        @change="sortJournalsList"
-                        outline
-                ></v-select>
-            </v-flex>
-        </v-toolbar>
+
+                    <v-flex grow></v-flex>
+
+                    <v-flex shrink class="paging">
+                        <v-layout align-center>
+                            <v-flex class="number">
+                                {{pageStartIndex + 1}}-{{pageEndIndex}}
+                                of {{journalsList.length}}
+                            </v-flex>
+                            <v-flex class="pr-4 pl-2">
+                                <v-layout>
+                                    <v-flex>
+                                        <v-btn @click="currentPage-=1" :disabled="isOnFirstPage" flat icon class="ma-0">
+                                            <i class="fas fa-angle-left"></i>
+                                        </v-btn>
+                                    </v-flex>
+                                    <v-flex>
+                                        <v-btn @click="currentPage+=1" :disabled="isOnLastPage" flat icon class="ma-0">
+                                            <i class="fas fa-angle-right"></i>
+                                        </v-btn>
+
+                                    </v-flex>
+                                </v-layout>
+                            </v-flex>
+
+                        </v-layout>
+                    </v-flex>
+                    <v-flex shrink xs2>
+                        <v-select
+                                :items="journalSortKeys"
+                                v-model="selectedJournalSortKey"
+                                label="Sort by"
+                                @change="manualSort"
+                                outline
+                        ></v-select>
+                    </v-flex>
+                </v-toolbar>
+            </div>
+        </div>
+
+
 
 
         <!--- journals list  -->
@@ -85,9 +148,7 @@
                 <v-layout>
                     <v-flex shrink>
                         <v-checkbox
-                                v-model="selectedJournals[journalData.meta.issnl]"
-                                @click="select(journalData.meta.issnl)"
-
+                                v-model="journalData.isSelected"
                                 class="pa-0 mt-1"></v-checkbox>
                     </v-flex>
                     <v-flex grow>
@@ -103,19 +164,19 @@
 <script>
     import {api} from "../api.js"
 
-    import DownloadsBar from "../components/DownloadsBar"
+    import DownloadsChart from "../components/DownloadsChart"
     import JournalRow from "../components/JournalRow"
     import ScenarioComparison from "../components/ScenarioComparison"
 
     import {currency, nFormat} from "../util";
-    import {makeJournal, Journal} from "../Journal.js";
+    import {Journal} from "../Journal.js";
     import {makeScenario, makeScenarioComparison} from "../scenario";
 
 
     export default {
         name: 'Home',
         components: {
-            DownloadsBar,
+            DownloadsChart,
             ScenarioComparison,
             JournalRow
         },
@@ -123,31 +184,29 @@
             currentPage: 1,
             pageSize: 20,
             sortBy: "default",
-            journalsFromApi: [],
-            journals: [],
-            bigDealJournals: [],
             api: api,
             isLoading: false,
-            selectedJournalSortKey: "getUseCount",
+            selectedJournalSortKey: "totalUsage",
             journalSortKeys: [
                 {text: "Best Cost Per Paid Use", value: "bestCostPerPaidUse"},
-                {text: "Total usage", value: "getUseCount"},
+                {text: "Total usage", value: "totalUsage"},
                 {text: "Hard turnaways", value: "hardTurnawayCount"},
                 {text: "Title", value: "title"},
             ],
-            journalsDict: {},
+            descendingSorts: [
+                "totalUsage",
+                "hardTurnawayCount",
+            ],
             journalsList: [],
             bigDealCost: 1000000,
-            journalsToPrint: [],
-            apiJournals: {},
             scenarioComparison: {},
             oldScenario: {},
+            newScenario: {},
             subscriptionNames: [
                 "fullSubscription",
                 "docdel",
                 "free"
             ],
-            selectedIssnls: [],
 
         }),
         computed: {
@@ -156,23 +215,34 @@
                 return (this.currentPage - 1) * this.pageSize
             },
             pageEndIndex() {
-                return (this.currentPage * this.pageSize) - 1
+                return (this.currentPage * this.pageSize)
             },
-            selectedJournals(){
-                let ret = {}
-                Object.keys(this.journalsDict).forEach(k=>{
-                    ret[k] = false
-                    if (this.selectedIssnls.includes(k)) {
-                        ret[k] = true
-                    }
-                })
-                return ret
+            isOnFirstPage(){
+                return this.currentPage <= 1
             },
+            isOnLastPage(){
+                const numPages = Math.ceil(this.journalsList.length / this.pageSize)
+                return this.currentPage >= numPages
+            },
+
 
             journalsPage(){
                 return this.journalsList
                     .slice(this.pageStartIndex, this.pageEndIndex)
+            },
+            selectedJournals(){
+                return this.journalsList.filter(j=>j.isSelected)
+            },
+            isAllSelected(){
+                return this.journalsList.length === this.selectedJournals.length
+            },
+            isPartSelected(){
+                return !this.isAllSelected && this.selectedJournals.length
+            },
+            isNoneSelected(){
+                return this.selectedJournals.length === 0
             }
+
 
 
         },
@@ -182,72 +252,66 @@
 
             // selection stuff
             // *****************
-            select(issnl) {
-                this.selectedIssnls.push(issnl)
-            },
-            toggleSelection(issnl) {
-                if (this.selectedIssnls.includes(issnl)){
-
-                }
-                this.selectedIssnls.push(issnl)
-            },
             selectAll() {
                 console.log("select all")
-                this.selectedIssnls = Object.keys(this.journalsDict)
+                this.journalsList.forEach(j=>{
+                    j.isSelected = true
+                })
+
             },
             unselectAll() {
-                this.selectedIssnls = []
+                console.log("unselect all")
+                this.journalsList.forEach(j=>{
+                    j.isSelected = false
+                })
+
             },
-            isSelected(issnl){
-                return this.selected.includes(issnl)
+
+
+            subscribeSelected(newSubscriptionName) {
+                console.log("subscribe selected", newSubscriptionName)
+                this.selectedJournals.forEach(j=>{
+                    j.subscribe(newSubscriptionName)
+                })
+                this.sortJournalsList()
+                this.printScenarioComparison()
             },
-
-
-
 
 
             getSubscription(issnl) {
                 if (this.subscriptions[issnl]) return this.subscriptions[issnl]
                 return "free"
             },
-            subscribeSelected(newSubscriptionName) {
-                console.log("subscribe selected!", newSubscriptionName)
-
-            },
 
             printScenarioComparison() {
+                this.newScenario = makeScenario(this.journalsList, 0)
                 this.scenarioComparison = makeScenarioComparison(
-                    makeScenario(this.journalsList, 0),
+                    this.newScenario,
                     this.oldScenario
                 )
-            },
-            changePage() {
-                console.log("change page")
             },
 
             subscribe(args) {
                 console.log("subscribe!", args.issnl, args.subscriptionName)
                 const myIssnl = args.issnl
                 const mySubscriptionName = args.subscriptionName
-                const myApiData = this.apiJournals[args.issnl]
-                this.journalsDict[args.issnl] = makeJournal(
-                    myApiData,
-                    args.subscriptionName
-                )
 
                 this.journalsList.find(j=>{
                     return j.meta.issnl === myIssnl
                 }).subscribe(mySubscriptionName)
 
-
-                this.printJournalsDict()
+                this.sortJournalsList()
                 this.printScenarioComparison()
 
 
             },
+            manualSort(){
+                this.sortJournalsList()
+                this.currentPage = 1
+            },
             sortJournalsList(){
                 const sortKey = this.selectedJournalSortKey
-                console.log("sorting journals dict!", sortKey)
+                const desc = this.descendingSorts.includes(sortKey)
                 const sortFn = function (a, b) {
                     let ret = 0
                     if (a.sortKeys[sortKey] < b.sortKeys[sortKey]) {
@@ -255,42 +319,26 @@
                     } else {
                         ret = 1
                     }
+                    if (desc) ret = -ret
+
                     return ret
                 }
                 this.journalsList = this.journalsList.sort(sortFn)
+                console.log("sort done", this.journalsList[0].meta.title, this.journalsList[0].sortKeys)
 
             },
-            printJournalsDict() {
-                console.log("printJournalsDict() doing nothing")
-                return
-
-
-                const sortKey = this.selectedJournalSortKey
-                const sortFn = function (a, b) {
-                    let ret = 0
-                    if (a.sortKeys[sortKey] < b.sortKeys[sortKey]) {
-                        ret = -1
-                    } else {
-                        ret = 1
-                    }
-                    return ret
-                }
-                this.journalsToPrint = Object.values(this.journalsDict)
-                    .sort(sortFn)
-                    .slice(this.pageStartIndex, this.pageEndIndex)
-            }
         },
         mounted() {
+            let maxJournalsToFetch
+            console.log("mounted")
+            // maxJournalsToFetch = 1  // for testing
             api.fetchJournals()
                 .then(resp => {
-                    resp.forEach(apiJournalData => {
-                        const myIssnl = apiJournalData.meta.issnl
+                    console.log("got journals back")
+                    resp.forEach((apiJournalData, index) => {
+                        if (index >= maxJournalsToFetch) return true
 
-                        this.apiJournals[myIssnl] = apiJournalData
-                        this.journalsDict[myIssnl] = makeJournal(
-                            apiJournalData,
-                            "fullSubscription"
-                        )
+                        const myIssnl = apiJournalData.meta.issnl
                         this.journalsList.push(new Journal(
                             apiJournalData,
                             "fullSubscription"
@@ -298,13 +346,15 @@
                     })
 
 
+                    console.log("printing scenario stuff")
                     this.oldScenario = makeScenario(
                        this.journalsList,
                         this.bigDealCost
                     )
 
-                    this.printJournalsDict()
                     this.printScenarioComparison()
+
+                    console.log("done loading")
 
 
                 })
