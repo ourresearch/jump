@@ -72,7 +72,7 @@
                         :items="journalSortKeys"
                         v-model="selectedJournalSortKey"
                         label="Sort journals by"
-                        @change="printJournalsDict"
+                        @change="sortJournalsList"
                         outline
                 ></v-select>
             </v-flex>
@@ -81,7 +81,7 @@
 
         <!--- journals list  -->
         <v-layout column>
-            <v-flex grow v-for="journalData in journalsToPrint" class="ma-5">
+            <v-flex grow v-for="journalData in journalsPage" class="ma-5">
                 <v-layout>
                     <v-flex shrink>
                         <v-checkbox
@@ -108,7 +108,7 @@
     import ScenarioComparison from "../components/ScenarioComparison"
 
     import {currency, nFormat} from "../util";
-    import {makeJournal} from "../subscription";
+    import {makeJournal, Journal} from "../Journal.js";
     import {makeScenario, makeScenarioComparison} from "../scenario";
 
 
@@ -136,6 +136,7 @@
                 {text: "Title", value: "title"},
             ],
             journalsDict: {},
+            journalsList: [],
             bigDealCost: 1000000,
             journalsToPrint: [],
             apiJournals: {},
@@ -166,6 +167,11 @@
                     }
                 })
                 return ret
+            },
+
+            journalsPage(){
+                return this.journalsList
+                    .slice(this.pageStartIndex, this.pageEndIndex)
             }
 
 
@@ -175,6 +181,7 @@
             currency: currency,
 
             // selection stuff
+            // *****************
             select(issnl) {
                 this.selectedIssnls.push(issnl)
             },
@@ -196,6 +203,9 @@
             },
 
 
+
+
+
             getSubscription(issnl) {
                 if (this.subscriptions[issnl]) return this.subscriptions[issnl]
                 return "free"
@@ -207,10 +217,7 @@
 
             printScenarioComparison() {
                 this.scenarioComparison = makeScenarioComparison(
-                    makeScenario(
-                        Object.values(this.journalsDict),
-                        0
-                    ),
+                    makeScenario(this.journalsList, 0),
                     this.oldScenario
                 )
             },
@@ -220,37 +227,47 @@
 
             subscribe(args) {
                 console.log("subscribe!", args.issnl, args.subscriptionName)
+                const myIssnl = args.issnl
+                const mySubscriptionName = args.subscriptionName
                 const myApiData = this.apiJournals[args.issnl]
                 this.journalsDict[args.issnl] = makeJournal(
                     myApiData,
                     args.subscriptionName
                 )
 
+                this.journalsList.find(j=>{
+                    return j.meta.issnl === myIssnl
+                }).subscribe(mySubscriptionName)
+
 
                 this.printJournalsDict()
                 this.printScenarioComparison()
 
 
-                // this.isLoading = true;
-                // this.subscriptions[issnl] = newSubscriptionName
-                //
-                // let that = this
-                // // setTimeout(function(){
-                // //     that.isLoading = false
-                // //     console.log("no more loading...")
-                // // },1000)
-                // setTimeout(function(){
-                //     that.setJournals()
-                //
-                // })
+            },
+            sortJournalsList(){
+                const sortKey = this.selectedJournalSortKey
+                console.log("sorting journals dict!", sortKey)
+                const sortFn = function (a, b) {
+                    let ret = 0
+                    if (a.sortKeys[sortKey] < b.sortKeys[sortKey]) {
+                        ret = -1
+                    } else {
+                        ret = 1
+                    }
+                    return ret
+                }
+                this.journalsList = this.journalsList.sort(sortFn)
 
             },
             printJournalsDict() {
+                console.log("printJournalsDict() doing nothing")
+                return
+
+
                 const sortKey = this.selectedJournalSortKey
-                console.log("printing journals dict!", sortKey)
                 const sortFn = function (a, b) {
                     let ret = 0
-                    a
                     if (a.sortKeys[sortKey] < b.sortKeys[sortKey]) {
                         ret = -1
                     } else {
@@ -274,16 +291,22 @@
                             apiJournalData,
                             "fullSubscription"
                         )
+                        this.journalsList.push(new Journal(
+                            apiJournalData,
+                            "fullSubscription"
+                        ))
                     })
 
 
                     this.oldScenario = makeScenario(
-                        Object.values(this.journalsDict),
+                       this.journalsList,
                         this.bigDealCost
                     )
 
                     this.printJournalsDict()
                     this.printScenarioComparison()
+
+
                 })
         },
         watch: {}

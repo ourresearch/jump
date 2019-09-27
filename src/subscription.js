@@ -22,7 +22,7 @@ const makeJournal = function (apiData, selectedSubscriptionName) {
         return mySelectedSub
     })
     const mySelectedSubscription = selectSubscription(apiData.subscriptions)
-    const bestCostPerPaidUse = Math.min(...apiData.subscriptions.map(sub=>{
+    const bestCostPerPaidUse = Math.min(...apiData.subscriptions.map(sub => {
         return sub.costPerPaidUse()
     }))
 
@@ -52,6 +52,7 @@ const makeJournal = function (apiData, selectedSubscriptionName) {
         }
     }
 }
+
 
 
 class BaseSubscription {
@@ -94,20 +95,24 @@ class BaseSubscription {
     paidUseCount() {
         return this.usage.fullSubscription + this.usage.docdel
     }
-    freeUseCount(){
+
+    freeUseCount() {
         return this.usage.oa + this.usage.backCatalog
     }
 
     useCount() {
         return _.sum(Object.values(this.usage))
     }
-    getCostForUsageType(useType){
+
+    getCostForUsageType(useType) {
         return (this.name === useType) ? this.cost : 0
     }
-    getTurnawaysCount(){
+
+    getTurnawaysCount() {
         return this.usage.hardTurnaway + this.usage.softTurnaway
     }
-    getFulfilledUsesCount(){
+
+    getFulfilledUsesCount() {
         return this.useCount() - this.getTurnawaysCount()
     }
 
@@ -125,7 +130,7 @@ class BaseSubscription {
             }
         })
 
-        ret.sort((a, b)=>{
+        ret.sort((a, b) => {
             return this.usageSortOrder[a.name] - this.usageSortOrder[b.name]
         })
 
@@ -133,10 +138,10 @@ class BaseSubscription {
 
     }
 
-    addSubscriptionObj(subscription){
-        if (subscription.name !== this.name){
+    addSubscriptionObj(subscription) {
+        if (subscription.name !== this.name) {
         }
-        Object.entries(subscription.usage).forEach(([k,v])=>{
+        Object.entries(subscription.usage).forEach(([k, v]) => {
             this.usage[k] += v
         })
         this.cost += subscription.cost
@@ -148,36 +153,33 @@ class BaseSubscription {
 }
 
 
-
 class SubscriptionPackage extends BaseSubscription {
-    constructor(subsToAdd, year){
+    constructor(subsToAdd, year) {
         super()
         this.name = "accumulator"
         this.year = year
         this.subscriptions = makeBlankSubscriptions(year)
 
-        subsToAdd.forEach(sub=>{
+        subsToAdd.forEach(sub => {
             this.addSubscriptionObj(sub)
         })
     }
 
 
-    addSubscriptionObj(newSub){
-        if (newSub.name==="accumulator") {
+    addSubscriptionObj(newSub) {
+        if (newSub.name === "accumulator") {
             this.addAccumulator(newSub)
-        }
-
-        else {
-            this.subscriptions.find(x=>x.name===newSub.name).addSubscriptionObj(newSub)
-            Object.entries(newSub.usage).forEach(([k,v])=>{
+        } else {
+            this.subscriptions.find(x => x.name === newSub.name).addSubscriptionObj(newSub)
+            Object.entries(newSub.usage).forEach(([k, v]) => {
                 this.usage[k] += v
             })
             this.cost += newSub.cost
         }
     }
 
-    addAccumulator(accumulator){
-        accumulator.subscriptions.forEach((sub)=>{
+    addAccumulator(accumulator) {
+        accumulator.subscriptions.forEach((sub) => {
             this.addSubscriptionObj(sub)
         })
     }
@@ -186,19 +188,17 @@ class SubscriptionPackage extends BaseSubscription {
         throw "SubscriptionPackage doesn't have a selfStat()"
     }
 
-    getSubscription(name){
-        return this.subscriptions.find(x=>x.name===name)
+    getSubscription(name) {
+        return this.subscriptions.find(x => x.name === name)
     }
 
-    getCostForUsageType(usageType){
-        if (["fullSubscription", "docdel"].includes(usageType)){
+    getCostForUsageType(usageType) {
+        if (["fullSubscription", "docdel"].includes(usageType)) {
             return this.getSubscription(usageType).cost
-        }
-        else {
+        } else {
             return 0
         }
     }
-
 
 
 }
@@ -209,7 +209,7 @@ class FullSubscription extends BaseSubscription {
         this.name = "fullSubscription"
     }
 
-    set(apiUsageStats, cost){
+    set(apiUsageStats, cost) {
         const total = apiUsageStats.useCount
         const free = apiUsageStats.oaUseCount + apiUsageStats.backCatalogUseCount
         const nonFree = total - free
@@ -240,7 +240,7 @@ class DocdelSubscription extends BaseSubscription {
         if (myFullSubscription) this.set(myFullSubscription)
     }
 
-    set(myFullSubscription){
+    set(myFullSubscription) {
         const turnaway = myFullSubscription.usage.fullSubscription
         const hardTurnawayCount = turnaway * hardTurnawayProp
 
@@ -271,7 +271,7 @@ class FreeSubscription extends BaseSubscription {
         if (myFullSubscription) this.set(myFullSubscription)
     }
 
-    set(myFullSubscription){
+    set(myFullSubscription) {
         const turnaway = myFullSubscription.usage.fullSubscription
         let hardTurnawayCount = turnaway * hardTurnawayProp
 
@@ -298,13 +298,13 @@ class FreeSubscription extends BaseSubscription {
     }
 }
 
-const makeBlankSubscriptions = function(year){
+const makeBlankSubscriptions = function (year) {
     const ret = [
         new FullSubscription(),
         new DocdelSubscription(),
         new FreeSubscription()
     ]
-    ret.forEach(x=>{
+    ret.forEach(x => {
         x.year = year
     })
 
@@ -322,7 +322,6 @@ const makeSubscriptions = function (apiUsageStats, cost, year) {
         new FreeSubscription(full)
     ]
 }
-
 
 
 export {
