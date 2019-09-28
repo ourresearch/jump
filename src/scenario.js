@@ -6,7 +6,7 @@ const makeScenario = function(journalsList, presetCost){
 
 
 
-    const allYearSubscriptions = [].concat(...journalsList.map(x=>x.subscriptions.selected.byYear))
+    const allYearSubscriptions = [].concat(...journalsList.map(x=>x.getYearlySubscriptions()))
 
     const subscriptionsDictByYear = _.groupBy(allYearSubscriptions, function(sub){
         return sub.year

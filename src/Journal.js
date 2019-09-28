@@ -1,3 +1,4 @@
+import {makeSubscriptions} from "./subscription";
 
 
 
@@ -13,54 +14,45 @@ class Journal {
             selected: {
                 name: "",
                 overall: {},
-                byYear: []
-            },
-            possible: {
-                overall: {},
-                overallUsageStats: []
             }
         }
 
-        this._setPossibleSubscriptions()
         this.subscribe(selectedSubscriptionName)
     }
 
     subscribe(subscriptionName) {
-
-        const selectSubscription = function (subscriptionsList) {
-            return subscriptionsList.find(mySub => {
+        const overall = this.apiData.subscriptions.find(mySub => {
                 return mySub.name === subscriptionName
             })
-        }
-
-        // for each year, get the subscription type i have selected
-        const yearlySubscriptionsSelected = this.apiData.subscriptionsByYear.map(myYear => {
-            const mySelectedSub = selectSubscription(myYear.subscriptions)
-            mySelectedSub.year = myYear.year
-            return mySelectedSub
-        })
-
-        const overall = selectSubscription(this.apiData.subscriptions)
 
         this.subscriptions.selected = {
             name: subscriptionName,
             overall: overall,
-            byYear: yearlySubscriptionsSelected
         }
         this._setSortKeys()
     }
 
-    _setPossibleSubscriptions(){
-        this.subscriptions.possible = {
-            overall: this.apiData.subscriptions,
-            overallUsageStats: this.apiData.subscriptions.map(sub => {
+
+    getPossibleUsageStats(){
+        return this.apiData.subscriptions.map(sub => {
                     return sub.selfStat()
-                })
-        }
+        })
+    }
+    getFullSubscriptionCost(){
+        return this.apiData.dollars_2018_subscription * 5
+    }
+
+    getYearlySubscriptions(){
+        const ret = this.apiData.yearlyDownloads.map(yearInfo=>{
+            const subs = makeSubscriptions(yearInfo, this.getFullSubscriptionCost(), yearInfo.year)
+            const mySub = subs.find(x => x.name === this.subscriptions.selected.name)
+            return mySub
+        })
+        return ret
     }
 
     _setSortKeys() {
-        const costsPerPaidUse = this.subscriptions.possible.overall.map(sub => {
+        const costsPerPaidUse = this.apiData.subscriptions.map(sub => {
             return sub.costPerPaidUse()
         })
 

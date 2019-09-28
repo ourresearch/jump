@@ -182,7 +182,7 @@
         },
         data: () => ({
             currentPage: 1,
-            pageSize: 20,
+            pageSize: 50,
             sortBy: "default",
             api: api,
             isLoading: false,

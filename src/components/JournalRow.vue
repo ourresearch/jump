@@ -7,7 +7,6 @@
 
                     <v-flex>
                         <div>
-                            <div>CPPA: {{ data.sortKeys.bestCostPerPaidUse }}</div>
                             <div class="name headline">
                                 {{data.meta.title}}
                                 <span class="body-1">({{data.subscriptions.selected.name}})</span>
@@ -25,7 +24,7 @@
                 <v-layout>
                     <v-flex shrink class="pr-2">
                         <downloads-chart
-                                :yearly-subscriptions="data.subscriptions.selected.byYear"></downloads-chart>
+                                :yearly-subscriptions="yearlySubscriptions"></downloads-chart>
                     </v-flex>
 
 
@@ -46,7 +45,7 @@
                                 class="subscription-row"
                                 :class="{selected: stat.name === data.subscriptions.selected.name}"
                                  @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: stat.name})"
-                                v-for="stat in data.subscriptions.possible.overallUsageStats">
+                                v-for="stat in possibleUsageStats">
                             <v-flex shrink>
                                 <span>
                                     <i v-if="stat.name !== data.subscriptions.selected.name" class="far fa-circle"></i>
@@ -96,7 +95,10 @@
             }
 
         },
-        computed: {},
+        computed: {
+            possibleUsageStats(){ return this.data.getPossibleUsageStats() },
+            yearlySubscriptions(){ return this.data.getYearlySubscriptions() },
+        },
         watchers() {
         }
     }

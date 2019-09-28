@@ -27,12 +27,7 @@ export const api = {
 
                         },
                         subscriptions: makeSubscriptions(downloads, journal.dollars_2018_subscription*5),
-                        subscriptionsByYear: downloadsByYear.map(yearInfo=>{
-                            return {
-                                year: yearInfo.year,
-                                subscriptions: makeSubscriptions(yearInfo, journal.dollars_2018_subscription)
-                            }
-                        })
+                        yearlyDownloads:downloadsByYear,
                     }
                 })
             })
