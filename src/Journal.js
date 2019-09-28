@@ -10,12 +10,20 @@ class Journal {
         this.sortKeys = {}
         this.apiData = apiData
         this.isSelected = false
+        this.citations = apiData.citations
+        this.subscription = {}
+
+        // hack
+        this.useCount = apiData.subscriptions.find(x=>x.name==="fullSubscription").useCount()
+
+        // legacy
         this.subscriptions = {
             selected: {
                 name: "",
                 overall: {},
             }
         }
+
 
         this.subscribe(selectedSubscriptionName)
     }
@@ -25,11 +33,16 @@ class Journal {
                 return mySub.name === subscriptionName
             })
 
+        this.subscription = overall
+        this._setSortKeys()
+
+
+        // legacy
         this.subscriptions.selected = {
             name: subscriptionName,
             overall: overall,
         }
-        this._setSortKeys()
+
     }
 
 
@@ -45,7 +58,7 @@ class Journal {
     getYearlySubscriptions(){
         const ret = this.apiData.yearlyDownloads.map(yearInfo=>{
             const subs = makeSubscriptions(yearInfo, this.getFullSubscriptionCost(), yearInfo.year)
-            const mySub = subs.find(x => x.name === this.subscriptions.selected.name)
+            const mySub = subs.find(x => x.name === this.subscription.name)
             return mySub
         })
         return ret
@@ -69,10 +82,10 @@ class Journal {
         // }))
 
         this.sortKeys = {
-            hardTurnawayCount: this.subscriptions.selected.overall.usage.hardTurnaway,
+            hardTurnawayCount: this.subscription.usage.hardTurnaway,
             bestCostPerPaidUse: bestCostPerPaidUse,
             title: this.apiData.meta.title,
-            totalUsage: this.subscriptions.selected.overall.useCount()
+            totalUsage: this.subscription.useCount()
         }
     }
 }

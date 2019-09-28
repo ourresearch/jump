@@ -4,6 +4,7 @@ import _ from "lodash";
 import {sumObjects} from "./util";
 
 const docDelCostPerUse = 25
+const illCostPerUse = 5
 const hardTurnawayProp = 0.1
 
 
@@ -15,6 +16,7 @@ class BaseSubscription {
             hardTurnaway: 0,
             fullSubscription: 0,
             docdel: 0,
+            ill: 0,
             backCatalog: 0,
             oa: 0
         }
@@ -25,6 +27,7 @@ class BaseSubscription {
             hardTurnaway: 0,
             softTurnaway: 1,
             docdel: 2,
+            ill: 2.5,
             fullSubscription: 3,
             backCatalog: 4,
             oa: 5,
@@ -35,6 +38,7 @@ class BaseSubscription {
             hardTurnaway: "#af4448",
             softTurnaway: "#ffa4a2",
             docdel: "#0069c0",
+            ill: "#0069c0", // same as docdel for now
             fullSubscription: "#64b5f6",
             backCatalog: "#76d275",
             oa: "#43a047",
@@ -46,7 +50,7 @@ class BaseSubscription {
     }
 
     paidUseCount() {
-        return this.usage.fullSubscription + this.usage.docdel
+        return this.usage.fullSubscription + this.usage.docdel + this.usage.ill
     }
 
     freeUseCount() {
@@ -100,9 +104,12 @@ class BaseSubscription {
         this.cost += subscription.cost
     }
 
+
     selfStat() {
-        throw "selfStat() needs to be overridden"
+        const usageStats = this.usageStats()
+        return usageStats.find(x => x.name === this.name)
     }
+
 }
 
 
@@ -146,7 +153,7 @@ class SubscriptionPackage extends BaseSubscription {
     }
 
     getCostForUsageType(usageType) {
-        if (["fullSubscription", "docdel"].includes(usageType)) {
+        if (["fullSubscription", "docdel", "ill"].includes(usageType)) {
             return this.getSubscription(usageType).cost
         } else {
             return 0
@@ -173,6 +180,7 @@ class FullSubscription extends BaseSubscription {
             hardTurnaway: 0,
             fullSubscription: nonFree,
             docdel: 0,
+            ill: 0,
             oa: apiUsageStats.oaUseCount || 0,
             backCatalog: apiUsageStats.backCatalogUseCount || 0
         }
@@ -180,10 +188,6 @@ class FullSubscription extends BaseSubscription {
         this.cost = cost || 0
     }
 
-    selfStat() {
-        const usageStats = this.usageStats()
-        return usageStats.find(x => x.name === this.name)
-    }
 }
 
 class DocdelSubscription extends BaseSubscription {
@@ -211,55 +215,50 @@ class DocdelSubscription extends BaseSubscription {
         this.year = myFullSubscription.year
     }
 
-    selfStat() {
-        const usageStats = this.usageStats()
-        return usageStats.find(x => x.name === this.name)
-    }
 
     costPerPaidUse() {
         return docDelCostPerUse
     }
 }
 
-class FreeSubscription extends BaseSubscription {
+class IllSubscription extends BaseSubscription {
     constructor(myFullSubscription) {
         super()
-        this.name = "free"
+        this.name = "ill"
         if (myFullSubscription) this.set(myFullSubscription)
     }
 
     set(myFullSubscription) {
         const turnaway = myFullSubscription.usage.fullSubscription
-        let hardTurnawayCount = turnaway * hardTurnawayProp
+        const hardTurnawayCount = turnaway * hardTurnawayProp
+
 
         this.usage = {
-            softTurnaway: turnaway - hardTurnawayCount,
-            hardTurnaway: hardTurnawayCount,
+            softTurnaway: Math.round(turnaway - hardTurnawayCount),
+            hardTurnaway: 0,
             fullSubscription: 0,
             docdel: 0,
+            ill: turnaway * hardTurnawayProp,
             backCatalog: myFullSubscription.usage.backCatalog || 0,
             oa: myFullSubscription.usage.oa || 0
         }
-        this.cost = 0
+
+        this.cost = (illCostPerUse * hardTurnawayCount) || 0
         this.year = myFullSubscription.year
     }
 
-    selfStat() {
-        return {
-            name: "free",
-            count: this.freeUseCount(),
-            percentage: 100 * this.freeUseCount() / this.useCount(),
-            cost: 0,
-            costPerCount: 0
-        }
+
+    costPerPaidUse() {
+        return illCostPerUse
     }
 }
+
 
 const makeBlankSubscriptions = function (year) {
     const ret = [
         new FullSubscription(),
         new DocdelSubscription(),
-        new FreeSubscription()
+        new IllSubscription(),
     ]
     ret.forEach(x => {
         x.year = year
@@ -276,7 +275,7 @@ const makeSubscriptions = function (apiUsageStats, cost, year) {
     return [
         full,
         new DocdelSubscription(full),
-        new FreeSubscription(full)
+        new IllSubscription(full),
     ]
 }
 

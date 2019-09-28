@@ -1,5 +1,5 @@
 <template>
-            <div style="display: flex; width: 100px; height: 100%; min-height: 50px;">
+            <div style="display: flex; min-width: 30px; height: 100%; min-height: 20px;">
 <!--                <downloads-bar-->
 <!--                        :snap="overallUseCounts"-->
 <!--                        class="pr-1"-->

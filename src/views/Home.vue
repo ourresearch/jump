@@ -144,7 +144,7 @@
 
         <!--- journals list  -->
         <v-layout column>
-            <v-flex grow v-for="journalData in journalsPage" class="ma-5">
+            <v-flex grow v-for="journalData in journalsPage" class="ma-3">
                 <v-layout>
                     <v-flex shrink>
                         <v-checkbox
@@ -205,6 +205,7 @@
             subscriptionNames: [
                 "fullSubscription",
                 "docdel",
+                "ill",
                 "free"
             ],
 
@@ -331,7 +332,7 @@
         mounted() {
             let maxJournalsToFetch
             console.log("mounted")
-            // maxJournalsToFetch = 1  // for testing
+            // maxJournalsToFetch = 10  // for testing
             api.fetchJournals()
                 .then(resp => {
                     console.log("got journals back")
