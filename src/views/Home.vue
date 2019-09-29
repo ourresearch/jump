@@ -325,14 +325,13 @@
                     return ret
                 }
                 this.journalsList = this.journalsList.sort(sortFn)
-                console.log("sort done", this.journalsList[0].meta.title, this.journalsList[0].sortKeys)
 
             },
         },
         mounted() {
             let maxJournalsToFetch
             console.log("mounted")
-            // maxJournalsToFetch = 10  // for testing
+            // maxJournalsToFetch = 1  // for testing
             api.fetchJournals()
                 .then(resp => {
                     console.log("got journals back")

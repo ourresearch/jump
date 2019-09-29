@@ -5,7 +5,7 @@ import {sumObjects} from "./util";
 
 const docDelCostPerUse = 25
 const illCostPerUse = 5
-const hardTurnawayProp = 0.1
+const hardTurnawayProp = 0.05
 
 
 

@@ -28,7 +28,7 @@
                     <v-flex shrink style="flex-basis: 4em;">
                         <v-tooltip left>
                             <template v-slot:activator="{ on }">
-                                <div  v-on="on">
+                                <div v-on="on">
                                     {{data.citations.toLocaleString()}}
                                     <i class="fas fa-pencil-alt light"></i>
                                 </div>
@@ -41,7 +41,7 @@
                     <v-flex shrink style="flex-basis: 7em;">
                         <v-tooltip left>
                             <template v-slot:activator="{ on }">
-                                <div  v-on="on">
+                                <div v-on="on">
                                     {{data.useCount.toLocaleString()}}
                                     <i class="fas fa-glasses light"></i>
                                 </div>
@@ -55,33 +55,47 @@
             </v-flex>
 
 
-
-            <v-flex xs3 class="subscriptions numbers">
+            <v-flex xs2 class="subscriptions">
                 <v-layout>
                     <v-flex
-                        class="subscription-item"
-                        :class="{selected: stat.name === data.subscription.name}"
-                        @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: stat.name})"
-                        v-for="stat in possibleUsageStats">
+                            class="numbers"
+                            @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: subr.name})"
+                            v-for="subr in altSubrs"
+                            v-if="subr.name !=='docdel'"
+                    >
                         <v-tooltip top>
                             <template v-slot:activator="{ on }">
-                                <div style="max-width: 6em;"  v-on="on">
-                                    {{currency(stat.cost, true)}}
-                                    <fulfillment-icon :name="stat.name"></fulfillment-icon>
+                                <div class="subscription-item numbers" style="display:inline-block;" v-on="on">
+                                    {{currency(subr.cost - data.subscription.cost, true, true)}}
+                                    <fulfillment-icon :name="subr.name"></fulfillment-icon>
                                 </div>
                             </template>
                             <span>
-                                select {{stat.name}}
+                                select {{subr.name}}
+                                ({{currency(subr.costPerPaidUse())}} per paid use)
                             </span>
                         </v-tooltip>
                     </v-flex>
                 </v-layout>
             </v-flex>
+            <v-flex xs2 class="selected-subscription numbers">
+                <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                        <div class="title" v-on="on">
+                            {{currency(data.subscription.cost, true)}}
+                            <fulfillment-icon :name="data.subscription.name"></fulfillment-icon>
+                        </div>
+                    </template>
+                    <span>
+                        {{data.subscription.name}}
+                        ({{currency(data.subscription.costPerPaidUse())}}/ paid use)
+                    </span>
+                </v-tooltip>
 
+            </v-flex>
 
 
         </v-layout>
-
 
 
     </v-container>
@@ -114,8 +128,8 @@
 
         },
         computed: {
-            possibleUsageStats() {
-                return this.data.getPossibleUsageStats()
+            altSubrs() {
+                return this.data.getAltSubrs()
             },
             yearlySubscriptions() {
                 return this.data.getYearlySubscriptions()
@@ -129,8 +143,13 @@
 <style scoped lang="scss">
     .numbers {
         text-align: right;
-        i.light {opacity: .8; font-size: 10px;}
+
+        i.light {
+            opacity: .8;
+            font-size: 10px;
+        }
     }
+
     .subscription-item {
         cursor: pointer;
         padding: 5px 10px;

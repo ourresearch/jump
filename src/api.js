@@ -29,6 +29,7 @@ export const api = {
                         citations: journal.citations_from_mit_in_2018,
                         subscriptions: makeSubscriptions(downloads, journal.dollars_2018_subscription*5),
                         yearlyDownloads:downloadsByYear,
+                        fullSubrCost2018: journal.dollars_2018_subscription,
                     }
                 })
             })

@@ -12,6 +12,7 @@ class Journal {
         this.isSelected = false
         this.citations = apiData.citations
         this.subscription = {}
+        this.fullSubrCost2018 = apiData.fullSubrCost2018
 
         // hack
         this.useCount = apiData.subscriptions.find(x=>x.name==="fullSubscription").useCount()
@@ -36,28 +37,19 @@ class Journal {
         this.subscription = overall
         this._setSortKeys()
 
-
-        // legacy
-        this.subscriptions.selected = {
-            name: subscriptionName,
-            overall: overall,
-        }
-
     }
-
-
-    getPossibleUsageStats(){
-        return this.apiData.subscriptions.map(sub => {
-                    return sub.selfStat()
+    getAltSubrs(){
+        return this.apiData.subscriptions.filter(subr=>{
+            return subr.name !== this.subscription.name
         })
     }
-    getFullSubscriptionCost(){
-        return this.apiData.dollars_2018_subscription * 5
-    }
+
 
     getYearlySubscriptions(){
+
         const ret = this.apiData.yearlyDownloads.map(yearInfo=>{
-            const subs = makeSubscriptions(yearInfo, this.getFullSubscriptionCost(), yearInfo.year)
+            // @todo make only the subsr of the type we want, not all of em
+            const subs = makeSubscriptions(yearInfo, this.fullSubrCost2018, yearInfo.year)
             const mySub = subs.find(x => x.name === this.subscription.name)
             return mySub
         })
