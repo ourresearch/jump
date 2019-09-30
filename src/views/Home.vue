@@ -6,9 +6,9 @@
         </div>
 
 
-        <scenario-comparison
-                :data="scenarioComparison"
-        ></scenario-comparison>
+<!--        <scenario-comparison-->
+<!--                :data="scenarioComparison"-->
+<!--        ></scenario-comparison>-->
 
 
 
@@ -16,57 +16,87 @@
 
 
         <!-- fixed-position header area -->
-        <div class="fixed-header-wrapper">
-            <div class="fixed-header">
+        <div class="fixed-header-wrapper" style="height: 250px;">
+            <div class="fixed-header"
+                 v-if="newScenario.subscriptions"
+                 style="position:fixed; background: #fff; width: 100%; z-index:999;">
 
-                <v-container fluid v-if="newScenario.subscriptions">
+                <v-container fluid >
                     <v-layout>
-                        <v-flex class="fulfillment-graph" shrink>
-                            <downloads-chart
-                                    :yearly-subscriptions="newScenario.subscriptions.byYear">
-                            </downloads-chart>
+<!--                        <v-flex class="fulfillment-graph" shrink>-->
+<!--                            <downloads-chart-->
+<!--                                    :yearly-subscriptions="newScenario.subscriptions.byYear">-->
+<!--                            </downloads-chart>-->
 
-                        </v-flex>
-                        <v-flex xs2>
+<!--                        </v-flex>-->
+
+                        <v-flex xs3 class="col">
                             <div class="body-1">Journals</div>
-
-
+                            <pre>
+                                {{newScenario.subrCounts}}
+                            </pre>
                         </v-flex>
 
-                        <v-flex xs3>
-                            <div class="text-xs-right">
-                                <div class="body-1">Instant fulfillments</div>
-                                <div class="headline">
-                                    {{nf(newScenario.subscriptions.overall.getFulfilledUsesCount())}}
-                                </div>
-                                <!--                            <div class="headline">{{nf(percentFulfillmentsChange), true}}%</div>-->
+                        <v-flex xs3 class="col">
+                            <div class="body-1">Usage</div>
+                            <pre>
+                                {{newScenario.usageByType}}
+                            </pre>
+                        </v-flex>
 
-                            </div>
+                        <v-flex xs3 class="col">
+                            <div class="body-1">Costs</div>
+                            <pre>
+                                {{newScenario.costBySubr}}
+                            </pre>
                         </v-flex>
-                        <v-flex xs3>
-                            <div class="text-xs-right">
-                                <div class="body-1">Cost</div>
-                                <div class="headline">{{currency(newScenario.subscriptions.overall.cost, true)}}</div>
-                                <!--                            <div class="headline">{{// nf(percentCostChange), true}}%</div>-->
 
-                            </div>
+                        <v-flex xs3 class="col">
+                            <div class="body-1">Cost per use</div>
+                            <pre>
+                                {{newScenario.costPerUseAdjustedBySubr}}
+                            </pre>
                         </v-flex>
-                        <v-flex xs3>
-                            <div class="text-xs-right">
-                                <div class="body-1">Cost per paid usage</div>
-                                <div class="headline">
-                                    {{currency(newScenario.subscriptions.overall.costPerPaidUse())}}
-                                </div>
-                                <!--                            <div class="headline">{{currency(pricePerPaidUseChange)}}</div>-->
-                            </div>
-                        </v-flex>
+
+
+
+<!--                        <v-flex xs3>-->
+<!--                            <div class="text-xs-right">-->
+<!--                                <div class="body-1">Instant fulfillments</div>-->
+<!--                                <div class="headline">-->
+<!--                                    {{nf(newScenario.subscriptions.overall.getFulfilledUsesCount())}}-->
+<!--                                </div>-->
+<!--                                &lt;!&ndash;                            <div class="headline">{{nf(percentFulfillmentsChange), true}}%</div>&ndash;&gt;-->
+
+<!--                            </div>-->
+<!--                        </v-flex>-->
+
+<!--                        <v-flex xs3>-->
+<!--                            <div class="text-xs-right">-->
+<!--                                <div class="body-1">Cost</div>-->
+<!--                                <div class="headline">{{currency(newScenario.subscriptions.overall.cost, true)}}</div>-->
+<!--                                &lt;!&ndash;                            <div class="headline">{{// nf(percentCostChange), true}}%</div>&ndash;&gt;-->
+
+<!--                            </div>-->
+<!--                        </v-flex>-->
+
+
+<!--                        <v-flex xs3>-->
+<!--                            <div class="text-xs-right">-->
+<!--                                <div class="body-1">Cost per paid usage</div>-->
+<!--                                <div class="headline">-->
+<!--                                    {{currency(newScenario.subscriptions.overall.costPerPaidUse())}}-->
+<!--                                </div>-->
+<!--                                &lt;!&ndash;                            <div class="headline">{{currency(pricePerPaidUseChange)}}</div>&ndash;&gt;-->
+<!--                            </div>-->
+<!--                        </v-flex>-->
 
                     </v-layout>
                 </v-container>
 
 
                 <!-- toolbar for sort and subscribe -->
-                <v-toolbar align-center class="toolbar pa-3" style="background: #ccc;">
+                <v-toolbar align-center flat class="toolbar pa-3">
                     <v-flex shrink>
                         <v-btn icon @click="selectAll" v-if="isNoneSelected">
                             <v-icon>check_box_outline_blank</v-icon>
@@ -340,7 +370,7 @@
         mounted() {
             let maxJournalsToFetch
             console.log("mounted")
-            maxJournalsToFetch = 20  // for testing
+            // maxJournalsToFetch = 20  // for testing
             api.fetchJournals()
                 .then(resp => {
                     console.log("got journals back")

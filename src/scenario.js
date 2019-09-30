@@ -29,10 +29,37 @@ const makeScenario = function(journalsList, presetCost){
         subscriptions: {
             overall: overallSubscription,
             byYear: subscriptionYears,
-        }
+        },
+        subrCounts: getJournalsByType(journalsList),
+        usageByType: overallSubscription.usage,
+        costBySubr: overallSubscription.getCostBySubr(),
+        costPerUseAdjustedBySubr: overallSubscription.getCostPerUseAdjBySubr()
 
     }
 }
+
+const getJournalsByType = function(journalsList){
+    const journalsCount = journalsList.length
+    const groups = _.groupBy(journalsList, j=>{
+        return j.subscription.name
+    })
+
+    const groupStats = Object.entries(groups).map(([subrName, journalsArr])=>{
+        return {
+            name: subrName,
+            count: journalsArr.length,
+            perc: 100 * journalsArr.length / journalsCount
+        }
+    })
+    return groupStats
+
+}
+
+const getCostBySubr = function(journalsList, cost){
+
+
+}
+
 
 const makeScenarioComparison = function(newScenario, oldScenario){
     return {

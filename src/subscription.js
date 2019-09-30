@@ -1,7 +1,6 @@
 import _ from "lodash";
 
 
-import {sumObjects} from "./util";
 
 const docDelCostPerUse = 25
 const illCostPerUse = 5
@@ -176,6 +175,24 @@ class SubscriptionPackage extends BaseSubscription {
             return 0
         }
     }
+    getCostBySubr(){
+        return this.subscriptions.map(subr=>{
+            return {
+                name: subr.name,
+                cost: subr.cost,
+                costPerc: 100 * subr.cost / this.cost
+            }
+        })
+    }
+    getCostPerUseAdjBySubr(){
+        return this.subscriptions.map(subr=>{
+            return {
+                name: subr.name,
+                costPerUseAdjusted: subr.getCostPerUseAdj()
+            }
+        })
+    }
+
 
 
 }

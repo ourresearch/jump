@@ -86,53 +86,6 @@ class Journal {
 }
 
 
-const makeJournal = function (apiData, selectedSubscriptionName) {
-
-    const selectSubscription = function (subscriptionsList) {
-        return subscriptionsList.find(mySub => {
-            return mySub.name === selectedSubscriptionName
-        })
-    }
-
-    // for each year, get the subscription type i have selected
-    const yearSubscriptionsSelected = apiData.subscriptionsByYear.map(myYear => {
-        const mySelectedSub = selectSubscription(myYear.subscriptions)
-        mySelectedSub.year = myYear.year
-        return mySelectedSub
-    })
-    const mySelectedSubscription = selectSubscription(apiData.subscriptions)
-    const bestCostPerPaidUse = Math.min(...apiData.subscriptions.map(sub => {
-        return sub.costPerPaidUse()
-    }))
-
-    return {
-        meta: apiData.meta,
-        subscriptions: {
-            selected: {
-                name: selectedSubscriptionName,
-                overall: mySelectedSubscription,
-                byYear: yearSubscriptionsSelected
-            },
-            possible: {
-                overall: apiData.subscriptions,
-                overallUsageStats: apiData.subscriptions.map(sub => {
-                    return sub.selfStat()
-                })
-
-                // we never need all possible subscriptions by year
-                // byYear: apiData.subscriptionsByYear
-            }
-        },
-        sortKeys: {
-            hardTurnawayCount: mySelectedSubscription.usage.hardTurnaway,
-            bestCostPerPaidUse: bestCostPerPaidUse,
-            title: apiData.meta.title
-
-        }
-    }
-}
-
-
 export {
     Journal
 }
