@@ -9,90 +9,105 @@
                 <downloads-chart
                         :yearly-subscriptions="yearlySubscriptions"></downloads-chart>
             </v-flex>
-            <v-flex xs3>
+
+            <v-flex xs3 class="col">
                 <div>
-                    <div class="name title">
+                    <div class="name title upper">
                         {{data.meta.title}}
                     </div>
-                    <div class="topic body-1">
+                    <div class="topic body-1 lower">
                         <!--                                {{data.meta.issnl}}-->
                         {{ data.meta.subject}}
                     </div>
-
                 </div>
             </v-flex>
 
 
-            <v-flex xs2 class="impact numbers">
-                <v-layout>
-                    <v-flex shrink style="flex-basis: 4em;">
-                        <v-tooltip left>
-                            <template v-slot:activator="{ on }">
-                                <div v-on="on">
-                                    {{data.citations.toLocaleString()}}
-                                    <i class="fas fa-pencil-alt light"></i>
-                                </div>
-                            </template>
-                            <span>
-                                2018 citations from MIT faculty
-                            </span>
-                        </v-tooltip>
-                    </v-flex>
-                    <v-flex shrink style="flex-basis: 7em;">
-                        <v-tooltip left>
-                            <template v-slot:activator="{ on }">
-                                <div v-on="on">
-                                    {{data.useCount.toLocaleString()}}
-                                    <i class="fas fa-glasses light"></i>
-                                </div>
-                            </template>
-                            <span>
-                                2018 downloads from MIT faculty
-                            </span>
-                        </v-tooltip>
-                    </v-flex>
-                </v-layout>
+            <v-flex xs1 class="impact citations numbers col">
+                    <v-tooltip top>
+                        <template v-slot:activator="{ on }">
+                            <div v-on="on">
+                                {{data.citations.toLocaleString()}}
+                                <i class="fas fa-pencil-alt light"></i>
+                            </div>
+                        </template>
+                        <span>
+                            2018 citations from MIT faculty
+                        </span>
+                    </v-tooltip>
             </v-flex>
 
-
-            <v-flex xs2 class="subscriptions">
-                <v-layout>
-                    <v-flex
-                            class="numbers"
-                            @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: subr.name})"
-                            v-for="subr in altSubrs"
-                            v-if="subr.name !=='docdel'"
-                    >
+            <v-flex xs1 class="impact usage numbers col">
+                <div>
+                    <div class="upper">
                         <v-tooltip top>
                             <template v-slot:activator="{ on }">
-                                <div class="subscription-item numbers" style="display:inline-block;" v-on="on">
-                                    {{currency(subr.cost - data.subscription.cost, true, true)}}
-                                    <fulfillment-icon :name="subr.name"></fulfillment-icon>
+                                <div v-on="on">
+                                    {{data.subscription.getUseCountAdjusted().toLocaleString()}}
                                 </div>
                             </template>
                             <span>
-                                select {{subr.name}}
-                                ({{currency(subr.costPerPaidUse())}} per paid use)
+                                2018 usage (Adj)
                             </span>
                         </v-tooltip>
-                    </v-flex>
-                </v-layout>
+                    </div>
+                    <div class="lower body-1">
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on }">
+                                <div v-on="on">
+                                    {{nf(data.subscription.getUseCountAdjustmentPerc())}}%
+                                </div>
+                            </template>
+                            <span>
+                                Adjustment factor
+                            </span>
+                        </v-tooltip>
+                    </div>
+                </div>
             </v-flex>
-            <v-flex xs2 class="selected-subscription numbers">
-                <v-tooltip top>
-                    <template v-slot:activator="{ on }">
-                        <div class="title" v-on="on">
-                            {{currency(data.subscription.cost, true)}}
-                            <fulfillment-icon :name="data.subscription.name"></fulfillment-icon>
-                        </div>
-                    </template>
-                    <span>
-                        {{data.subscription.name}}
-                        ({{currency(data.subscription.costPerPaidUse())}}/ paid use)
-                    </span>
-                </v-tooltip>
 
+
+            <v-flex
+                    xs1
+                    class="numbers subscription-item"
+                    @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: subr.name})"
+                    :key="subr.name"
+                    v-for="subr in data.getSubrs()"
+                    v-if="subr.name !=='docdel'"
+            >
+                <div>
+                    <div class="upper">
+                        <v-tooltip top>
+                            <template v-slot:activator="{ on }">
+                                <div class="numbers" style="display:inline-block;" v-on="on">
+                                    {{currency(subr.costPerPaidUse())}}
+                                </div>
+                            </template>
+                            <span>
+                                {{subr.name}} CPUa
+                            </span>
+                        </v-tooltip>
+                    </div>
+                    <div class="lower body-1">
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on }">
+                                <div class="numbers" style="display:inline-block;" v-on="on">
+                                    {{currency(subr.cost)}}
+                                </div>
+                            </template>
+                            <span>
+                                {{subr.name}} total cost ({{currency(subr.cost - data.subscription.cost, true, true)}})
+                            </span>
+                        </v-tooltip>
+
+                    </div>
+                </div>
+<!--                <div class="icon">-->
+<!--                    <fulfillment-icon :name="subr.name"></fulfillment-icon>-->
+<!--                </div>-->
             </v-flex>
+
+
 
 
         </v-layout>

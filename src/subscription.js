@@ -23,6 +23,8 @@ class BaseSubscription {
         this.cost = 0
         this.name = null
         this.year = null
+
+        // @todo move this into the module to save memory
         this.usageSortOrder = {
             hardTurnaway: 0,
             softTurnaway: 1,
@@ -33,6 +35,7 @@ class BaseSubscription {
             oa: 5,
         }
 
+        // @todo move this into the module to save memory
         // from http://colorbrewer2.org/#type=qualitative&scheme=Set2&n=3
         this.usageColors = {
             hardTurnaway: "#af4448",
@@ -71,6 +74,16 @@ class BaseSubscription {
 
     getFulfilledUsesCount() {
         return this.useCount() - this.getTurnawaysCount()
+    }
+
+    getUseCount(){
+        return _.sum(Object.values(this.usage))
+    }
+    getUseCountAdjusted(){
+        return this.useCount() - this.freeUseCount()
+    }
+    getUseCountAdjustmentPerc(){
+        return  this.getUseCountAdjusted() / this.getUseCount()
     }
 
     usageStats() {
@@ -219,6 +232,7 @@ class DocdelSubscription extends BaseSubscription {
     costPerPaidUse() {
         return docDelCostPerUse
     }
+
 }
 
 class IllSubscription extends BaseSubscription {
@@ -251,6 +265,7 @@ class IllSubscription extends BaseSubscription {
     costPerPaidUse() {
         return illCostPerUse
     }
+
 }
 
 

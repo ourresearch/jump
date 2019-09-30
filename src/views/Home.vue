@@ -27,6 +27,12 @@
                             </downloads-chart>
 
                         </v-flex>
+                        <v-flex xs2>
+                            <div class="body-1">Journals</div>
+
+
+                        </v-flex>
+
                         <v-flex xs3>
                             <div class="text-xs-right">
                                 <div class="body-1">Instant fulfillments</div>
@@ -144,7 +150,10 @@
 
         <!--- journals list  -->
         <v-layout column>
-            <v-flex grow v-for="journalData in journalsPage" class="ma-3">
+            <v-flex grow
+                    v-for="journalData in journalsPage"
+                    :key="journalData.issnl"
+                    class="ma-3">
                 <v-layout>
                     <v-flex shrink>
                         <v-checkbox
@@ -331,7 +340,7 @@
         mounted() {
             let maxJournalsToFetch
             console.log("mounted")
-            // maxJournalsToFetch = 1  // for testing
+            maxJournalsToFetch = 100  // for testing
             api.fetchJournals()
                 .then(resp => {
                     console.log("got journals back")
