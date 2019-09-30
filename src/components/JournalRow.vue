@@ -5,10 +5,10 @@
         <!-- journal META section -->
         <v-layout align-content-center align-center>
 
-            <v-flex shrink class="pa-1" style="align-self: stretch;">
-                <downloads-chart
-                        :yearly-subscriptions="yearlySubscriptions"></downloads-chart>
-            </v-flex>
+<!--            <v-flex shrink class="pa-1" style="align-self: stretch;">-->
+<!--                <downloads-chart-->
+<!--                        :yearly-subscriptions="yearlySubscriptions"></downloads-chart>-->
+<!--            </v-flex>-->
 
             <v-flex xs3 class="col">
                 <div>
@@ -65,11 +65,14 @@
                     </div>
                 </div>
             </v-flex>
+            <v-flex shrink class="mx-4" style="align-self: stretch; border-right:1px solid #999;">
+            </v-flex>
 
 
             <v-flex
                     xs1
-                    class="numbers subscription-item"
+                    class="numbers subscription-item col"
+                    :class="{selected: subr.name===data.subscription.name}"
                     @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: subr.name})"
                     :key="subr.name"
                     v-for="subr in data.getSubrs()"
@@ -80,7 +83,7 @@
                         <v-tooltip top>
                             <template v-slot:activator="{ on }">
                                 <div class="numbers" style="display:inline-block;" v-on="on">
-                                    {{currency(subr.costPerPaidUse())}}
+                                    {{currency(subr.getCostPerUseAdj())}}
                                 </div>
                             </template>
                             <span>
@@ -164,13 +167,16 @@
             font-size: 10px;
         }
     }
+    .flex.col {
+        padding: 5px 10px !important;
+    }
 
     .subscription-item {
         cursor: pointer;
         padding: 5px 10px;
         border-radius: 5px;
         border: 1px solid transparent;
-        font-weight: light;
+        font-weight: 300;
 
         &:hover {
             background: #f2f2f2;

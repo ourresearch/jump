@@ -191,7 +191,7 @@
         },
         data: () => ({
             currentPage: 1,
-            pageSize: 50,
+            pageSize: 20,
             sortBy: "default",
             api: api,
             isLoading: false,
@@ -340,7 +340,7 @@
         mounted() {
             let maxJournalsToFetch
             console.log("mounted")
-            maxJournalsToFetch = 100  // for testing
+            maxJournalsToFetch = 20  // for testing
             api.fetchJournals()
                 .then(resp => {
                     console.log("got journals back")

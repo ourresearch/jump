@@ -86,6 +86,10 @@ class BaseSubscription {
         return  this.getUseCountAdjusted() / this.getUseCount()
     }
 
+    getCostPerUseAdj(){
+        return this.cost / this.getUseCountAdjusted()
+    }
+
     usageStats() {
         const useCount = this.useCount()
         const ret = Object.entries(this.usage).map(([k, v]) => {
@@ -233,6 +237,10 @@ class DocdelSubscription extends BaseSubscription {
         return docDelCostPerUse
     }
 
+    getCostPerUseAdj(){
+        return docDelCostPerUse * hardTurnawayProp
+    }
+
 }
 
 class IllSubscription extends BaseSubscription {
@@ -264,6 +272,10 @@ class IllSubscription extends BaseSubscription {
 
     costPerPaidUse() {
         return illCostPerUse
+    }
+
+    getCostPerUseAdj(){
+        return illCostPerUse * hardTurnawayProp
     }
 
 }
