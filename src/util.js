@@ -56,7 +56,7 @@ const nFormat = function (num, printReallyLongNumbers) {
     }
 
     if (num < 1) {
-        return Math.round(100 * num)
+        return Math.round(100 * num) / 100
     }
 
 

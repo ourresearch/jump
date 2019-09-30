@@ -31,9 +31,12 @@ const makeScenario = function(journalsList, presetCost){
             byYear: subscriptionYears,
         },
         subrCounts: getJournalsByType(journalsList),
-        usageByType: overallSubscription.usage,
+        usageByType: overallSubscription.getUsageStats(),
         costBySubr: overallSubscription.getCostBySubr(),
-        costPerUseAdjustedBySubr: overallSubscription.getCostPerUseAdjBySubr()
+        costPerUseAdjustedBySubr: overallSubscription.getCostPerUseAdjBySubr(),
+
+        costOverall: overallSubscription.cost,
+        costPerUseAdjustedOverall: overallSubscription.cost / overallSubscription.getUseCountAdjusted(),
 
     }
 }

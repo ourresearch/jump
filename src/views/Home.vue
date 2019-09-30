@@ -32,30 +32,62 @@
 
                         <v-flex xs3 class="col">
                             <div class="body-1">Journals</div>
-                            <pre>
-                                {{newScenario.subrCounts}}
-                            </pre>
+                            <table>
+                                <tr :key="subr.name"
+                                    v-for="subr in newScenario.subrCounts">
+                                    <td>{{subr.name}}</td>
+                                    <td>{{nf(subr.count)}}</td>
+                                    <td>{{nf(subr.perc)}}%</td>
+                                </tr>
+                            </table>
                         </v-flex>
 
                         <v-flex xs3 class="col">
                             <div class="body-1">Usage</div>
-                            <pre>
-                                {{newScenario.usageByType}}
-                            </pre>
+                            <table>
+                                <tr :key="usageType.name"
+                                    v-if="usageType.count > 0"
+                                    v-for="usageType in newScenario.usageByType">
+                                    <td>{{usageType.name}}</td>
+                                    <td>{{nf(usageType.count)}}</td>
+                                    <td>{{nf(usageType.perc)}}%</td>
+                                </tr>
+                            </table>
                         </v-flex>
 
                         <v-flex xs3 class="col">
                             <div class="body-1">Costs</div>
-                            <pre>
-                                {{newScenario.costBySubr}}
-                            </pre>
+                            <table>
+                                <tr :key="subr.name"
+                                    v-if="subr.count > 0"
+                                    v-for="subr in newScenario.costBySubr">
+                                    <td>{{subr.name}}</td>
+                                    <td>{{currency(subr.count, true)}}</td>
+                                    <td>{{nf(subr.perc)}}%</td>
+                                </tr>
+                                <tr class="total-row">
+                                    <td>Overall</td>
+                                    <td>{{currency(newScenario.costOverall, true)}}</td>
+                                    <td></td>
+                                </tr>
+                            </table>
                         </v-flex>
 
                         <v-flex xs3 class="col">
                             <div class="body-1">Cost per use</div>
-                            <pre>
-                                {{newScenario.costPerUseAdjustedBySubr}}
-                            </pre>
+                            <table>
+                                <tr :key="subr.name"
+                                    v-if="subr.cost > 0"
+                                    v-for="subr in newScenario.costPerUseAdjustedBySubr">
+                                    <td>{{subr.name}}</td>
+                                    <td>{{currency(subr.cost)}}</td>
+                                </tr>
+                                <tr class="total-row">
+                                    <td>Overall</td>
+                                    <td>{{currency(newScenario.costPerUseAdjustedOverall)}}</td>
+                                    <td></td>
+                                </tr>
+                            </table>
                         </v-flex>
 
 
@@ -406,5 +438,19 @@
 
 <style scoped lang="scss">
 
+    table {
+        text-align: right;
+        border-collapse: collapse;
+        border-top: 1px solid #ddd;
+        tr {
+            border-bottom: 1px solid #ddd;
+            td {
+                padding: 2px 10px;
+                /*border-left: none;*/
+                /*border-right: none;*/
+            }
+        }
+
+    }
 
 </style>

@@ -89,7 +89,7 @@ class BaseSubscription {
         return this.cost / this.getUseCountAdjusted()
     }
 
-    usageStats() {
+    getUsageStats() {
         const useCount = this.useCount()
         const ret = Object.entries(this.usage).map(([k, v]) => {
             const costForThisUseType = this.getCostForUsageType(k)
@@ -97,7 +97,7 @@ class BaseSubscription {
                 name: k,
                 count: v,
                 color: this.usageColors[k],
-                percentage: 100 * v / useCount,
+                perc: 100 * v / useCount,
                 cost: costForThisUseType,
                 costPerCount: (costForThisUseType / v) || 0 // fix division by 0
             }
@@ -179,8 +179,8 @@ class SubscriptionPackage extends BaseSubscription {
         return this.subscriptions.map(subr=>{
             return {
                 name: subr.name,
-                cost: subr.cost,
-                costPerc: 100 * subr.cost / this.cost
+                count: subr.cost,
+                perc: 100 * subr.cost / this.cost
             }
         })
     }
@@ -188,7 +188,7 @@ class SubscriptionPackage extends BaseSubscription {
         return this.subscriptions.map(subr=>{
             return {
                 name: subr.name,
-                costPerUseAdjusted: subr.getCostPerUseAdj()
+                cost: subr.getCostPerUseAdj()
             }
         })
     }
