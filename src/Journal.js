@@ -66,6 +66,8 @@ class Journal {
 
         const nonZeroCostsPerPaidUse = costsPerPaidUse.filter(x=>x>0)
 
+        const fullSubr = this.apiData.subscriptions.find(x=>x.name==='fullSubscription')
+
         const bestCostPerPaidUse = Math.min(...nonZeroCostsPerPaidUse)
         // console.log("setting sort keys. costsPerPaidUse", costsPerPaidUse)
         // console.log("setting sort keys. nonZeroCostsPerPaidUse", nonZeroCostsPerPaidUse)
@@ -77,9 +79,8 @@ class Journal {
         // }))
 
         this.sortKeys = {
-            hardTurnawayCount: this.subscription.usage.hardTurnaway,
-            bestCostPerPaidUse: bestCostPerPaidUse,
             title: this.apiData.meta.title,
+            subrCpua: fullSubr.getCostPerUseAdj() || 1000000000,
             totalUsage: this.subscription.useCount()
         }
     }

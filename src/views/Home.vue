@@ -16,7 +16,7 @@
 
 
         <!-- fixed-position header area -->
-        <div class="fixed-header-wrapper" style="height: 250px;">
+        <div class="fixed-header-wrapper" style="height: 350px;">
             <div class="fixed-header"
                  v-if="newScenario.subscriptions"
                  style="position:fixed; background: #fff; width: 100%; z-index:999;">
@@ -89,40 +89,6 @@
                                 </tr>
                             </table>
                         </v-flex>
-
-
-
-<!--                        <v-flex xs3>-->
-<!--                            <div class="text-xs-right">-->
-<!--                                <div class="body-1">Instant fulfillments</div>-->
-<!--                                <div class="headline">-->
-<!--                                    {{nf(newScenario.subscriptions.overall.getFulfilledUsesCount())}}-->
-<!--                                </div>-->
-<!--                                &lt;!&ndash;                            <div class="headline">{{nf(percentFulfillmentsChange), true}}%</div>&ndash;&gt;-->
-
-<!--                            </div>-->
-<!--                        </v-flex>-->
-
-<!--                        <v-flex xs3>-->
-<!--                            <div class="text-xs-right">-->
-<!--                                <div class="body-1">Cost</div>-->
-<!--                                <div class="headline">{{currency(newScenario.subscriptions.overall.cost, true)}}</div>-->
-<!--                                &lt;!&ndash;                            <div class="headline">{{// nf(percentCostChange), true}}%</div>&ndash;&gt;-->
-
-<!--                            </div>-->
-<!--                        </v-flex>-->
-
-
-<!--                        <v-flex xs3>-->
-<!--                            <div class="text-xs-right">-->
-<!--                                <div class="body-1">Cost per paid usage</div>-->
-<!--                                <div class="headline">-->
-<!--                                    {{currency(newScenario.subscriptions.overall.costPerPaidUse())}}-->
-<!--                                </div>-->
-<!--                                &lt;!&ndash;                            <div class="headline">{{currency(pricePerPaidUseChange)}}</div>&ndash;&gt;-->
-<!--                            </div>-->
-<!--                        </v-flex>-->
-
                     </v-layout>
                 </v-container>
 
@@ -259,9 +225,8 @@
             isLoading: false,
             selectedJournalSortKey: "totalUsage",
             journalSortKeys: [
-                {text: "Best Cost Per Paid Use", value: "bestCostPerPaidUse"},
+                {text: "Subscription Cost Per Use (adj)", value: "subrCpua"},
                 {text: "Total usage", value: "totalUsage"},
-                {text: "Hard turnaways", value: "hardTurnawayCount"},
                 {text: "Title", value: "title"},
             ],
             descendingSorts: [
@@ -364,7 +329,6 @@
             },
 
             subscribe(args) {
-                console.log("subscribe!", args.issnl, args.subscriptionName)
                 const myIssnl = args.issnl
                 const mySubscriptionName = args.subscriptionName
 
@@ -395,7 +359,7 @@
 
                     return ret
                 }
-                this.journalsList = this.journalsList.sort(sortFn)
+                this.journalsList.sort(sortFn)
 
             },
         },

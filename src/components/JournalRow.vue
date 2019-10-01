@@ -12,6 +12,7 @@
 
             <v-flex xs3 class="col">
                 <div>
+<!--                    <div class="body-1">{{currency(data.sortKeys.subrCpua)}}</div>-->
                     <div class="name title upper">
                         {{data.meta.title}}
                     </div>
@@ -72,11 +73,12 @@
             <v-flex
                     xs1
                     class="numbers subscription-item col"
+                    :style="{background: (subr.name===data.subscription.name) ? subr.getColor() : subr.getColorLightened()}"
                     :class="{selected: subr.name===data.subscription.name}"
                     @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: subr.name})"
                     :key="subr.name"
                     v-for="subr in data.getSubrs()"
-                    v-if="subr.name !=='docdel'"
+                    v-if="!(hideDocdel && subr.name === 'docdel')"
             >
                 <div>
                     <div class="upper">
@@ -129,7 +131,7 @@
 
     export default {
         name: "JournalRow",
-        props: ["data"],
+        props: ["data", "hideDocdel"],
         components: {
             UsageTable,
             UsageTableRow,

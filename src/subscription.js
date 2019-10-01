@@ -1,11 +1,34 @@
 import _ from "lodash";
 
 
-
 const docDelCostPerUse = 25
 const illCostPerUse = 5
 const hardTurnawayProp = 0.05
 
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+}
+
+
+const usageColors = {
+    hardTurnaway: "#333", // legacy, should be unused
+
+    softTurnaway: "#90a4ae", // blue grey 200
+
+    ill: "#9575cd", // deep purple 300
+
+    docdel: "#2196f3", // blue 500
+    fullSubscription: "#00acc1", // cyan 600
+
+    backCatalog: "#43a047", // green 600
+    oa: "#7cb342", // light green 600
+}
 
 
 class BaseSubscription {
@@ -27,23 +50,11 @@ class BaseSubscription {
         this.usageSortOrder = {
             hardTurnaway: 0,
             softTurnaway: 1,
-            docdel: 2,
-            ill: 2.5,
+            ill: 2,
+            docdel: 2.5,
             fullSubscription: 3,
             backCatalog: 4,
             oa: 5,
-        }
-
-        // @todo move this into the module to save memory
-        // from http://colorbrewer2.org/#type=qualitative&scheme=Set2&n=3
-        this.usageColors = {
-            hardTurnaway: "#af4448",
-            softTurnaway: "#ffa4a2",
-            docdel: "#0069c0",
-            ill: "#0069c0", // same as docdel for now
-            fullSubscription: "#64b5f6",
-            backCatalog: "#76d275",
-            oa: "#43a047",
         }
     }
 
@@ -75,18 +86,29 @@ class BaseSubscription {
         return this.useCount() - this.getTurnawaysCount()
     }
 
-    getUseCount(){
+    getUseCount() {
         return _.sum(Object.values(this.usage))
     }
-    getUseCountAdjusted(){
+
+    getUseCountAdjusted() {
         return this.useCount() - this.freeUseCount()
     }
-    getUseCountAdjustmentPerc(){
-        return  this.getUseCountAdjusted() / this.getUseCount()
+
+    getUseCountAdjustmentPerc() {
+        return this.getUseCountAdjusted() / this.getUseCount()
     }
 
-    getCostPerUseAdj(){
+    getCostPerUseAdj() {
         return this.cost / this.getUseCountAdjusted()
+    }
+
+    getColor() {
+        return usageColors[this.name]
+    }
+    getColorLightened(){
+        const rgb = hexToRgb(this.getColor())
+        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`
+
     }
 
     getUsageStats() {
@@ -96,7 +118,7 @@ class BaseSubscription {
             return {
                 name: k,
                 count: v,
-                color: this.usageColors[k],
+                color: usageColors[k],
                 perc: 100 * v / useCount,
                 cost: costForThisUseType,
                 costPerCount: (costForThisUseType / v) || 0 // fix division by 0
@@ -175,8 +197,9 @@ class SubscriptionPackage extends BaseSubscription {
             return 0
         }
     }
-    getCostBySubr(){
-        return this.subscriptions.map(subr=>{
+
+    getCostBySubr() {
+        return this.subscriptions.map(subr => {
             return {
                 name: subr.name,
                 count: subr.cost,
@@ -184,15 +207,15 @@ class SubscriptionPackage extends BaseSubscription {
             }
         })
     }
-    getCostPerUseAdjBySubr(){
-        return this.subscriptions.map(subr=>{
+
+    getCostPerUseAdjBySubr() {
+        return this.subscriptions.map(subr => {
             return {
                 name: subr.name,
                 cost: subr.getCostPerUseAdj()
             }
         })
     }
-
 
 
 }
@@ -254,7 +277,7 @@ class DocdelSubscription extends BaseSubscription {
         return docDelCostPerUse
     }
 
-    getCostPerUseAdj(){
+    getCostPerUseAdj() {
         return docDelCostPerUse * hardTurnawayProp
     }
 
@@ -291,7 +314,7 @@ class IllSubscription extends BaseSubscription {
         return illCostPerUse
     }
 
-    getCostPerUseAdj(){
+    getCostPerUseAdj() {
         return illCostPerUse * hardTurnawayProp
     }
 
@@ -322,7 +345,6 @@ const makeSubscriptions = function (apiUsageStats, cost, year) {
         new IllSubscription(full),
     ]
 }
-
 
 
 export {
