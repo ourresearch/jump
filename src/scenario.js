@@ -1,6 +1,8 @@
 import _ from "lodash";
 import {SubscriptionPackage} from "./subscription";
 
+import {usageColors} from "./subscription";
+
 
 const makeScenario = function(journalsList, presetCost){
 
@@ -31,8 +33,11 @@ const makeScenario = function(journalsList, presetCost){
             byYear: subscriptionYears,
         },
         subrCounts: getJournalsByType(journalsList),
+        getSubrCount: getSubrCount,
+
+
         usageByType: overallSubscription.getUsageStats(),
-        costBySubr: overallSubscription.getCostBySubr(),
+        costBySubr: overallSubscription.getCostStats(),
         costPerUseAdjustedBySubr: overallSubscription.getCostPerUseAdjBySubr(),
 
         costOverall: overallSubscription.cost,
@@ -42,7 +47,6 @@ const makeScenario = function(journalsList, presetCost){
 }
 
 const getJournalsByType = function(journalsList){
-    const journalsCount = journalsList.length
     const groups = _.groupBy(journalsList, j=>{
         return j.subscription.name
     })
@@ -51,14 +55,25 @@ const getJournalsByType = function(journalsList){
         return {
             name: subrName,
             count: journalsArr.length,
-            perc: 100 * journalsArr.length / journalsCount
         }
     })
     return groupStats
-
 }
 
-const getCostBySubr = function(journalsList, cost){
+
+const getSubrCount = function(subrName){
+    const groups = _.groupBy(journalsList, j=>{
+        return j.subscription.name
+    })
+    if (groups[subrName]) {
+        return groups[subrName].length
+    }
+    else {
+        return 0
+    }
+}
+
+const getCostStats = function(journalsList, cost){
 
 
 }

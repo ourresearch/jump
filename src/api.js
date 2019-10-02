@@ -17,7 +17,7 @@ export const api = {
 
                 return resp.data.list.map(journal => {
                     const downloadsByYear = apiDownloadsByYear(journal.downloads_by_year)
-                    const downloads = apiDownloads(journal.downloads_by_year)
+                    const downloadsOverall = apiDownloads(journal.downloads_by_year)
 
                     return {
                         meta: {
@@ -27,7 +27,7 @@ export const api = {
 
                         },
                         citations: journal.citations_from_mit_in_2018,
-                        subscriptions: makeSubscriptions(downloads, journal.dollars_2018_subscription*5),
+                        subscriptions: makeSubscriptions(downloadsOverall, journal.dollars_2018_subscription*5),
                         yearlyDownloads:downloadsByYear,
                         fullSubrCost2018: journal.dollars_2018_subscription,
                     }
@@ -46,12 +46,12 @@ export const api = {
 
 
 
-function apiDownloadsByYear(apiDownloads) {
-    return apiDownloads.year.map((year, i) => {
+function apiDownloadsByYear(api_downloads) {
+    return api_downloads.year.map((year, i) => {
         return {
-            useCount: apiDownloads.total[i],
-            oaUseCount: apiDownloads.oa[i],
-            backCatalogUseCount: apiDownloads.back_catalog[i],
+            useCount: api_downloads.total[i],
+            oaUseCount: api_downloads.oa[i],
+            backCatalogUseCount: api_downloads.back_catalog[i],
             year: year
         }
     })

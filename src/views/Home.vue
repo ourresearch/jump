@@ -6,89 +6,210 @@
         </div>
 
 
-<!--        <scenario-comparison-->
-<!--                :data="scenarioComparison"-->
-<!--        ></scenario-comparison>-->
+        <!--        <scenario-comparison-->
+        <!--                :data="scenarioComparison"-->
+        <!--        ></scenario-comparison>-->
 
 
 
 
+
+        <div class="scenario-report"
+             style="padding-top: 400px;"
+             v-if="newScenario.subscriptions">
+            <v-container fluid>
+                <v-layout>
+                    <!--                        <v-flex class="fulfillment-graph" shrink>-->
+                    <!--                            <downloads-chart-->
+                    <!--                                    :yearly-subscriptions="newScenario.subscriptions.byYear">-->
+                    <!--                            </downloads-chart>-->
+
+                    <!--                        </v-flex>-->
+
+                    <v-flex xs4 class="col body-1">
+                        <div class="body-1">Journals</div>
+                        <!--                            <vc-donut :sections="[{value: 25}, {value:25}]">Basic donut</vc-donut>-->
+
+                        <table class="pretty">
+                            <tr :key="subr.name"
+                                v-for="subr in scenario.getJournalsByType()">
+                                <td>{{subr.name}}</td>
+                                <td>{{nf(subr.count)}}</td>
+                                <td>{{nf(subr.perc)}}%</td>
+                            </tr>
+                        </table>
+                    </v-flex>
+
+                    <v-flex xs4 class="col body-1">
+                        <div class="body-1">Usage</div>
+                        <table class="pretty">
+                            <tr :key="usageType.name"
+                                v-if="usageType.count > 0"
+                                v-for="usageType in newScenario.usageByType">
+                                <td>{{usageType.name}}</td>
+                                <td>{{nf(usageType.count)}}</td>
+                                <td>{{nf(usageType.perc)}}%</td>
+                            </tr>
+                        </table>
+                    </v-flex>
+
+                    <v-flex xs4 class="col body-1">
+                        <div class="body-1">Costs</div>
+                        <table class="pretty">
+                            <tr :key="subr.name"
+                                v-if="subr.count > 0"
+                                v-for="subr in newScenario.costBySubr">
+                                <td>{{subr.name}}</td>
+                                <td>{{currency(subr.count, true)}}</td>
+                                <td>{{nf(subr.perc)}}%</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td>Overall</td>
+                                <td>{{currency(newScenario.costOverall, true)}}</td>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </v-flex>
+
+                    <!--                        <v-flex xs3 class="col">-->
+                    <!--                            <div class="body-1">Cost per use</div>-->
+                    <!--                            <table>-->
+                    <!--                                <tr :key="subr.name"-->
+                    <!--                                    v-if="subr.cost > 0"-->
+                    <!--                                    v-for="subr in newScenario.costPerUseAdjustedBySubr">-->
+                    <!--                                    <td>{{subr.name}}</td>-->
+                    <!--                                    <td>{{currency(subr.cost)}}</td>-->
+                    <!--                                </tr>-->
+                    <!--                                <tr class="total-row">-->
+                    <!--                                    <td>Overall</td>-->
+                    <!--                                    <td>{{currency(newScenario.costPerUseAdjustedOverall)}}</td>-->
+                    <!--                                    <td></td>-->
+                    <!--                                </tr>-->
+                    <!--                            </table>-->
+                    <!--                        </v-flex>-->
+                </v-layout>
+            </v-container>
+        </div>
 
 
         <!-- fixed-position header area -->
         <div class="fixed-header-wrapper" style="height: 350px;">
             <div class="fixed-header"
-                 v-if="newScenario.subscriptions"
-                 style="position:fixed; background: #fff; width: 100%; z-index:999;">
+                 v-if="scenario.overallSubrPackage"
+                 style="position:fixed; top:0; background: #fff; width: 100%; z-index:999;">
 
-                <v-container fluid >
+                <v-container fluid>
                     <v-layout>
-<!--                        <v-flex class="fulfillment-graph" shrink>-->
-<!--                            <downloads-chart-->
-<!--                                    :yearly-subscriptions="newScenario.subscriptions.byYear">-->
-<!--                            </downloads-chart>-->
 
+                        <v-flex xs4 class="col body-1">
+                            <v-layout>
+                                <v-flex xs1 class="mr-2">
+                                    <div style="height: 100%; flex-grow: 1">
+
+                                    <downloads-bar :segments="scenario.getJournalsByType()"></downloads-bar>
+                                    </div>
+
+                                </v-flex>
+                                <v-flex xs11>
+                                    <div class="body-1">Journals</div>
+                                    <div class="stats">
+                                        <div :key="subr.name"
+                                             v-for="subr in scenario.overallSubrPackage.subscriptions"
+                                             class="stat"
+                                             :style="{color: subr.colors.primary}"
+                                             :class="{headline: subr.name==='fullSubscription'}">
+                                            <span class="num">
+                                                {{ nf(subr.count) }}
+                                            </span>
+                                            <span>
+                                                {{subr.displayName}}
+                                            </span>
+                                        </div>
+
+
+                                    </div>
+
+                                </v-flex>
+                            </v-layout>
+                        </v-flex>
+
+                        <v-flex xs4 class="col body-1">
+                            <div class="body-1">Usage</div>
+                            <v-layout>
+                                <v-flex xs2 style="display:flex;">
+                                    <div :key="subrPackage.year"
+                                         style="height: 50px; flex-grow: 1"
+                                         v-for="subrPackage in scenario.yearlySubrPackages">
+                                        <downloads-bar :year="subrPackage.year"
+                                                       :segments="subrPackage.getUsageStats()">
+                                        </downloads-bar>
+                                    </div>
+                                </v-flex>
+                                <v-flex xs10>
+                                    <table  class="pretty">
+                                        <tr :key="usageType.name"
+                                            v-if="usageType.count > 0"
+                                            v-for="usageType in scenario.overallSubrPackage.getUsageStats()">
+                                            <td>{{usageType.name}}</td>
+                                            <td>{{nf(usageType.count)}}</td>
+                                            <td>{{nf(usageType.perc)}}%</td>
+                                        </tr>
+                                    </table>
+                                </v-flex>
+
+                            </v-layout>
+                        </v-flex>
+
+
+                        <v-flex xs4 class="col body-1">
+                            <div class="body-1">Costs</div>
+                            <v-layout>
+                                <v-flex xs2 style="display:flex;">
+                                    <div :key="subrPackage.year"
+                                         style="height: 50px; flex-grow: 1"
+                                         v-for="subrPackage in scenario.yearlySubrPackages">
+                                        <downloads-bar :year="subrPackage.year"
+                                                       :is-currency="true"
+                                                       :segments="subrPackage.getCostStats()">
+                                        </downloads-bar>
+                                    </div>
+                                </v-flex>
+                                <v-flex xs10>
+                                    <table  class="pretty">
+                                        <tr :key="usageType.name"
+                                            v-if="usageType.count > 0"
+                                            v-for="usageType in scenario.overallSubrPackage.getCostStats()">
+                                            <td>{{usageType.name}}</td>
+                                            <td>{{nf(usageType.count)}}</td>
+                                            <td>{{nf(usageType.perc)}}%</td>
+                                        </tr>
+                                    </table>
+                                </v-flex>
+
+                            </v-layout>
+                        </v-flex>
+
+
+
+
+<!--                        <v-flex xs4 class="col body-1">-->
+<!--                            <div class="body-1">Costs</div>-->
+<!--                            <table class="pretty">-->
+<!--                                <tr :key="subr.name"-->
+<!--                                    v-if="subr.count > 0"-->
+<!--                                    v-for="subr in newScenario.costBySubr">-->
+<!--                                    <td>{{subr.name}}</td>-->
+<!--                                    <td>{{currency(subr.count, true)}}</td>-->
+<!--                                    <td>{{nf(subr.perc)}}%</td>-->
+<!--                                </tr>-->
+<!--                                <tr class="total-row">-->
+<!--                                    <td>Overall</td>-->
+<!--                                    <td>{{currency(newScenario.costOverall, true)}}</td>-->
+<!--                                    <td></td>-->
+<!--                                </tr>-->
+<!--                            </table>-->
 <!--                        </v-flex>-->
 
-                        <v-flex xs3 class="col">
-                            <div class="body-1">Journals</div>
-                            <table>
-                                <tr :key="subr.name"
-                                    v-for="subr in newScenario.subrCounts">
-                                    <td>{{subr.name}}</td>
-                                    <td>{{nf(subr.count)}}</td>
-                                    <td>{{nf(subr.perc)}}%</td>
-                                </tr>
-                            </table>
-                        </v-flex>
-
-                        <v-flex xs3 class="col">
-                            <div class="body-1">Usage</div>
-                            <table>
-                                <tr :key="usageType.name"
-                                    v-if="usageType.count > 0"
-                                    v-for="usageType in newScenario.usageByType">
-                                    <td>{{usageType.name}}</td>
-                                    <td>{{nf(usageType.count)}}</td>
-                                    <td>{{nf(usageType.perc)}}%</td>
-                                </tr>
-                            </table>
-                        </v-flex>
-
-                        <v-flex xs3 class="col">
-                            <div class="body-1">Costs</div>
-                            <table>
-                                <tr :key="subr.name"
-                                    v-if="subr.count > 0"
-                                    v-for="subr in newScenario.costBySubr">
-                                    <td>{{subr.name}}</td>
-                                    <td>{{currency(subr.count, true)}}</td>
-                                    <td>{{nf(subr.perc)}}%</td>
-                                </tr>
-                                <tr class="total-row">
-                                    <td>Overall</td>
-                                    <td>{{currency(newScenario.costOverall, true)}}</td>
-                                    <td></td>
-                                </tr>
-                            </table>
-                        </v-flex>
-
-                        <v-flex xs3 class="col">
-                            <div class="body-1">Cost per use</div>
-                            <table>
-                                <tr :key="subr.name"
-                                    v-if="subr.cost > 0"
-                                    v-for="subr in newScenario.costPerUseAdjustedBySubr">
-                                    <td>{{subr.name}}</td>
-                                    <td>{{currency(subr.cost)}}</td>
-                                </tr>
-                                <tr class="total-row">
-                                    <td>Overall</td>
-                                    <td>{{currency(newScenario.costPerUseAdjustedOverall)}}</td>
-                                    <td></td>
-                                </tr>
-                            </table>
-                        </v-flex>
                     </v-layout>
                 </v-container>
 
@@ -108,7 +229,7 @@
                         <span class="num" style="min-width: 2em; display:inline-block;text-align:right;">
                             {{this.selectedJournals.length}}
                         </span>
-                         selected
+                        selected
                     </v-flex>
                     <v-flex shrink v-if="this.selectedJournals.length">
                         <v-menu offset-y>
@@ -174,8 +295,6 @@
         </div>
 
 
-
-
         <!--- journals list  -->
         <v-layout column>
             <v-flex grow
@@ -202,18 +321,21 @@
     import {api} from "../api.js"
 
     import DownloadsChart from "../components/DownloadsChart"
+    import DownloadsBar from "../components/DownloadsBar"
     import JournalRow from "../components/JournalRow"
     import ScenarioComparison from "../components/ScenarioComparison"
 
     import {currency, nFormat} from "../util";
     import {Journal} from "../Journal.js";
     import {makeScenario, makeScenarioComparison} from "../scenario";
+    import Scenario from "../ScenarioNew"
 
 
     export default {
         name: 'Home',
         components: {
             DownloadsChart,
+            DownloadsBar,
             ScenarioComparison,
             JournalRow
         },
@@ -238,6 +360,7 @@
             scenarioComparison: {},
             oldScenario: {},
             newScenario: {},
+            scenario: {},
             subscriptionNames: [
                 "fullSubscription",
                 "docdel",
@@ -254,32 +377,31 @@
             pageEndIndex() {
                 return (this.currentPage * this.pageSize)
             },
-            isOnFirstPage(){
+            isOnFirstPage() {
                 return this.currentPage <= 1
             },
-            isOnLastPage(){
+            isOnLastPage() {
                 const numPages = Math.ceil(this.journalsList.length / this.pageSize)
                 return this.currentPage >= numPages
             },
 
 
-            journalsPage(){
+            journalsPage() {
                 return this.journalsList
                     .slice(this.pageStartIndex, this.pageEndIndex)
             },
-            selectedJournals(){
-                return this.journalsList.filter(j=>j.isSelected)
+            selectedJournals() {
+                return this.journalsList.filter(j => j.isSelected)
             },
-            isAllSelected(){
+            isAllSelected() {
                 return this.journalsList.length === this.selectedJournals.length
             },
-            isPartSelected(){
+            isPartSelected() {
                 return !this.isAllSelected && this.selectedJournals.length
             },
-            isNoneSelected(){
+            isNoneSelected() {
                 return this.selectedJournals.length === 0
             }
-
 
 
         },
@@ -291,14 +413,14 @@
             // *****************
             selectAll() {
                 console.log("select all")
-                this.journalsList.forEach(j=>{
+                this.journalsList.forEach(j => {
                     j.isSelected = true
                 })
 
             },
             unselectAll() {
                 console.log("unselect all")
-                this.journalsList.forEach(j=>{
+                this.journalsList.forEach(j => {
                     j.isSelected = false
                 })
 
@@ -307,7 +429,7 @@
 
             subscribeSelected(newSubscriptionName) {
                 console.log("subscribe selected", newSubscriptionName)
-                this.selectedJournals.forEach(j=>{
+                this.selectedJournals.forEach(j => {
                     j.subscribe(newSubscriptionName)
                 })
                 this.sortJournalsList()
@@ -321,6 +443,10 @@
             },
 
             printScenarioComparison() {
+
+                this.scenario = new Scenario(this.journalsList)
+
+                // legacy
                 this.newScenario = makeScenario(this.journalsList, 0)
                 this.scenarioComparison = makeScenarioComparison(
                     this.newScenario,
@@ -332,7 +458,7 @@
                 const myIssnl = args.issnl
                 const mySubscriptionName = args.subscriptionName
 
-                this.journalsList.find(j=>{
+                this.journalsList.find(j => {
                     return j.meta.issnl === myIssnl
                 }).subscribe(mySubscriptionName)
 
@@ -341,11 +467,11 @@
 
 
             },
-            manualSort(){
+            manualSort() {
                 this.sortJournalsList()
                 this.currentPage = 1
             },
-            sortJournalsList(){
+            sortJournalsList() {
                 const sortKey = this.selectedJournalSortKey
                 const desc = this.descendingSorts.includes(sortKey)
                 const sortFn = function (a, b) {
@@ -383,7 +509,7 @@
 
                     console.log("printing scenario stuff")
                     this.oldScenario = makeScenario(
-                       this.journalsList,
+                        this.journalsList,
                         this.bigDealCost
                     )
 
@@ -402,12 +528,37 @@
 
 <style scoped lang="scss">
 
-    table {
+    .fixed-header {
+        .stats {
+            .stat {
+                display:inline;
+                padding: 0 5px;
+                font-weight: bold;
+                &.headline {
+                    display:block;
+                    padding: 0;
+                    font-weight: normal;
+                }
+            }
+        }
+    }
+
+    table.infographic {
+
+        td.num {
+            text-align: right;
+            padding: 0 5px;
+        }
+    }
+
+    table.pretty {
         text-align: right;
         border-collapse: collapse;
         border-top: 1px solid #ddd;
+
         tr {
             border-bottom: 1px solid #ddd;
+
             td {
                 padding: 2px 10px;
                 /*border-left: none;*/

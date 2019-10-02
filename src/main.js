@@ -15,7 +15,10 @@ import VueMoment from 'vue-moment'
 
 import 'vuetify/dist/vuetify.min.css'
 
+import Donut from 'vue-css-donut-chart';
+import 'vue-css-donut-chart/dist/vcdonut.css';
 
+Vue.use(Donut);
 
 
 Vue.use(Vuetify)

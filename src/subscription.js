@@ -6,28 +6,61 @@ const illCostPerUse = 5
 const hardTurnawayProp = 0.05
 
 
-function hexToRgb(hex) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  } : null;
+function lighten(hex, amount) {
+    if (hex === "transparent") return "transparent"
+
+
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    const rgb = {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    }
+    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${amount})`
 }
 
 
 const usageColors = {
     hardTurnaway: "#333", // legacy, should be unused
 
-    softTurnaway: "#90a4ae", // blue grey 200
+    softTurnaway: "#cfd8dc", // blue grey 100
 
-    ill: "#9575cd", // deep purple 300
+    ill: "#7e57c2", // deep purple 400
 
     docdel: "#2196f3", // blue 500
     fullSubscription: "#00acc1", // cyan 600
 
     backCatalog: "#43a047", // green 600
-    oa: "#7cb342", // light green 600
+    oa: "#558b2f", // light green 700
+}
+
+
+class Color {
+    constructor(primary, accent) {
+        this.primary = primary
+        this.accent = accent
+    }
+
+    getPrimary(getLight) {
+        if (getLight) return lighten(this.primary, .2)
+        return this.primary
+    }
+
+    getAccent(getLight) {
+        if (this.primary === this.accent){
+            return "transparent"
+        }
+        if (getLight) return lighten(this.accent, .2)
+        return this.accent
+    }
+    get(primaryOrAccent, makeLight){
+        if (primaryOrAccent==='primary'){
+            return this.getPrimary(makeLight)
+        }
+        else if (primaryOrAccent==='accent'){
+            return this.getAccent(makeLight)
+        }
+    }
 }
 
 
@@ -43,6 +76,7 @@ class BaseSubscription {
             oa: 0
         }
         this.cost = 0
+        this.count = 0 // keep track of how times we've added a subscription
         this.name = null
         this.year = null
 
@@ -56,6 +90,12 @@ class BaseSubscription {
             backCatalog: 4,
             oa: 5,
         }
+
+        this.colors = {
+            tile: "transparent",
+            tileBorder: "transparent"
+        }
+
     }
 
     costPerPaidUse() {
@@ -78,13 +118,6 @@ class BaseSubscription {
         return (this.name === useType) ? this.cost : 0
     }
 
-    getTurnawaysCount() {
-        return this.usage.hardTurnaway + this.usage.softTurnaway
-    }
-
-    getFulfilledUsesCount() {
-        return this.useCount() - this.getTurnawaysCount()
-    }
 
     getUseCount() {
         return _.sum(Object.values(this.usage))
@@ -102,14 +135,17 @@ class BaseSubscription {
         return this.cost / this.getUseCountAdjusted()
     }
 
-    getColor() {
-        return usageColors[this.name]
+    getColor(name, makeLight) {
+        const color = this.colors[name]
+        if (makeLight){
+            return lighten(color, .2)
+        }
+        else {
+            return color
+        }
     }
-    getColorLightened(){
-        const rgb = hexToRgb(this.getColor())
-        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.2)`
 
-    }
+
 
     getUsageStats() {
         const useCount = this.useCount()
@@ -140,6 +176,7 @@ class BaseSubscription {
             this.usage[k] += v
         })
         this.cost += subscription.cost
+        this.count += 1
     }
 
 
@@ -173,6 +210,7 @@ class SubscriptionPackage extends BaseSubscription {
                 this.usage[k] += v
             })
             this.cost += newSub.cost
+
         }
     }
 
@@ -198,7 +236,7 @@ class SubscriptionPackage extends BaseSubscription {
         }
     }
 
-    getCostBySubr() {
+    getCostStats() {
         return this.subscriptions.map(subr => {
             return {
                 name: subr.name,
@@ -224,6 +262,12 @@ class FullSubscription extends BaseSubscription {
     constructor() {
         super()
         this.name = "fullSubscription"
+        this.displayName = "Subscription"
+        this.colors = {
+            tile: usageColors.fullSubscription,
+            tileBorder: "transparent",
+            primary: usageColors.fullSubscription
+        }
     }
 
     set(apiUsageStats, cost) {
@@ -243,6 +287,7 @@ class FullSubscription extends BaseSubscription {
         }
 
         this.cost = cost || 0
+        this.count = 1
     }
 
 }
@@ -251,7 +296,13 @@ class DocdelSubscription extends BaseSubscription {
     constructor(myFullSubscription) {
         super()
         this.name = "docdel"
+        this.displayName = "DocDel"
         if (myFullSubscription) this.set(myFullSubscription)
+        this.colors = {
+            tile: usageColors.softTurnaway,
+            tileBorder: usageColors.docdel,
+            primary: usageColors.docdel,
+        }
     }
 
     set(myFullSubscription) {
@@ -270,6 +321,7 @@ class DocdelSubscription extends BaseSubscription {
 
         this.cost = (docDelCostPerUse * hardTurnawayCount) || 0
         this.year = myFullSubscription.year
+        this.count = 1
     }
 
 
@@ -281,13 +333,22 @@ class DocdelSubscription extends BaseSubscription {
         return docDelCostPerUse * hardTurnawayProp
     }
 
+
+
+
 }
 
 class IllSubscription extends BaseSubscription {
     constructor(myFullSubscription) {
         super()
         this.name = "ill"
+        this.displayName = "ILL"
         if (myFullSubscription) this.set(myFullSubscription)
+        this.colors = {
+            tile: usageColors.softTurnaway,
+            tileBorder: usageColors.ill,
+            primary: usageColors.ill,
+        }
     }
 
     set(myFullSubscription) {
@@ -307,6 +368,7 @@ class IllSubscription extends BaseSubscription {
 
         this.cost = (illCostPerUse * hardTurnawayCount) || 0
         this.year = myFullSubscription.year
+        this.count = 1
     }
 
 
@@ -349,7 +411,8 @@ const makeSubscriptions = function (apiUsageStats, cost, year) {
 
 export {
     makeSubscriptions,
-    SubscriptionPackage
+    SubscriptionPackage,
+    usageColors
 }
 
 

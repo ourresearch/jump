@@ -48,7 +48,7 @@
                                 </div>
                             </template>
                             <span>
-                                2018 usage (Adj)
+                                projected 5yr usage (Adj)
                             </span>
                         </v-tooltip>
                     </div>
@@ -73,8 +73,8 @@
             <v-flex
                     xs1
                     class="numbers subscription-item col"
-                    :style="{background: (subr.name===data.subscription.name) ? subr.getColor() : subr.getColorLightened()}"
-                    :class="{selected: subr.name===data.subscription.name}"
+                    :style="{background: subr.getColor('tile', subr.name !== data.subscription.name), 'border-bottom-color': subr.getColor('tileBorder', subr.name !== data.subscription.name)}"
+                    :class="{selected: subr.name===data.subscription.name, [subr.name]: true}"
                     @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: subr.name})"
                     :key="subr.name"
                     v-for="subr in data.getSubrs()"
@@ -177,16 +177,17 @@
         cursor: pointer;
         padding: 5px 10px;
         border-radius: 5px;
-        border: 1px solid transparent;
+        /*border: 1px solid transparent;*/
         font-weight: 300;
+        margin-right: 5px;
+        border-bottom: 10px solid;
+
 
         &:hover {
             background: #f2f2f2;
         }
 
         &.selected {
-            background: #ddd;
-            border: 1px solid #ddd;
             font-weight: bold;
         }
 
