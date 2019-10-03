@@ -257,7 +257,7 @@
                                         outline
                                         v-on="on"
                                 >
-                                    Change subscription
+                                    Update subscriptions
                                 </v-btn>
                             </template>
                             <v-list>
@@ -274,6 +274,34 @@
 
 
                     <v-flex grow></v-flex>
+
+
+                    <v-flex shrink class="pr-2 mr-2" style="border-right: 1px solid #bbb;">
+                        <div>
+                            <span class="sorting-by">Sorting by: </span>
+                            <v-menu offset-y>
+                                <template v-slot:activator="{ on }">
+                                    <span class="sort-button" v-on="on">
+                                        {{selectedSorter.text}}
+                                        <i class="fas fa-caret-down"></i>
+                                    </span>
+                                </template>
+                                <v-list>
+                                    <v-list-tile
+                                            v-for="sorter in sorters"
+                                            :key="sorter.name"
+                                            @click="selectSorter(sorter)"
+                                    >
+                                        <v-list-tile-title>{{ sorter.text }}</v-list-tile-title>
+                                    </v-list-tile>
+                                </v-list>
+                            </v-menu>
+
+                        </div>
+
+
+
+                    </v-flex>
 
                     <v-flex shrink class="paging">
                         <v-layout align-center>
@@ -299,15 +327,7 @@
 
                         </v-layout>
                     </v-flex>
-                    <v-flex shrink xs2>
-                        <v-select
-                                :items="journalSortKeys"
-                                v-model="selectedJournalSortKey"
-                                label="Sort by"
-                                @change="manualSort"
-                                outline
-                        ></v-select>
-                    </v-flex>
+
                 </v-toolbar>
             </div>
         </div>
@@ -362,16 +382,13 @@
             sortBy: "default",
             api: api,
             isLoading: false,
-            selectedJournalSortKey: "totalUsage",
-            journalSortKeys: [
-                {text: "Subscription Cost Per Use (adj)", value: "subrCpua"},
-                {text: "Total usage", value: "totalUsage"},
-                {text: "Title", value: "title"},
+            sorters: [
+                {text: "Subscription Cost Per Use (adj)", name: "subrCpua"},
+                {text: "Total usage", name: "totalUsage", isDescending: true},
+                {text: "Title", name: "title"},
+
             ],
-            descendingSorts: [
-                "totalUsage",
-                "hardTurnawayCount",
-            ],
+            selectedSorter: {text: "Total usage", name: "totalUsage", isDescending: true},
             journalsList: [],
             bigDealCost: 1000000,
             scenarioComparison: {},
@@ -381,8 +398,7 @@
             subscriptionNames: [
                 "fullSubscription",
                 "docdel",
-                "ill",
-                "free"
+                "ill"
             ],
 
         }),
@@ -418,7 +434,8 @@
             },
             isNoneSelected() {
                 return this.selectedJournals.length === 0
-            }
+            },
+
 
 
         },
@@ -484,13 +501,15 @@
 
 
             },
-            manualSort() {
+            selectSorter(newSorter){
+                console.log("select sort!", newSorter)
+                this.selectedSorter = newSorter
                 this.sortJournalsList()
                 this.currentPage = 1
             },
             sortJournalsList() {
-                const sortKey = this.selectedJournalSortKey
-                const desc = this.descendingSorts.includes(sortKey)
+                const sortKey = this.selectedSorter.name
+                const desc = this.selectedSorter.isDescending
                 const sortFn = function (a, b) {
                     let ret = 0
                     if (a.sortKeys[sortKey] < b.sortKeys[sortKey]) {
@@ -544,6 +563,12 @@
 
 
 <style scoped lang="scss">
+    .sorting-by {
+        opacity: .5;
+    }
+    .sort-button {
+        cursor: pointer;
+    }
 
     .fixed-header {
     }
