@@ -5,10 +5,10 @@
                    :key="segment.name"
                    v-for="segment in computedSegments">
             <template v-slot:activator="{ on }">
-                <div class="segment" v-on="on" :style="{background: segment.color, height: segment.perc+'%'}"></div>
+                <div class="segment" v-on="on" :style="{background: segment.fillColor, height: segment.perc+'%'}"></div>
             </template>
             <span>
-                {{computedYear}} {{segment.name}}: {{Math.round(segment.perc)+'%'}} ({{ format(segment.count) }} total)
+                {{computedYear}} {{segment.displayName}}: {{Math.round(segment.perc)+'%'}} ({{ format(segment.count) }} total)
             </span>
 
         </v-tooltip>
@@ -48,8 +48,9 @@
                 return this.segments.map(seg => {
                     return {
                         name: seg.name,
+                        displayName: seg.displayName,
                         count: seg.count,
-                        color: usageColors[seg.name],
+                        fillColor: seg.fillColor,
                         perc: 100 * seg.count / this.sumCount
                     }
                 })

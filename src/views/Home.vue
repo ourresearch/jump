@@ -40,6 +40,7 @@
                         </table>
                     </v-flex>
 
+
                     <v-flex xs4 class="col body-1">
                         <div class="body-1">Usage</div>
                         <table class="pretty">
@@ -106,28 +107,28 @@
                                 <v-flex xs1 class="mr-2">
                                     <div style="height: 100%; flex-grow: 1">
 
-                                    <downloads-bar :segments="scenario.getJournalsByType()"></downloads-bar>
+                                    <downloads-bar :segments="scenario.overallSubrPackage.getSubrStats()"></downloads-bar>
                                     </div>
 
                                 </v-flex>
                                 <v-flex xs11>
                                     <div class="body-1">Journals</div>
-                                    <div class="stats">
-                                        <div :key="subr.name"
-                                             v-for="subr in scenario.overallSubrPackage.subscriptions"
+                                    <table class="stats infographic">
+                                        <tr :key="stat.name"
+                                             v-for="stat in scenario.overallSubrPackage.getSubrStats()"
                                              class="stat"
-                                             :style="{color: subr.colors.primary}"
-                                             :class="{headline: subr.name==='fullSubscription'}">
-                                            <span class="num">
-                                                {{ nf(subr.count) }}
-                                            </span>
-                                            <span>
-                                                {{subr.displayName}}
-                                            </span>
-                                        </div>
+                                             :style="{color: stat.color}"
+                                             :class="{callout: stat.name==='fullSubscription'}">
+                                            <td class="num">
+                                                {{ nf(stat.count) }}
+                                            </td>
+                                            <td>
+                                                {{stat.displayName}}
+                                            </td>
+                                        </tr>
 
 
-                                    </div>
+                                    </table>
 
                                 </v-flex>
                             </v-layout>
@@ -145,14 +146,22 @@
                                         </downloads-bar>
                                     </div>
                                 </v-flex>
-                                <v-flex xs10>
-                                    <table  class="pretty">
+
+
+                                <v-flex xs5>
+                                    <table class="stats infographic">
                                         <tr :key="usageType.name"
-                                            v-if="usageType.count > 0"
-                                            v-for="usageType in scenario.overallSubrPackage.getUsageStats()">
-                                            <td>{{usageType.name}}</td>
-                                            <td>{{nf(usageType.count)}}</td>
-                                            <td>{{nf(usageType.perc)}}%</td>
+                                             v-for="usageType in scenario.overallSubrPackage.getUsageStats()"
+                                            v-if="true"
+                                             class="stat"
+                                             :style="{color: usageType.color}"
+                                             :class="{callout: usageType.name==='fullSubscription'}">
+                                            <td class="num">
+                                                {{ nf(usageType.count) }}
+                                            </td>
+                                            <td>
+                                                {{usageType.displayName}}
+                                            </td>
                                         </tr>
                                     </table>
                                 </v-flex>
@@ -175,13 +184,22 @@
                                     </div>
                                 </v-flex>
                                 <v-flex xs10>
-                                    <table  class="pretty">
-                                        <tr :key="usageType.name"
-                                            v-if="usageType.count > 0"
-                                            v-for="usageType in scenario.overallSubrPackage.getCostStats()">
-                                            <td>{{usageType.name}}</td>
-                                            <td>{{nf(usageType.count)}}</td>
-                                            <td>{{nf(usageType.perc)}}%</td>
+                                    <table class="stats infographic">
+                                        <tr :key="stat.name"
+                                             v-for="stat in scenario.overallSubrPackage.getCostStats()"
+                                             class="stat"
+                                             :style="{color: stat.color}"
+                                             :class="{callout: stat.name==='fullSubscription'}">
+                                            <td class="num">
+                                                {{ currency(stat.count, true) }}
+                                            </td>
+                                            <td>
+                                                {{stat.displayName}}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="num">{{currency(scenario.overallSubrPackage.cost, true)}}</td>
+                                            <td>Total</td>
                                         </tr>
                                     </table>
                                 </v-flex>
@@ -327,8 +345,7 @@
 
     import {currency, nFormat} from "../util";
     import {Journal} from "../Journal.js";
-    import {makeScenario, makeScenarioComparison} from "../scenario";
-    import Scenario from "../ScenarioNew"
+    import Scenario from "../Scenario.js"
 
 
     export default {
@@ -447,11 +464,11 @@
                 this.scenario = new Scenario(this.journalsList)
 
                 // legacy
-                this.newScenario = makeScenario(this.journalsList, 0)
-                this.scenarioComparison = makeScenarioComparison(
-                    this.newScenario,
-                    this.oldScenario
-                )
+                // this.newScenario = makeScenario(this.journalsList, 0)
+                // this.scenarioComparison = makeScenarioComparison(
+                //     this.newScenario,
+                //     this.oldScenario
+                // )
             },
 
             subscribe(args) {
@@ -502,16 +519,16 @@
                         const myIssnl = apiJournalData.meta.issnl
                         this.journalsList.push(new Journal(
                             apiJournalData,
-                            "fullSubscription"
+                            "ill"
                         ))
                     })
 
 
                     console.log("printing scenario stuff")
-                    this.oldScenario = makeScenario(
-                        this.journalsList,
-                        this.bigDealCost
-                    )
+                    // this.oldScenario = makeScenario(
+                    //     this.journalsList,
+                    //     this.bigDealCost
+                    // )
 
                     this.printScenarioComparison()
 
@@ -529,26 +546,20 @@
 <style scoped lang="scss">
 
     .fixed-header {
-        .stats {
-            .stat {
-                display:inline;
-                padding: 0 5px;
-                font-weight: bold;
-                &.headline {
-                    display:block;
-                    padding: 0;
-                    font-weight: normal;
-                }
-            }
-        }
     }
 
     table.infographic {
+        tr {
+            &.callout {
+                font-weight: bold;
+            }
+            td.num {
+                text-align: right;
+                padding: 0 5px;
+            }
 
-        td.num {
-            text-align: right;
-            padding: 0 5px;
         }
+
     }
 
     table.pretty {
