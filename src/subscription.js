@@ -428,12 +428,24 @@ const makeSubscriptions = function (apiUsageStats, cost, year) {
     ]
 }
 
+const makeSubrMenu = function(){
+    const blanks = makeBlankSubscriptions()
+    return blanks.map(subr=>{
+        return {
+            name: subr.name,
+            displayName: subr.displayName,
+            color: subr.getPrimaryColor(),
+            fillColor: subr.getFillColor()
+        }
+    })
+}
+
 
 export {
     makeSubscriptions,
     SubscriptionPackage,
     usageColors,
-    usageFillColors, // shouldn't have to export this, it's a hack
+    makeSubrMenu
 }
 
 

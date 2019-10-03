@@ -11,9 +11,6 @@
         <!--        ></scenario-comparison>-->
 
 
-
-
-
         <div class="scenario-report"
              style="padding-top: 400px;"
              v-if="newScenario.subscriptions">
@@ -107,7 +104,8 @@
                                 <v-flex xs1 class="mr-2">
                                     <div style="height: 100%; flex-grow: 1">
 
-                                    <downloads-bar :segments="scenario.overallSubrPackage.getSubrStats()"></downloads-bar>
+                                        <downloads-bar
+                                                :segments="scenario.overallSubrPackage.getSubrStats()"></downloads-bar>
                                     </div>
 
                                 </v-flex>
@@ -115,10 +113,10 @@
                                     <div class="body-1">Journals</div>
                                     <table class="stats infographic">
                                         <tr :key="stat.name"
-                                             v-for="stat in scenario.overallSubrPackage.getSubrStats()"
-                                             class="stat"
-                                             :style="{color: stat.color}"
-                                             :class="{callout: stat.name==='fullSubscription'}">
+                                            v-for="stat in scenario.overallSubrPackage.getSubrStats()"
+                                            class="stat"
+                                            :style="{color: stat.color}"
+                                            :class="{callout: stat.name==='fullSubscription'}">
                                             <td class="num">
                                                 {{ nf(stat.count) }}
                                             </td>
@@ -151,11 +149,11 @@
                                 <v-flex xs5>
                                     <table class="stats infographic">
                                         <tr :key="usageType.name"
-                                             v-for="usageType in scenario.overallSubrPackage.getUsageStats()"
+                                            v-for="usageType in scenario.overallSubrPackage.getUsageStats()"
                                             v-if="true"
-                                             class="stat"
-                                             :style="{color: usageType.color}"
-                                             :class="{callout: usageType.name==='fullSubscription'}">
+                                            class="stat"
+                                            :style="{color: usageType.color}"
+                                            :class="{callout: usageType.name==='fullSubscription'}">
                                             <td class="num">
                                                 {{ nf(usageType.count) }}
                                             </td>
@@ -186,10 +184,10 @@
                                 <v-flex xs10>
                                     <table class="stats infographic">
                                         <tr :key="stat.name"
-                                             v-for="stat in scenario.overallSubrPackage.getCostStats()"
-                                             class="stat"
-                                             :style="{color: stat.color}"
-                                             :class="{callout: stat.name==='fullSubscription'}">
+                                            v-for="stat in scenario.overallSubrPackage.getCostStats()"
+                                            class="stat"
+                                            :style="{color: stat.color}"
+                                            :class="{callout: stat.name==='fullSubscription'}">
                                             <td class="num">
                                                 {{ currency(stat.count, true) }}
                                             </td>
@@ -208,75 +206,82 @@
                         </v-flex>
 
 
-
-
-<!--                        <v-flex xs4 class="col body-1">-->
-<!--                            <div class="body-1">Costs</div>-->
-<!--                            <table class="pretty">-->
-<!--                                <tr :key="subr.name"-->
-<!--                                    v-if="subr.count > 0"-->
-<!--                                    v-for="subr in newScenario.costBySubr">-->
-<!--                                    <td>{{subr.name}}</td>-->
-<!--                                    <td>{{currency(subr.count, true)}}</td>-->
-<!--                                    <td>{{nf(subr.perc)}}%</td>-->
-<!--                                </tr>-->
-<!--                                <tr class="total-row">-->
-<!--                                    <td>Overall</td>-->
-<!--                                    <td>{{currency(newScenario.costOverall, true)}}</td>-->
-<!--                                    <td></td>-->
-<!--                                </tr>-->
-<!--                            </table>-->
-<!--                        </v-flex>-->
+                        <!--                        <v-flex xs4 class="col body-1">-->
+                        <!--                            <div class="body-1">Costs</div>-->
+                        <!--                            <table class="pretty">-->
+                        <!--                                <tr :key="subr.name"-->
+                        <!--                                    v-if="subr.count > 0"-->
+                        <!--                                    v-for="subr in newScenario.costBySubr">-->
+                        <!--                                    <td>{{subr.name}}</td>-->
+                        <!--                                    <td>{{currency(subr.count, true)}}</td>-->
+                        <!--                                    <td>{{nf(subr.perc)}}%</td>-->
+                        <!--                                </tr>-->
+                        <!--                                <tr class="total-row">-->
+                        <!--                                    <td>Overall</td>-->
+                        <!--                                    <td>{{currency(newScenario.costOverall, true)}}</td>-->
+                        <!--                                    <td></td>-->
+                        <!--                                </tr>-->
+                        <!--                            </table>-->
+                        <!--                        </v-flex>-->
 
                     </v-layout>
                 </v-container>
 
 
                 <!-- toolbar for sort and subscribe -->
-                <v-toolbar align-center flat class="toolbar pa-3">
+                <v-layout align-center flat class="toolbar pa-0">
                     <v-flex shrink>
-                        <v-btn icon @click="selectAll" v-if="isNoneSelected">
+                        <v-btn icon @click="selectPage" v-if="isNonePageSelected">
                             <v-icon>check_box_outline_blank</v-icon>
                         </v-btn>
-                        <v-btn icon @click="unselectAll" v-if="isAllSelected">
+                        <v-btn icon @click="unselectAll" v-if="isAllPageSelected">
                             <v-icon>check_box</v-icon>
                         </v-btn>
-                        <v-btn icon @click="unselectAll" v-if="isPartSelected">
+                        <v-btn icon @click="unselectAll" v-if="isPartPageSelected">
                             <v-icon>indeterminate_check_box</v-icon>
                         </v-btn>
-                        <span class="num" style="min-width: 2em; display:inline-block;text-align:right;">
+                        <span class="num">
                             {{this.selectedJournals.length}}
                         </span>
                         selected
+                        <span v-if="isPartSelected">
+                            <v-btn small flat class="add-everything"
+
+                                  @click="selectAll">
+                                select all {{nf(this.journalsList.length)}}
+                            </v-btn>
+                        </span>
                     </v-flex>
-                    <v-flex shrink v-if="this.selectedJournals.length">
+
+                    <v-flex grow></v-flex>
+
+                    <v-flex shrink v-if="this.selectedJournals.length" class="mr-3" style="border-right: 1px solid #bbb;">
                         <v-menu offset-y>
                             <template v-slot:activator="{ on }">
                                 <v-btn
                                         flat
-                                        outline
+                                        small
                                         v-on="on"
                                 >
-                                    Update subscriptions
+                                    Change subscriptions
                                 </v-btn>
                             </template>
                             <v-list>
                                 <v-list-tile
-                                        v-for="(subscriptionName, index) in subscriptionNames"
+                                        v-for="(menuItem, index) in subrMenu"
                                         :key="index"
-                                        @click="subscribeSelected(subscriptionName)"
+                                        @click="subscribeSelected(menuItem.name)"
                                 >
-                                    <v-list-tile-title>{{ subscriptionName }}</v-list-tile-title>
+                                    <v-list-tile-title :style="{color: menuItem.color}">
+                                        {{ menuItem.displayName }}
+                                    </v-list-tile-title>
                                 </v-list-tile>
                             </v-list>
                         </v-menu>
                     </v-flex>
 
 
-                    <v-flex grow></v-flex>
-
-
-                    <v-flex shrink class="pr-2 mr-2" style="border-right: 1px solid #bbb;">
+                    <v-flex shrink class="pr-3 mr-3" style="border-right: 1px solid #bbb;">
                         <div>
                             <span class="sorting-by">Sorting by: </span>
                             <v-menu offset-y>
@@ -300,7 +305,6 @@
                         </div>
 
 
-
                     </v-flex>
 
                     <v-flex shrink class="paging">
@@ -312,12 +316,12 @@
                             <v-flex class="pr-4 pl-2">
                                 <v-layout>
                                     <v-flex>
-                                        <v-btn @click="currentPage-=1" :disabled="isOnFirstPage" flat icon class="ma-0">
+                                        <v-btn @click="pageBack" :disabled="isOnFirstPage" flat icon class="ma-0">
                                             <i class="fas fa-angle-left"></i>
                                         </v-btn>
                                     </v-flex>
                                     <v-flex>
-                                        <v-btn @click="currentPage+=1" :disabled="isOnLastPage" flat icon class="ma-0">
+                                        <v-btn @click="pageForward" :disabled="isOnLastPage" flat icon class="ma-0">
                                             <i class="fas fa-angle-right"></i>
                                         </v-btn>
 
@@ -328,7 +332,7 @@
                         </v-layout>
                     </v-flex>
 
-                </v-toolbar>
+                </v-layout>
             </div>
         </div>
 
@@ -366,6 +370,7 @@
     import {currency, nFormat} from "../util";
     import {Journal} from "../Journal.js";
     import Scenario from "../Scenario.js"
+    import {makeSubrMenu} from "../subscription";
 
 
     export default {
@@ -378,12 +383,12 @@
         },
         data: () => ({
             currentPage: 1,
-            pageSize: 20,
+            pageSize: 50,
             sortBy: "default",
             api: api,
             isLoading: false,
             sorters: [
-                {text: "Subscription Cost Per Use (adj)", name: "subrCpua"},
+                {text: "Subscription value", name: "subrCpua"},
                 {text: "Total usage", name: "totalUsage", isDescending: true},
                 {text: "Title", name: "title"},
 
@@ -436,6 +441,20 @@
                 return this.selectedJournals.length === 0
             },
 
+            isAllPageSelected() {
+                return this.journalsPage.every(j => j.isSelected)
+            },
+            isNonePageSelected() {
+                return !this.journalsPage.some(j => j.isSelected)
+            },
+            isPartPageSelected() {
+                return !this.isAllPageSelected && !this.isNonePageSelected
+            },
+            subrMenu(){
+                const ret = makeSubrMenu()
+                console.log("making subr menu", ret)
+                return ret
+            },
 
 
         },
@@ -457,7 +476,23 @@
                 this.journalsList.forEach(j => {
                     j.isSelected = false
                 })
-
+            },
+            selectPage() {
+                this.journalsPage.forEach(j => {
+                    j.isSelected = true
+                })
+            },
+            pageForward() {
+                this.currentPage += 1
+                if (!this.isAllSelected) {
+                    this.unselectAll()
+                }
+            },
+            pageBack() {
+                this.currentPage -= 1
+                if (!this.isAllSelected) {
+                    this.unselectAll()
+                }
             },
 
 
@@ -466,6 +501,7 @@
                 this.selectedJournals.forEach(j => {
                     j.subscribe(newSubscriptionName)
                 })
+                this.unselectAll()
                 this.sortJournalsList()
                 this.printScenarioComparison()
             },
@@ -501,10 +537,11 @@
 
 
             },
-            selectSorter(newSorter){
+            selectSorter(newSorter) {
                 console.log("select sort!", newSorter)
                 this.selectedSorter = newSorter
                 this.sortJournalsList()
+                this.unselectAll()
                 this.currentPage = 1
             },
             sortJournalsList() {
@@ -543,7 +580,6 @@
                     })
 
 
-                    console.log("printing scenario stuff")
                     // this.oldScenario = makeScenario(
                     //     this.journalsList,
                     //     this.bigDealCost
@@ -566,6 +602,7 @@
     .sorting-by {
         opacity: .5;
     }
+
     .sort-button {
         cursor: pointer;
     }
@@ -578,6 +615,7 @@
             &.callout {
                 font-weight: bold;
             }
+
             td.num {
                 text-align: right;
                 padding: 0 5px;
