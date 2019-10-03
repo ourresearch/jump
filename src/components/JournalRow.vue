@@ -5,14 +5,14 @@
         <!-- journal META section -->
         <v-layout align-content-center align-center>
 
-<!--            <v-flex shrink class="pa-1" style="align-self: stretch;">-->
-<!--                <downloads-chart-->
-<!--                        :yearly-subscriptions="yearlySubscriptions"></downloads-chart>-->
-<!--            </v-flex>-->
+            <!--            <v-flex shrink class="pa-1" style="align-self: stretch;">-->
+            <!--                <downloads-chart-->
+            <!--                        :yearly-subscriptions="yearlySubscriptions"></downloads-chart>-->
+            <!--            </v-flex>-->
 
             <v-flex xs3 class="col">
                 <div>
-<!--                    <div class="body-1">{{currency(data.sortKeys.subrCpua)}}</div>-->
+                    <!--                    <div class="body-1">{{currency(data.sortKeys.subrCpua)}}</div>-->
                     <div class="name title upper">
                         {{data.meta.title}}
                     </div>
@@ -25,17 +25,17 @@
 
 
             <v-flex xs1 class="impact citations numbers col">
-                    <v-tooltip top>
-                        <template v-slot:activator="{ on }">
-                            <div v-on="on">
-                                {{data.citations.toLocaleString()}}
-                                <i class="fas fa-pencil-alt light"></i>
-                            </div>
-                        </template>
-                        <span>
+                <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                        <div v-on="on">
+                            {{data.citations.toLocaleString()}}
+                            <i class="fas fa-pencil-alt light"></i>
+                        </div>
+                    </template>
+                    <span>
                             2018 citations from MIT faculty
                         </span>
-                    </v-tooltip>
+                </v-tooltip>
             </v-flex>
 
             <v-flex xs1 class="impact usage numbers col">
@@ -66,21 +66,32 @@
                     </div>
                 </div>
             </v-flex>
-            <v-flex shrink class="mx-4" style="align-self: stretch; border-right:1px solid #999;">
+            <v-flex shrink class="mx-4" style="display:flex; align-self: stretch; ">
+                    <div :key="subrYear.year"
+                         style="width: 10px;"
+                         v-for="subrYear in yearlySubscriptions">
+                        <downloads-bar :year="subrYear.year"
+                                       :segments="subrYear.getUsageStats()">
+                        </downloads-bar>
+                    </div>
             </v-flex>
 
 
             <v-flex
-                    xs1
-                    class="numbers subscription-item col"
-                    :style="{background: subr.getColor('tile', subr.name !== data.subscription.name), 'border-bottom-color': subr.getColor('tileBorder', subr.name !== data.subscription.name)}"
-                    :class="{selected: subr.name===data.subscription.name, [subr.name]: true}"
-                    @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: subr.name})"
-                    :key="subr.name"
-                    v-for="subr in data.getSubrs()"
-                    v-if="!(hideDocdel && subr.name === 'docdel')"
+                    grow
+                    style="display:flex;"
+
             >
-                <div>
+                <div
+                        class="numbers subscription-item col"
+                        :style="{background: subr.getColor('tile', subr.name !== data.subscription.name), 'border-bottom-color': subr.getColor('tileBorder', subr.name !== data.subscription.name)}"
+                        :class="{selected: subr.name===data.subscription.name, [subr.name]: true}"
+                        @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: subr.name})"
+                        :key="subr.name"
+                        v-for="subr in data.getSubrs()"
+                        v-if="!(hideDocdel && subr.name === 'docdel')"
+                        style="min-width: 6em;"
+                >
                     <div class="upper">
                         <v-tooltip top>
                             <template v-slot:activator="{ on }">
@@ -107,12 +118,10 @@
 
                     </div>
                 </div>
-<!--                <div class="icon">-->
-<!--                    <fulfillment-icon :name="subr.name"></fulfillment-icon>-->
-<!--                </div>-->
+                <!--                <div class="icon">-->
+                <!--                    <fulfillment-icon :name="subr.name"></fulfillment-icon>-->
+                <!--                </div>-->
             </v-flex>
-
-
 
 
         </v-layout>
@@ -124,7 +133,7 @@
 <script>
     import UsageTable from "../components/UsageTable"
     import UsageTableRow from "../components/UsageTableRow"
-    import DownloadsChart from "../components/DownloadsChart"
+    import DownloadsBar from "../components/DownloadsBar"
     import FulfillmentIcon from "../components/FullfillmentIcon"
 
     import {currency, nFormat} from "../util";
@@ -135,7 +144,7 @@
         components: {
             UsageTable,
             UsageTableRow,
-            DownloadsChart,
+            DownloadsBar,
             FulfillmentIcon
         },
         data: () => ({}),
@@ -169,6 +178,7 @@
             font-size: 10px;
         }
     }
+
     .flex.col {
         padding: 5px 10px !important;
     }
@@ -176,11 +186,11 @@
     .subscription-item {
         cursor: pointer;
         padding: 5px 10px;
-        border-radius: 5px;
+        /*border-radius: 5px;*/
         /*border: 1px solid transparent;*/
         font-weight: 300;
-        margin-right: 5px;
-        border-bottom: 10px solid;
+        margin-right: 1px;
+        border-bottom: 5px solid;
 
 
         &:hover {

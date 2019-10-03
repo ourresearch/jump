@@ -44,33 +44,6 @@ const usageDisplayNames = {
 }
 
 
-class Color {
-    constructor(primary, accent) {
-        this.primary = primary
-        this.accent = accent
-    }
-
-    getPrimary(getLight) {
-        if (getLight) return lighten(this.primary, .2)
-        return this.primary
-    }
-
-    getAccent(getLight) {
-        if (this.primary === this.accent){
-            return "transparent"
-        }
-        if (getLight) return lighten(this.accent, .2)
-        return this.accent
-    }
-    get(primaryOrAccent, makeLight){
-        if (primaryOrAccent==='primary'){
-            return this.getPrimary(makeLight)
-        }
-        else if (primaryOrAccent==='accent'){
-            return this.getAccent(makeLight)
-        }
-    }
-}
 
 
 class BaseSubscription {
@@ -145,7 +118,7 @@ class BaseSubscription {
     getColor(name, makeLight) {
         const color = this.colors[name]
         if (makeLight){
-            return lighten(color, .2)
+            return lighten(color, .05)
         }
         else {
             return color
