@@ -1,4 +1,15 @@
 
+
+
+const displayNames = {
+    docDelCostPerUse: "DocDel transaction cost",
+    illCostPerUse: "ILL transaction cost",
+    hardTurnawayProp: "Item-level request percentage",
+    bigDealCostAnnualIncrease: "Big Deal cost % annual increase",
+    subrCostAnnualIncrease: "A-la-carte subscription cost % annual increase",
+    bigDealCost: "Big Deal annual cost"
+}
+
 export default class UserSettings {
     constructor(){
         // item-level acquisition
@@ -12,6 +23,22 @@ export default class UserSettings {
 
         // cost
         this.bigDealCost = 1000000
+    }
+
+    getList(){
+        return Object.entries(displayNames).map(([k, v])=>{
+            return {
+                name: k,
+                displayName: v,
+                val: this[k]
+            }
+        })
+    }
+    setFromList(myList){
+        myList.forEach(setting=>{
+            this[setting.name] = parseFloat(setting.val)
+        })
+
     }
 
 }

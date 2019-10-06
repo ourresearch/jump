@@ -2,6 +2,7 @@
     <v-container fluid class="body-1 pa-0">
         <usage-table-row
                 v-for="stat in usageStats"
+                :key="stat.name"
                 :name="stat.name"
                 :count="stat.count"
                 :cost="stat.cost"

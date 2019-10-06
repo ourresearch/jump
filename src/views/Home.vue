@@ -148,6 +148,34 @@
         <div class="scenario-report"
              v-if="scenario.overallSubrPackage">
             <v-container fluid>
+                <!--- settings  -->
+                <v-layout class="settings pa-5">
+                    <v-flex>
+                        <div>
+                            <table>
+                                <tr :key="setting.name"
+                                     v-for="setting in userSettingsList">
+                                    <td style="text-align:right;">
+                                        {{setting.displayName}}
+                                    </td>
+                                    <td>
+                                        <v-text-field
+                                                class="pa-0 ma-0"
+                                                v-model="setting.val"
+                                        ></v-text-field>
+                                    </td>
+                                </tr>
+
+                            </table>
+                            <v-layout class="buttons">
+                                <v-flex grow></v-flex>
+                                    <v-btn outline small @click="saveSettings">Save</v-btn>
+                                    <v-btn outline small @click="isEditingSettings=false">Cancel</v-btn>
+                            </v-layout>
+                        </div>
+                    </v-flex>
+                </v-layout>
+                <!--- data about the scenario  -->
                 <v-layout>
                         <v-flex xs4 class="col body-1">
                             <v-layout>
@@ -318,7 +346,7 @@
         },
         data: () => ({
             currentPage: 1,
-            pageSize: 50,
+            pageSize: 20,
             sortBy: "default",
             api: api,
             isLoading: false,
@@ -340,6 +368,9 @@
                 "docdel",
                 "ill"
             ],
+            settings: null,
+            isEditingSettings: false,
+            userSettingsList: [],
 
         }),
         computed: {
@@ -459,6 +490,14 @@
                 // )
             },
 
+            saveSettings(){
+                this.isEditingSettings = false
+                this.userSettings.setFromList(this.userSettingsList)
+                this.userSettingsList = this.userSettings.getList()
+                console.log("saving settings!", this.userSettings)
+
+            },
+
             subscribe(args) {
                 const myIssnl = args.issnl
                 const mySubscriptionName = args.subscriptionName
@@ -522,6 +561,9 @@
 
                     this.printScenarioComparison()
 
+                    this.userSettings = new UserSettings()
+                    this.userSettingsList = this.userSettings.getList()
+
                     console.log("done loading")
 
 
@@ -533,9 +575,15 @@
 </script>
 
 
-<style scoped lang="scss">
+<style  lang="scss">
     .sorting-by {
         opacity: .5;
+    }
+    .v-input {
+        input {
+            text-align: right !important;
+        }
+
     }
 
     .sort-button {

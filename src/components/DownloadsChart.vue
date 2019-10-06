@@ -9,6 +9,7 @@
                 <downloads-bar
                         v-for="subscription in yearlySubscriptions"
                         :year="subscription.year"
+                        :key="subscription.name"
                         style="flex-grow: 1;"
                         :subscription="subscription"></downloads-bar>
 
