@@ -6,27 +6,90 @@
         </div>
 
 
-
-
-
         <div class="fixed-header-wrapper" style="height: 100px;">
             <div class="fixed-header"
                  v-if="scenario.overallSubrPackage"
                  style="position:fixed; top:0; background: #fff; width: 100%; z-index:999;">
 
-                <v-container fluid>
 
-                </v-container>
+                <!-- DATA TOOLBAR -->
+                <v-layout class="py-1 px-3">
+                    <v-flex xs3>
+                        <v-layout>
+                            <v-flex xs1 class="graphic mr-2">
+                                <div style="height: 100%; flex-grow: 1">
+                                    <downloads-bar
+                                            :segments="scenario.overallSubrPackage.getSubrStats()"></downloads-bar>
+                                </div>
+                            </v-flex>
+                            <v-flex grow class="data">
+                                <div>
+                                    <div class="num headline">
+                                        {{scenario.overallSubrPackage.getFullSubrCount()}}
+                                    </div>
+                                    <div class="name body-1">
+                                        Subscriptions
+                                    </div>
+                                </div>
+                            </v-flex>
+                        </v-layout>
+                    </v-flex>
+
+                    <v-flex xs3>
+                        <v-layout>
+                            <v-flex xs2 class="graphic mr-2">
+                                <div style="height: 100%; flex-grow: 1; display:flex;">
+                                    <div :key="subrPackage.year"
+                                         style="height: 50px; flex-grow: 1"
+                                         v-for="subrPackage in scenario.yearlySubrPackages">
+                                        <downloads-bar :year="subrPackage.year"
+                                                       :segments="subrPackage.getUsageStats()">
+                                        </downloads-bar>
+                                    </div>
+                                </div>
+                            </v-flex>
+                            <v-flex grow class="data">
+                                <div>
+                                    <div class="num headline">
+                                        {{(scenario.overallSubrPackage.getPercInstantAccess()).toFixed(2)}}%
+                                    </div>
+                                    <div class="name body-1">
+                                        Instant access
+                                    </div>
+                                </div>
+                            </v-flex>
+                        </v-layout>
+                    </v-flex>
+
+                    <v-flex xs3>
+                        <v-layout>
+                            <v-flex xs2 class="graphic mr-2" style="display:flex;">
+                                <div :key="subrPackage.year"
+                                     style="height: 50px; flex-grow: 1"
+                                     v-for="subrPackage in scenario.yearlySubrPackages">
+                                    <downloads-bar :year="subrPackage.year"
+                                                   :is-currency="true"
+                                                   :segments="subrPackage.getCostStats()">
+                                    </downloads-bar>
+                                </div>
+                            </v-flex>
+
+                            <v-flex grow class="data">
+                                <div>
+                                    <div class="num headline">
+                                        {{currency(scenario.overallSubrPackage.cost, true)}}
+                                    </div>
+                                    <div class="name body-1">
+                                        Total Cost
+                                    </div>
+                                </div>
+                            </v-flex>
+                        </v-layout>
+                    </v-flex>
+                </v-layout>
 
 
-
-
-
-
-
-
-
-                <!-- TOOL BAR -->
+                <!-- TOOLS TOOLBAR -->
                 <v-layout align-center flat class="toolbar pa-0">
                     <v-flex shrink>
                         <v-btn icon @click="selectPage" v-if="isNonePageSelected">
@@ -136,167 +199,123 @@
         </div>
 
 
-
-
-
-
-
-
-
-
         <!--- SUM-UP REPORT  -->
         <div class="scenario-report"
              v-if="scenario.overallSubrPackage">
             <v-container fluid>
                 <!--- settings  -->
-                <v-layout class="settings pa-5">
-                    <v-flex>
-                        <div>
-                            <table>
-                                <tr :key="setting.name"
-                                     v-for="setting in userSettingsList">
-                                    <td style="text-align:right;">
-                                        {{setting.displayName}}
-                                    </td>
-                                    <td>
-                                        <v-text-field
-                                                class="pa-0 ma-0"
-                                                v-model="setting.val"
-                                        ></v-text-field>
-                                    </td>
-                                </tr>
 
-                            </table>
-                            <v-layout class="buttons">
-                                <v-flex grow></v-flex>
-                                    <v-btn outline small @click="saveSettings">Save</v-btn>
-                                    <v-btn outline small @click="isEditingSettings=false">Cancel</v-btn>
-                            </v-layout>
-                        </div>
-                    </v-flex>
-                </v-layout>
                 <!--- data about the scenario  -->
                 <v-layout>
-                        <v-flex xs4 class="col body-1">
-                            <v-layout>
-                                <v-flex xs1 class="mr-2">
-                                    <div style="height: 100%; flex-grow: 1">
+                    <v-flex xs4 class="col body-1">
+                        <v-layout>
+                            <v-flex xs1 class="mr-2">
+                                <div style="height: 100%; flex-grow: 1">
 
-                                        <downloads-bar
-                                                :segments="scenario.overallSubrPackage.getSubrStats()"></downloads-bar>
-                                    </div>
+                                    <downloads-bar
+                                            :segments="scenario.overallSubrPackage.getSubrStats()"></downloads-bar>
+                                </div>
 
-                                </v-flex>
-                                <v-flex xs11>
-                                    <div class="body-1">Journals</div>
-                                    <table class="stats infographic">
-                                        <tr :key="stat.name"
-                                            v-for="stat in scenario.overallSubrPackage.getSubrStats()"
-                                            class="stat"
-                                            :style="{color: stat.color}"
-                                            :class="{callout: stat.name==='fullSubscription'}">
-                                            <td class="num">
-                                                {{ nf(stat.count) }}
-                                            </td>
-                                            <td>
-                                                {{stat.displayName}}
-                                            </td>
-                                        </tr>
-
-
-                                    </table>
-
-                                </v-flex>
-                            </v-layout>
-                        </v-flex>
-
-                        <v-flex xs4 class="col body-1">
-                            <div class="body-1">Usage</div>
-                            <v-layout>
-                                <v-flex xs2 style="display:flex;">
-                                    <div :key="subrPackage.year"
-                                         style="height: 50px; flex-grow: 1"
-                                         v-for="subrPackage in scenario.yearlySubrPackages">
-                                        <downloads-bar :year="subrPackage.year"
-                                                       :segments="subrPackage.getUsageStats()">
-                                        </downloads-bar>
-                                    </div>
-                                </v-flex>
+                            </v-flex>
+                            <v-flex xs11>
+                                <div class="body-1">Journals</div>
+                                <table class="stats infographic">
+                                    <tr :key="stat.name"
+                                        v-for="stat in scenario.overallSubrPackage.getSubrStats()"
+                                        class="stat"
+                                        :style="{color: stat.color}"
+                                        :class="{callout: stat.name==='fullSubscription'}">
+                                        <td class="num">
+                                            {{ nf(stat.count) }}
+                                        </td>
+                                        <td>
+                                            {{stat.displayName}}
+                                        </td>
+                                    </tr>
 
 
-                                <v-flex xs10>
-                                    <table class="stats infographic">
-                                        <tr :key="usageType.name"
-                                            v-for="usageType in scenario.overallSubrPackage.getUsageStats()"
-                                            v-if="true"
-                                            class="stat"
-                                            :style="{color: usageType.color}"
-                                            :class="{callout: usageType.name==='fullSubscription'}">
-                                            <td class="num">
-                                                {{ nf(usageType.count) }}
-                                            </td>
-                                            <td>
-                                                {{usageType.displayName}}
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </v-flex>
+                                </table>
 
-                            </v-layout>
-                        </v-flex>
+                            </v-flex>
+                        </v-layout>
+                    </v-flex>
+
+                    <v-flex xs4 class="col body-1">
+                        <div class="body-1">Usage</div>
+                        <v-layout>
+                            <v-flex xs2 style="display:flex;">
+                                <div :key="subrPackage.year"
+                                     style="height: 50px; flex-grow: 1"
+                                     v-for="subrPackage in scenario.yearlySubrPackages">
+                                    <downloads-bar :year="subrPackage.year"
+                                                   :segments="subrPackage.getUsageStats()">
+                                    </downloads-bar>
+                                </div>
+                            </v-flex>
 
 
-                        <v-flex xs4 class="col body-1">
-                            <div class="body-1">Costs</div>
-                            <v-layout>
-                                <v-flex xs2 style="display:flex;">
-                                    <div :key="subrPackage.year"
-                                         style="height: 50px; flex-grow: 1"
-                                         v-for="subrPackage in scenario.yearlySubrPackages">
-                                        <downloads-bar :year="subrPackage.year"
-                                                       :is-currency="true"
-                                                       :segments="subrPackage.getCostStats()">
-                                        </downloads-bar>
-                                    </div>
-                                </v-flex>
-                                <v-flex xs10>
-                                    <table class="stats infographic">
-                                        <tr :key="stat.name"
-                                            v-for="stat in scenario.overallSubrPackage.getCostStats()"
-                                            class="stat"
-                                            :style="{color: stat.color}"
-                                            :class="{callout: stat.name==='fullSubscription'}">
-                                            <td class="num">
-                                                {{ currency(stat.count, true) }}
-                                            </td>
-                                            <td>
-                                                {{stat.displayName}}
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="num">{{currency(scenario.overallSubrPackage.cost, true)}}</td>
-                                            <td>Total</td>
-                                        </tr>
-                                    </table>
-                                </v-flex>
+                            <v-flex xs10>
+                                <table class="stats infographic">
+                                    <tr :key="usageType.name"
+                                        v-for="usageType in scenario.overallSubrPackage.getUsageStats()"
+                                        v-if="true"
+                                        class="stat"
+                                        :style="{color: usageType.color}"
+                                        :class="{callout: usageType.name==='fullSubscription'}">
+                                        <td class="num">
+                                            {{ nf(usageType.count) }}
+                                        </td>
+                                        <td>
+                                            {{usageType.displayName}}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </v-flex>
 
-                            </v-layout>
-                        </v-flex>
+                        </v-layout>
+                    </v-flex>
 
-                    </v-layout>
+
+                    <v-flex xs4 class="col body-1">
+                        <div class="body-1">Costs</div>
+                        <v-layout>
+                            <v-flex xs2 style="display:flex;">
+                                <div :key="subrPackage.year"
+                                     style="height: 50px; flex-grow: 1"
+                                     v-for="subrPackage in scenario.yearlySubrPackages">
+                                    <downloads-bar :year="subrPackage.year"
+                                                   :is-currency="true"
+                                                   :segments="subrPackage.getCostStats()">
+                                    </downloads-bar>
+                                </div>
+                            </v-flex>
+                            <v-flex xs10>
+                                <table class="stats infographic">
+                                    <tr :key="stat.name"
+                                        v-for="stat in scenario.overallSubrPackage.getCostStats()"
+                                        class="stat"
+                                        :style="{color: stat.color}"
+                                        :class="{callout: stat.name==='fullSubscription'}">
+                                        <td class="num">
+                                            {{ currency(stat.count, true) }}
+                                        </td>
+                                        <td>
+                                            {{stat.displayName}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="num">{{currency(scenario.overallSubrPackage.cost, true)}}</td>
+                                        <td>Total</td>
+                                    </tr>
+                                </table>
+                            </v-flex>
+
+                        </v-layout>
+                    </v-flex>
+
+                </v-layout>
             </v-container>
         </div>
-
-
-
-
-
-
-
-
-
-
-
 
 
         <!--- JOURNALS LIST  -->
@@ -317,6 +336,37 @@
                 </v-layout>
             </v-flex>
         </v-layout>
+
+
+        <!--- JOURNALS LIST  -->
+        <v-layout class="settings pa-5">
+            <v-flex>
+                <div>
+                    <table>
+                        <tr :key="setting.name"
+                            v-for="setting in userSettingsList">
+                            <td style="text-align:right;">
+                                {{setting.displayName}}
+                            </td>
+                            <td>
+                                <v-text-field
+                                        class="pa-0 ma-0"
+                                        v-model="setting.val"
+                                ></v-text-field>
+                            </td>
+                        </tr>
+
+                    </table>
+                    <v-layout class="buttons">
+                        <v-flex grow></v-flex>
+                        <v-btn outline small @click="saveSettings">Save</v-btn>
+                        <v-btn outline small @click="isEditingSettings=false">Cancel</v-btn>
+                    </v-layout>
+                </div>
+            </v-flex>
+        </v-layout>
+
+
     </v-container>
 </template>
 
@@ -327,7 +377,6 @@
     import DownloadsChart from "../components/DownloadsChart"
     import DownloadsBar from "../components/DownloadsBar"
     import JournalRow from "../components/JournalRow"
-    import ScenarioComparison from "../components/ScenarioComparison"
 
     import {currency, nFormat} from "../util";
     import {Journal} from "../Journal.js";
@@ -341,7 +390,6 @@
         components: {
             DownloadsChart,
             DownloadsBar,
-            ScenarioComparison,
             JournalRow
         },
         data: () => ({
@@ -490,7 +538,7 @@
                 // )
             },
 
-            saveSettings(){
+            saveSettings() {
                 this.isEditingSettings = false
                 this.userSettings.setFromList(this.userSettingsList)
                 this.userSettingsList = this.userSettings.getList()
@@ -543,13 +591,15 @@
             api.fetchJournals()
                 .then(resp => {
                     console.log("got journals back")
+                    this.userSettings = new UserSettings()
+
                     resp.forEach((apiJournalData, index) => {
                         if (index >= maxJournalsToFetch) return true
 
                         const myIssnl = apiJournalData.meta.issnl
                         this.journalsList.push(new Journal(
                             apiJournalData,
-                            "ill"
+                            this.userSettings
                         ))
                     })
 
@@ -561,7 +611,7 @@
 
                     this.printScenarioComparison()
 
-                    this.userSettings = new UserSettings()
+
                     this.userSettingsList = this.userSettings.getList()
 
                     console.log("done loading")
@@ -575,10 +625,11 @@
 </script>
 
 
-<style  lang="scss">
+<style lang="scss">
     .sorting-by {
         opacity: .5;
     }
+
     .v-input {
         input {
             text-align: right !important;

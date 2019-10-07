@@ -1,18 +1,31 @@
-import {makeSubscriptions} from "./subscription";
+import {makeSubscriptions, makeSubrYear} from "./subscription";
 
-
-
+import {makeTimelines} from "./SubrTimeline";
 
 
 class Journal {
-    constructor(apiData, selectedSubscriptionName) {
+    constructor(apiData, userSettings) {
         this.meta = apiData.meta
+        this.userSettings = userSettings
+
+        this.timelines = makeTimelines(
+            apiData.yearlyDownloads,
+            userSettings,
+            apiData.fullSubrCost2018
+        )
+        this.selectedTimeline = this.timelines.ill
+
+
+
+
         this.sortKeys = {}
         this.apiData = apiData
         this.isSelected = false
         this.citations = apiData.citations
         this.subscription = {}
         this.fullSubrCost2018 = apiData.fullSubrCost2018
+
+        this.yearlySubscriptions = []
 
         // hack
         this.useCount = apiData.subscriptions.find(x=>x.name==="fullSubscription").useCount()
@@ -26,10 +39,35 @@ class Journal {
         }
 
 
-        this.subscribe(selectedSubscriptionName)
+        this.subscribe("ill")
     }
 
+    getTotalDownloads(){
+        return this.selectedTimeline.getUsageTotal()
+    }
+
+    getAdjUse(){
+        return this.selectedTimeline.getNonfreeUsage()
+    }
+
+    getAdjSubrCost(){
+        return this.timelines.fullSubscription.getCost() - this.timelines.ill.getCost()
+    }
+    getAdjSubrCPU(){
+        return this.getAdjSubrCost() / this.getAdjUse()
+    }
+    getIllCost(){
+        return this.timelines.ill.getCost()
+    }
+    getDocdelCost(){
+        return this.timelines.docdel.getCost() - this.timelines.ill.getCost()
+    }
+
+
+
     subscribe(subscriptionName) {
+        this.selectedTimeline = this.timelines[subscriptionName]
+
         const overall = this.apiData.subscriptions.find(mySub => {
                 return mySub.name === subscriptionName
             })
@@ -60,28 +98,10 @@ class Journal {
     }
 
     _setSortKeys() {
-        const costsPerPaidUse = this.apiData.subscriptions.map(sub => {
-            return sub.costPerPaidUse()
-        })
-
-        const nonZeroCostsPerPaidUse = costsPerPaidUse.filter(x=>x>0)
-
-        const fullSubr = this.apiData.subscriptions.find(x=>x.name==='fullSubscription')
-
-        const bestCostPerPaidUse = Math.min(...nonZeroCostsPerPaidUse)
-        // console.log("setting sort keys. costsPerPaidUse", costsPerPaidUse)
-        // console.log("setting sort keys. nonZeroCostsPerPaidUse", nonZeroCostsPerPaidUse)
-        // console.log("setting sort keys. bestCostPerPaidUse", bestCostPerPaidUse)
-
-        // const bestCostPerPaidUse = Math.min(...this.subscriptions.possible.overall.map(sub => {
-        //     console.log("looking at this subscription", sub, sub.costPerPaidUse())
-        //     return sub.costPerPaidUse()
-        // }))
-
         this.sortKeys = {
             title: this.apiData.meta.title,
-            subrCpua: fullSubr.getCostPerUseAdj() || 1000000000,
-            totalUsage: this.subscription.useCount()
+            subrCpua: this.getAdjSubrCPU() || 1000000000,
+            totalUsage: this.getTotalDownloads()
         }
     }
 }

@@ -44,7 +44,7 @@
                         <v-tooltip top>
                             <template v-slot:activator="{ on }">
                                 <div v-on="on">
-                                    {{data.subscription.getUseCountAdjusted().toLocaleString()}}
+                                    {{data.getAdjUse().toLocaleString()}}
                                 </div>
                             </template>
                             <span>
@@ -56,11 +56,11 @@
                         <v-tooltip bottom>
                             <template v-slot:activator="{ on }">
                                 <div v-on="on">
-                                    {{nf(data.subscription.getUseCountAdjustmentPerc())}}%
+                                    {{nf(data.getTotalDownloads())}}
                                 </div>
                             </template>
                             <span>
-                                Adjustment factor
+                                Total downloads
                             </span>
                         </v-tooltip>
                     </div>
@@ -75,55 +75,36 @@
                         </downloads-bar>
                     </div>
             </v-flex>
-
-
-            <v-flex
-                    grow
-                    style="display:flex;"
-
-            >
-                <div
-                        class="numbers subscription-item col"
-                        :style="{background: subr.getColor('tile', subr.name !== data.subscription.name), 'border-bottom-color': subr.getColor('tileBorder', subr.name !== data.subscription.name)}"
-                        :class="{selected: subr.name===data.subscription.name, [subr.name]: true}"
-                        @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: subr.name})"
-                        :key="subr.name"
-                        v-for="subr in data.getSubrs()"
-                        v-if="!(hideDocdel && subr.name === 'docdel')"
-                        style="min-width: 6em;"
-                >
-                    <div class="upper">
-                        <v-tooltip top>
-                            <template v-slot:activator="{ on }">
-                                <div class="numbers" style="display:inline-block;" v-on="on">
-                                    {{currency(subr.getCostPerUseAdj())}}
-                                </div>
-                            </template>
-                            <span>
-                                {{subr.name}} CPUa
-                            </span>
-                        </v-tooltip>
-                    </div>
-                    <div class="lower body-1">
-                        <v-tooltip bottom>
-                            <template v-slot:activator="{ on }">
-                                <div class="numbers" style="display:inline-block;" v-on="on">
-                                    {{currency(subr.cost)}}
-                                </div>
-                            </template>
-                            <span>
-                                {{subr.name}} total cost ({{currency(subr.cost - data.subscription.cost, true, true)}})
-                            </span>
-                        </v-tooltip>
-
-                    </div>
+            <v-flex class="subr fulfillment">
+                <div @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: 'fullSubscription'})"
+                     class="subr full"
+                     :style="{color: data.timelines.fullSubscription.getColor()}"
+                     :class="{selected: data.selectedTimeline.name==='fullSubscription'}">
+                    <div class="upper">{{currency(data.getAdjSubrCPU())}}</div>
+                    <div class="lower">{{ currency(data.getAdjSubrCost()) }}</div>
                 </div>
-                <!--                <div class="icon">-->
-                <!--                    <fulfillment-icon :name="subr.name"></fulfillment-icon>-->
-                <!--                </div>-->
+
             </v-flex>
 
+            <v-flex class="item-level fulfillment">
+                <div>
+                    <div @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: 'ill'})"
+                         class="subr ill"
+                         :style="{color: data.timelines.ill.getColor()}"
+                         :class="{selected: data.selectedTimeline.name==='ill'}">
+                        <span class="num">{{currency(data.getIllCost(), true)}}</span>
+                        <span class="word">ILL</span>
+                    </div>
+                    <div @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: 'docdel'})"
+                         class="subr docdel"
+                         :style="{color: data.timelines.docdel.getColor()}"
+                         :class="{selected: data.selectedTimeline.name==='docdel'}">
+                        <span class="num">+{{ currency(data.getDocdelCost(), true) }}</span>
+                        <span class="word">DocDel</span>
+                    </div>
+                </div>
 
+            </v-flex>
         </v-layout>
 
 
@@ -170,6 +151,26 @@
 </script>
 
 <style scoped lang="scss">
+
+    .subr {
+        cursor:pointer;
+        &.selected {
+            font-weight: bold;
+        }
+        .num {
+            padding-right: 5px;
+            text-align: right;
+            width:10em;
+            display: inline-block;
+        }
+        text-align: right;
+        .word {
+            width: 10em;
+            display: inline-block;
+            text-align: left;
+        }
+    }
+
     .numbers {
         text-align: right;
 

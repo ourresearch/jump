@@ -23,6 +23,9 @@ export default class UserSettings {
 
         // cost
         this.bigDealCost = 1000000
+
+        // impact
+        this.downloadsPerCitation = 10
     }
 
     getList(){
