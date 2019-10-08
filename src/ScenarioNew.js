@@ -1,51 +1,79 @@
 import _ from "lodash";
 import {SubscriptionPackage} from "./subscription";
+import {sumObjects} from "./util";
 
 
-export default class Scenario {
+export default class ScenarioNew {
     constructor(journalsList) {
         this.journalsList = journalsList
 
+    }
 
-        // flat list of every subscription-year from every journal
-        const allYearSubscriptions = [].concat(...journalsList.map(x => x.getYearlySubscriptions()))
+    getSubrTable(){
+        const groups = this._getTimelinesByName()
+        const groupCounts = _.mapValues(groups, g=>g.length)
+        return groupCounts
+    }
 
-        // group them all into years
-        const subscriptionsDictByYear = _.groupBy(allYearSubscriptions, function (sub) {
-            return sub.year
-        })
-
-        // make a single SubscriptionYear for every year, summing up all the journals
-        this.yearlySubrPackages = Object.entries(subscriptionsDictByYear)
-            .map(([year, subscriptionsList]) => {
-                return new SubscriptionPackage(subscriptionsList, year)
+    getUsageByYear(){
+        const ret = {}
+        this._getYearsCovered().forEach(year=>{
+            const thisYearUsagesList = this.journalsList.map(j=>{
+                return j.selectedTimeline.getUsageYear(year)
             })
 
-        // all years, all journals.
-        // @todo rename to overallSubrPackage
-        this.overallSubrPackage = new SubscriptionPackage(
-            journalsList.map(x=>x.subscription)
-        )
+            ret[year] = thisYearUsagesList.reduce(sumObjects)
+        })
+        return ret
+    }
+
+    getUsageCounts(){
+        return Object.values(this.getUsageByYear()).reduce(sumObjects)
+    }
+    getUsageTotal(){
+        return Object.values(this.getUsageCounts()).reduce((a, b) => a + b)
+    }
+
+    getPercInstantAccess(){
+        const usage = this.getUsageCounts()
+        return 100 * (usage.fullSubscription + usage.docdel + usage.oa + usage.backCatalog) / this.getUsageTotal()
     }
 
 
-    // @todo replace this with just delivering counts of this.overallSubrPackage
-    getJournalsByType(){
-        const groups = _.groupBy(this.journalsList, j=>{
-            return j.subscription.name
-        })
 
-        const groupStats = Object.entries(groups).map(([subrName, journalsArr])=>{
-            return {
-                name: subrName,
-                count: journalsArr.length,
-            }
+    getCostByYear() {
+        const groups = this._getTimelinesByName()
+
+        const costsBySubr = _.mapValues(groups, timelinesList=>{  //  ill, docdel, and fullSubscription
+            return timelinesList.map(t=>t.getCostByYear()).reduce(sumObjects)
         })
-        return groupStats
+        const ret = {}
+        Object.entries(costsBySubr).forEach(([name, costsByYear])=>{
+            Object.entries(costsByYear).forEach(([year, cost]) => {
+                if (!ret[year]) ret[year] = {}
+                ret[year][name] = cost
+            })
+        })
+        return ret
     }
 
-    getSubr(subrName) {
-        return this.overallSubrPackage.getSubscription(subrName)
+    getCostTotal(){
+        return Object.values(this.getCostByYear()).reduce(sumObjects)
+    }
+
+
+
+
+
+
+    _getTimelinesByName(){
+        const selectedTimelines = this.journalsList.map(j=>j.selectedTimeline)
+        return _.groupBy(selectedTimelines, t=>{
+            return t.name
+        })
+    }
+    _getYearsCovered(){
+        return this.journalsList[0].selectedTimeline.getYears()
     }
 
 

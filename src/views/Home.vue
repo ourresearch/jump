@@ -14,18 +14,19 @@
 
                 <!-- DATA TOOLBAR -->
                 <v-layout class="py-1 px-3">
+                    <!-- num journals -->
                     <v-flex xs3>
                         <v-layout>
                             <v-flex xs1 class="graphic mr-2">
                                 <div style="height: 100%; flex-grow: 1">
                                     <downloads-bar
-                                            :segments="scenario.overallSubrPackage.getSubrStats()"></downloads-bar>
+                                            :segments="display.barSegments(scenarioNew.getSubrTable())"></downloads-bar>
                                 </div>
                             </v-flex>
                             <v-flex grow class="data">
                                 <div>
                                     <div class="num headline">
-                                        {{scenario.overallSubrPackage.getFullSubrCount()}}
+                                        {{nf(scenarioNew.getSubrTable().fullSubscription)}}
                                     </div>
                                     <div class="name body-1">
                                         Subscriptions
@@ -35,15 +36,17 @@
                         </v-layout>
                     </v-flex>
 
+
+                    <!-- usage -->
                     <v-flex xs3>
                         <v-layout>
                             <v-flex xs2 class="graphic mr-2">
                                 <div style="height: 100%; flex-grow: 1; display:flex;">
-                                    <div :key="subrPackage.year"
+                                    <div :key="year"
                                          style="height: 50px; flex-grow: 1"
-                                         v-for="subrPackage in scenario.yearlySubrPackages">
-                                        <downloads-bar :year="subrPackage.year"
-                                                       :segments="subrPackage.getUsageStats()">
+                                         v-for="(usageDict, year) in scenarioNew.getUsageByYear()">
+                                        <downloads-bar :year="year"
+                                                       :segments="display.barSegments(usageDict)">
                                         </downloads-bar>
                                     </div>
                                 </div>
@@ -51,7 +54,7 @@
                             <v-flex grow class="data">
                                 <div>
                                     <div class="num headline">
-                                        {{(scenario.overallSubrPackage.getPercInstantAccess()).toFixed(2)}}%
+                                        {{(scenarioNew.getPercInstantAccess()).toFixed(2)}}%
                                     </div>
                                     <div class="name body-1">
                                         Instant access
@@ -61,24 +64,27 @@
                         </v-layout>
                     </v-flex>
 
+
+
+                    <!-- cost -->
                     <v-flex xs3>
                         <v-layout>
-                            <v-flex xs2 class="graphic mr-2" style="display:flex;">
-                                <div :key="subrPackage.year"
-                                     style="height: 50px; flex-grow: 1"
-                                     v-for="subrPackage in scenario.yearlySubrPackages">
-                                    <downloads-bar :year="subrPackage.year"
-                                                   :is-currency="true"
-                                                   :segments="subrPackage.getCostStats()">
-                                    </downloads-bar>
-                                </div>
-                            </v-flex>
+<!--                            <v-flex xs2 class="graphic mr-2" style="display:flex;">-->
+<!--                                <div :key="year"-->
+<!--                                     style="height: 50px; flex-grow: 1"-->
+<!--                                     v-for="(costsDict, year) in scenarioNew.getCostByYear()">-->
+<!--                                    <downloads-bar :year="year"-->
+<!--                                                   :is-currency="true"-->
+<!--                                                   :segments="display.barSegments(costsDict)">-->
+<!--                                    </downloads-bar>-->
+<!--                                </div>-->
+<!--                            </v-flex>-->
 
                             <v-flex grow class="data">
                                 <div>
-                                    <div class="num headline">
-                                        {{currency(scenario.overallSubrPackage.cost, true)}}
-                                    </div>
+<!--                                    <div class="num headline">-->
+<!--                                        {{currency(scenarioNew.getCostTotal())}}-->
+<!--                                    </div>-->
                                     <div class="name body-1">
                                         Total Cost
                                     </div>
@@ -203,7 +209,12 @@
         <div class="scenario-report"
              v-if="scenario.overallSubrPackage">
             <v-container fluid>
-                <!--- settings  -->
+                <!--- *testing space  -->
+                <v-layout>
+                    <pre>
+                        {{scenarioNew.getCostTotal()}}
+                    </pre>
+                </v-layout>
 
                 <!--- data about the scenario  -->
                 <v-layout>
@@ -380,9 +391,11 @@
 
     import {currency, nFormat} from "../util";
     import {Journal} from "../Journal.js";
-    import Scenario from "../Scenario.js"
+    import Scenario from "../Scenario.js";
+    import ScenarioNew from "../ScenarioNew";
     import {makeSubrMenu} from "../subscription";
-    import UserSettings from "../UserSettings"
+    import UserSettings from "../UserSettings";
+    import * as display from "../display"
 
 
     export default {
@@ -419,6 +432,7 @@
             settings: null,
             isEditingSettings: false,
             userSettingsList: [],
+            display: display,
 
         }),
         computed: {
@@ -529,13 +543,7 @@
             printScenarioComparison() {
 
                 this.scenario = new Scenario(this.journalsList)
-
-                // legacy
-                // this.newScenario = makeScenario(this.journalsList, 0)
-                // this.scenarioComparison = makeScenarioComparison(
-                //     this.newScenario,
-                //     this.oldScenario
-                // )
+                this.scenarioNew = new ScenarioNew(this.journalsList)
             },
 
             saveSettings() {

@@ -2,6 +2,8 @@ import axios from 'axios'
 import _ from "lodash";
 import {makeSubscriptions} from "./subscription";
 
+const subscriptionPackage = window.location.href.match(/package=(.+)/)
+
 
 export const api = {
     loadingState: "ready",
@@ -11,7 +13,11 @@ export const api = {
     fetchJournals(){
         this.loadingState = "loading"
 
-        const url = this.baseUrl
+        let url = this.baseUrl
+        if (subscriptionPackage){
+            url += "?package=" + subscriptionPackage[1]
+        }
+
         let request = axios.get(url)
             .then(resp => {
 
