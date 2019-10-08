@@ -51,16 +51,16 @@ class Journal {
     }
 
     getAdjSubrCost(){
-        return this.timelines.fullSubscription.getCost() - this.timelines.ill.getCost()
+        return this.timelines.fullSubscription.getCostTotal() - this.timelines.ill.getCostTotal()
     }
     getAdjSubrCPU(){
         return this.getAdjSubrCost() / this.getAdjUse()
     }
     getIllCost(){
-        return this.timelines.ill.getCost()
+        return this.timelines.ill.getCostTotal()
     }
     getDocdelCost(){
-        return this.timelines.docdel.getCost() - this.timelines.ill.getCost()
+        return this.timelines.docdel.getCostTotal() - this.timelines.ill.getCostTotal()
     }
 
 

@@ -23,7 +23,7 @@ class SubrTimeline {
     }
 
 
-    getCost() {
+    getCostTotal() {
         return Object.values(this.getCostByYear()).reduce((a, b) => a + b)
     }
 

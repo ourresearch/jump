@@ -58,7 +58,7 @@ export default class ScenarioNew {
     }
 
     getCostTotal(){
-        return Object.values(this.getCostByYear()).reduce(sumObjects)
+        return this.journalsList.map(j=>j.selectedTimeline.getCostTotal()).reduce((a,b)=>a+b)
     }
 
 
