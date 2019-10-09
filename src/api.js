@@ -8,6 +8,7 @@ const subscriptionPackage = window.location.href.match(/package=(.+)/)
 export const api = {
     loadingState: "ready",
     baseUrl: "https://rickscafe-api.herokuapp.com/jump/temp",
+    journals: [],
 
 
     fetchJournals(){
@@ -20,6 +21,8 @@ export const api = {
 
         let request = axios.get(url)
             .then(resp => {
+
+
 
 
                 return resp.data.list.map(journal => {

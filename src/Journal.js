@@ -81,9 +81,6 @@ class Journal {
             return subr.name !== this.subscription.name
         })
     }
-    getSubrs(){
-        return this.apiData.subscriptions
-    }
 
 
     getYearlySubscriptions(){

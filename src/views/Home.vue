@@ -13,7 +13,7 @@
 
 
                 <!-- DATA TOOLBAR -->
-                <data-toolbar :scenario-new="scenarioNew"></data-toolbar>
+                <data-toolbar :scenario="scenarioNew"></data-toolbar>
 
 
 
@@ -128,7 +128,7 @@
 
 
         <!--- SUM-UP REPORT  -->
-        <scenario-report :scenario="scenario"></scenario-report>
+        <scenario-report :scenario="scenarioNew"></scenario-report>
 
 
 
@@ -231,6 +231,7 @@
             scenarioComparison: {},
             oldScenario: {},
             newScenario: {},
+            scenarioNew:{},
             scenario: {},
             subscriptionNames: [
                 "fullSubscription",
@@ -241,6 +242,7 @@
             isEditingSettings: false,
             userSettingsList: [],
             display: display,
+            apiJournals: [],
 
         }),
         computed: {
@@ -359,6 +361,7 @@
                 this.userSettings.setFromList(this.userSettingsList)
                 this.userSettingsList = this.userSettings.getList()
                 console.log("saving settings!", this.userSettings)
+                this.printJournals()
 
             },
 
@@ -397,42 +400,28 @@
                     return ret
                 }
                 this.journalsList.sort(sortFn)
-
             },
+            printJournals(){
+                console.log("printing journals")
+                this.apiJournals.forEach((apiJournalData, index) => {
+                    this.journalsList.push(new Journal(
+                        apiJournalData,
+                        this.userSettings
+                    ))
+                })
+                this.printScenarioComparison()
+            }
+
         },
         mounted() {
-            let maxJournalsToFetch
             console.log("mounted")
-            // maxJournalsToFetch = 20  // for testing
+            this.userSettings = new UserSettings()
+            this.userSettingsList = this.userSettings.getList()
+
             api.fetchJournals()
                 .then(resp => {
-                    console.log("got journals back")
-                    this.userSettings = new UserSettings()
-
-                    resp.forEach((apiJournalData, index) => {
-                        if (index >= maxJournalsToFetch) return true
-
-                        const myIssnl = apiJournalData.meta.issnl
-                        this.journalsList.push(new Journal(
-                            apiJournalData,
-                            this.userSettings
-                        ))
-                    })
-
-
-                    // this.oldScenario = makeScenario(
-                    //     this.journalsList,
-                    //     this.bigDealCost
-                    // )
-
-                    this.printScenarioComparison()
-
-
-                    this.userSettingsList = this.userSettings.getList()
-
-                    console.log("done loading")
-
-
+                    this.apiJournals = resp
+                    this.printJournals()
                 })
         },
         watch: {}

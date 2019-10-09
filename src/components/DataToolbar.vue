@@ -1,5 +1,5 @@
 <template>
-    <v-container v-if="scenarioNew.journalsList.length" fluid class="data-toolbar">
+    <v-container v-if="scenario.journalsList.length" fluid class="data-toolbar pa-0 ma-0">
         <v-layout class="py-1 px-3">
             <!-- num journals -->
             <v-flex xs3>
@@ -7,13 +7,13 @@
                     <v-flex xs1 class="graphic mr-2">
                         <div style="height: 100%; flex-grow: 1">
                             <downloads-bar
-                                    :segments="display.barSegments(scenarioNew.getSubrTable())"></downloads-bar>
+                                    :segments="display.barSegments(scenario.getSubrTable())"></downloads-bar>
                         </div>
                     </v-flex>
                     <v-flex grow class="data">
                         <div>
                             <div class="num headline">
-                                {{nf(scenarioNew.getSubrTable().fullSubscription)}}
+                                {{nf(scenario.getSubrTable().fullSubscription)}}
                             </div>
                             <div class="name body-1">
                                 Subscriptions
@@ -31,7 +31,7 @@
                         <div style="height: 100%; flex-grow: 1; display:flex;">
                             <div :key="year"
                                  style="height: 50px; flex-grow: 1"
-                                 v-for="(usageDict, year) in scenarioNew.getUsageByYear()">
+                                 v-for="(usageDict, year) in scenario.getUsageByYear()">
                                 <downloads-bar :year="year"
                                                :segments="display.barSegments(usageDict)">
                                 </downloads-bar>
@@ -41,7 +41,7 @@
                     <v-flex grow class="data">
                         <div>
                             <div class="num headline">
-                                {{(scenarioNew.getPercInstantAccess()).toFixed(2)}}%
+                                {{(scenario.getPercInstantAccess()).toFixed(2)}}%
                             </div>
                             <div class="name body-1">
                                 Instant access
@@ -58,7 +58,7 @@
                     <v-flex xs2 class="graphic mr-2" style="display:flex;">
                         <div :key="year"
                              style="height: 50px; flex-grow: 1"
-                             v-for="(costsDict, year) in scenarioNew.getCostByYear()">
+                             v-for="(costsDict, year) in scenario.getCostByYear()">
                             <downloads-bar :year="year"
                                            :is-currency="true"
                                            :segments="display.barSegments(costsDict)">
@@ -69,7 +69,7 @@
                     <v-flex grow class="data">
                         <div>
                             <div class="num headline">
-                                {{currency(scenarioNew.getCostTotal())}}
+                                {{currency(scenario.getCostTotal())}}
                             </div>
                             <div class="name body-1">
                                 Total Cost
@@ -92,7 +92,7 @@
 
     export default {
         name: "DataToolbar",
-        props: ["scenarioNew"],
+        props: ["scenario"],
         components: {
             DownloadsBar,
         },
