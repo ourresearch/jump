@@ -78,6 +78,16 @@
                     </v-flex>
                 </v-layout>
             </v-flex>
+
+            <!-- cost per paid use -->
+            <v-flex xs3>
+                <div class="num headline">
+                    {{currency(scenario.getCostPerInstantUse(), 3)}}
+                </div>
+                <div class="name body-1">
+                    Cost per instant use
+                </div>
+            </v-flex>
         </v-layout>
 
 

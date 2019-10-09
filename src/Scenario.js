@@ -2,10 +2,10 @@ import _ from "lodash";
 import {sumObjects} from "./util";
 
 
-export default class Scenario {
-    constructor(journalsList, userSettings, isBigDeal) {
+class Scenario {
+    constructor(journalsList, userSettings) {
         this.journalsList = journalsList
-        this.isBigdeal = isBigDeal
+        this.isBigdeal = false
         this.userSettings = userSettings
 
         this.cache = {}
@@ -45,9 +45,12 @@ export default class Scenario {
     getUsageTotal(){
         return Object.values(this.getUsageByType()).reduce((a, b) => a + b)
     }
-    getPercInstantAccess(){
+    getUsageInstant(){
         const usage = this.getUsageByType()
-        return 100 * (usage.fullSubscription + usage.docdel + usage.oa + usage.backCatalog) / this.getUsageTotal()
+        return usage.fullSubscription + usage.docdel + usage.oa + usage.backCatalog
+    }
+    getPercInstantAccess(){
+        return 100 * this.getUsageInstant() / this.getUsageTotal()
     }
 
 
@@ -87,6 +90,11 @@ export default class Scenario {
     }
 
 
+    getCostPerInstantUse(){
+        return this.getCostTotal() / this.getUsageInstant()
+    }
+
+
 
 
 
@@ -101,6 +109,29 @@ export default class Scenario {
         return this.journalsList[0].selectedTimeline.getYears()
     }
 
+}
+
+class BigDealScenario extends Scenario {
+    constructor(journalsList, userSettings) {
+        super(journalsList, userSettings);
+    }
 
 
+    getCostTotal(){
+        let years = {}
+        let costThisYear = this.userSettings.bigDealCost
+        this._getYearsCovered().forEach(y=>{
+            years[y] = costThisYear
+            costThisYear = costThisYear + (costThisYear * this.userSettings.bigDealCostAnnualIncrease)
+        })
+        return Object.values(years).reduce((a,b)=>a+b) / 5
+    }
+}
+
+
+
+
+export {
+    Scenario,
+    BigDealScenario
 }

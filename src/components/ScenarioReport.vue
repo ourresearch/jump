@@ -131,6 +131,30 @@
                 </v-flex>
 
             </v-layout>
+
+            <v-layout>
+                <table class="pretty">
+                    <tr>
+                        <td>A-la-carte</td>
+                        <td>{{currency(scenario.getCostTotal())}}</td>
+                        <td>{{nf(scenario.getUsageInstant())}}</td>
+                    </tr>
+                    <tr>
+                        <td>Big Deal</td>
+                        <td>{{currency(oldScenario.getCostTotal())}}</td>
+                        <td>{{nf(oldScenario.getUsageInstant())}}</td>
+                    </tr>
+                    <tr>
+                        <td>Percent</td>
+                        <td>{{nf(100* scenario.getCostTotal() / oldScenario.getCostTotal())}}%</td>
+                        <td>{{nf(100* scenario.getUsageInstant() / oldScenario.getUsageInstant())}}%</td>
+                    </tr>
+                </table>
+
+
+            </v-layout>
+
+
         </v-container>
     </div>
 </template>

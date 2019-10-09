@@ -195,7 +195,7 @@
 
     import {currency, nFormat} from "../util";
     import {Journal} from "../Journal.js";
-    import Scenario from "../Scenario";
+    import {Scenario, BigDealScenario} from "../Scenario";
 
     import UserSettings from "../UserSettings";
     import * as display from "../display"
@@ -419,7 +419,18 @@
                 .then(resp => {
                     this.apiJournals = resp
                     this.makeJournalsList()
-                    this.oldScenario = new Scenario(this.journalsList)
+
+
+                    // make the Big Deal Scenario just once
+                    const fullSubscriptionJournals = this.apiJournals.map(j=>{
+                        const myJournal = new Journal(j, this.userSettings)
+                        myJournal.subscribe("fullSubscription")
+                        return myJournal
+                    })
+                    this.oldScenario = new BigDealScenario(
+                        fullSubscriptionJournals,
+                        this.userSettings
+                    )
                 })
         },
         watch: {}

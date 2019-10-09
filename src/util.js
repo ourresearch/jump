@@ -31,7 +31,15 @@ const hashCode = function (str) {
 
 // https://blog.abelotech.com/posts/number-currency-formatting-javascript/
 const currency = function (num, roundToDollars, asDiff) {
-    const placesToRound = (roundToDollars) ? 0 : 2;
+    let placesToRound = 2
+    if (roundToDollars===true){
+        placesToRound = 0
+    }
+    else if (roundToDollars > 2){
+        placesToRound = roundToDollars // hack
+    }
+
+    // const placesToRound = (roundToDollars) ? 0 : 2;
     const str = num.toFixed(placesToRound).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
 
     if (asDiff && num < 0) {
