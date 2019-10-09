@@ -1,5 +1,5 @@
 <template>
-    <v-container v-if="scenario.journalsList.length" fluid class="data-toolbar pa-0 ma-0">
+    <v-container v-if="scenario.journalsList" fluid class="data-toolbar pa-0 ma-0">
         <v-layout class="py-1 px-3">
             <!-- num journals -->
             <v-flex xs3>
@@ -31,7 +31,7 @@
                         <div style="height: 100%; flex-grow: 1; display:flex;">
                             <div :key="year"
                                  style="height: 50px; flex-grow: 1"
-                                 v-for="(usageDict, year) in scenario.getUsageByYear()">
+                                 v-for="(usageDict, year) in scenario.getUsageByTypeByYear()">
                                 <downloads-bar :year="year"
                                                :segments="display.barSegments(usageDict)">
                                 </downloads-bar>
@@ -58,7 +58,7 @@
                     <v-flex xs2 class="graphic mr-2" style="display:flex;">
                         <div :key="year"
                              style="height: 50px; flex-grow: 1"
-                             v-for="(costsDict, year) in scenario.getCostByYear()">
+                             v-for="(costsDict, year) in scenario.getCostByTypeByYear()">
                             <downloads-bar :year="year"
                                            :is-currency="true"
                                            :segments="display.barSegments(costsDict)">
@@ -72,7 +72,7 @@
                                 {{currency(scenario.getCostTotal())}}
                             </div>
                             <div class="name body-1">
-                                Total Cost
+                                Avg annual Cost
                             </div>
                         </div>
                     </v-flex>

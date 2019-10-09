@@ -1,6 +1,5 @@
 import axios from 'axios'
 import _ from "lodash";
-import {makeSubscriptions} from "./subscription";
 
 const subscriptionPackage = window.location.href.match(/package=(.+)/)
 
@@ -27,7 +26,6 @@ export const api = {
 
                 return resp.data.list.map(journal => {
                     const downloadsByYear = apiDownloadsByYear(journal.downloads_by_year)
-                    const downloadsOverall = apiDownloads(journal.downloads_by_year)
 
                     return {
                         meta: {
@@ -40,8 +38,6 @@ export const api = {
                         yearlyDownloads:downloadsByYear,
                         fullSubrCost2018: journal.dollars_2018_subscription,
 
-                        // goal is to get rid of this
-                        subscriptions: makeSubscriptions(downloadsOverall, journal.dollars_2018_subscription*5),
                     }
                 })
             })
@@ -69,13 +65,6 @@ function apiDownloadsByYear(api_downloads) {
     })
 }
 
-const apiDownloads = function(api_downloads){
-    return {
-        useCount: _.sum(api_downloads.total),
-        oaUseCount: _.sum(api_downloads.oa),
-        backCatalogUseCount: _.sum(api_downloads.back_catalog),
-    }
-}
 
 let downloads_by_year = {
     back_catalog: [

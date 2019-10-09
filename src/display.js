@@ -35,6 +35,7 @@ const barSegments = function(dataDict){
             count: v,
             perc: 100 * v / total,
             fillColor: usageFillColors[k],
+            color: usageColors[k],
             displayName: usageDisplayNames[k]
         }
     })
@@ -42,10 +43,14 @@ const barSegments = function(dataDict){
 const color = function(k){
     return usageColors[k]
 }
+const displayName = function(k){
+    return usageDisplayNames[k]
+}
 
 
 
 export {
     barSegments,
     color,
+    displayName,
 }

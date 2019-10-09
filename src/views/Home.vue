@@ -8,12 +8,11 @@
 
         <div class="fixed-header-wrapper" style="height: 100px;">
             <div class="fixed-header"
-                 v-if="scenario.overallSubrPackage"
                  style="position:fixed; top:0; background: #fff; width: 100%; z-index:999;">
 
 
                 <!-- DATA TOOLBAR -->
-                <data-toolbar :scenario="scenarioNew"></data-toolbar>
+                <data-toolbar :scenario="scenario"></data-toolbar>
 
 
 
@@ -128,7 +127,7 @@
 
 
         <!--- SUM-UP REPORT  -->
-        <scenario-report :scenario="scenarioNew"></scenario-report>
+        <scenario-report :scenario="scenario" :old-scenario="oldScenario"></scenario-report>
 
 
 
@@ -196,10 +195,8 @@
 
     import {currency, nFormat} from "../util";
     import {Journal} from "../Journal.js";
-    import Scenario from "../Scenario.js";
-    import ScenarioNew from "../ScenarioNew";
+    import Scenario from "../Scenario";
 
-    import {makeSubrMenu} from "../subscription";
     import UserSettings from "../UserSettings";
     import * as display from "../display"
 
@@ -230,9 +227,7 @@
             bigDealCost: 1000000,
             scenarioComparison: {},
             oldScenario: {},
-            newScenario: {},
-            scenarioNew:{},
-            scenario: {},
+            scenario:{},
             subscriptionNames: [
                 "fullSubscription",
                 "docdel",
@@ -289,9 +284,13 @@
                 return !this.isAllPageSelected && !this.isNonePageSelected
             },
             subrMenu() {
-                const ret = makeSubrMenu()
-                console.log("making subr menu", ret)
-                return ret
+                return ["ill", "docdel", "fullSubscription"].map(name=>{
+                    return {
+                        name: name,
+                        displayName: display.displayName(name),
+                        color: display.color(name)
+                    }
+                })
             },
 
 
@@ -351,9 +350,7 @@
             },
 
             printScenarioComparison() {
-
                 this.scenario = new Scenario(this.journalsList)
-                this.scenarioNew = new ScenarioNew(this.journalsList)
             },
 
             saveSettings() {
@@ -361,7 +358,7 @@
                 this.userSettings.setFromList(this.userSettingsList)
                 this.userSettingsList = this.userSettings.getList()
                 console.log("saving settings!", this.userSettings)
-                this.printJournals()
+                this.makeJournalsList()
 
             },
 
@@ -401,7 +398,7 @@
                 }
                 this.journalsList.sort(sortFn)
             },
-            printJournals(){
+            makeJournalsList(){
                 console.log("printing journals")
                 this.apiJournals.forEach((apiJournalData, index) => {
                     this.journalsList.push(new Journal(
@@ -421,7 +418,8 @@
             api.fetchJournals()
                 .then(resp => {
                     this.apiJournals = resp
-                    this.printJournals()
+                    this.makeJournalsList()
+                    this.oldScenario = new Scenario(this.journalsList)
                 })
         },
         watch: {}

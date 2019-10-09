@@ -18,7 +18,6 @@
 </template>
 
 <script>
-    import {usageColors} from "../subscription";
     import {nFormat, currency} from "../util";
 
     export default {

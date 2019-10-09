@@ -1,4 +1,3 @@
-import {makeUsageStats, usageColors} from "./UsageStat";
 import {sumObjects} from "./util";
 
 class SubrTimeline {
@@ -10,6 +9,8 @@ class SubrTimeline {
         this.name = "fullSubscription"
         this.displayName = "Subscription"
         this.yearlyCitations = {}
+
+        this.cache = {}
 
 
     }
@@ -24,16 +25,20 @@ class SubrTimeline {
 
 
     getCostTotal() {
-        return Object.values(this.getCostByYear()).reduce((a, b) => a + b)
+        return Object.values(this.getCostByTypeByYear()).reduce((a, b) => a + b)
     }
 
-    getCostByYear() {
+    getCostByTypeByYear() {
+        if (this.cache.getCostByTypeByYear) {
+            return this.cache.getCostByTypeByYear
+        }
         let annualCost = this.firstYearCost
         const ret = {}
         this.apiUsage.forEach(myYear => {
             ret[myYear.year] = annualCost
             annualCost = annualCost + (annualCost * this.userSettings.subrCostAnnualIncrease)
         })
+        this.cache.getCostByTypeByYear = ret
         return ret
     }
 
@@ -47,19 +52,16 @@ class SubrTimeline {
     }
 
     getUsageCounts() {
-        return Object.values(this.getUsageByYear()).reduce(sumObjects)
+        return Object.values(this.getUsageByTypeByYear()).reduce(sumObjects)
     }
 
-    getUsageStats() {
-        return makeUsageStats(this.getUsageCounts())
-    }
 
     getYears() {
         return this.apiUsage.map(x => x.year)
     }
 
     getUsageYear(year) {
-        return this.getUsageByYear()[year]
+        return this.getUsageByTypeByYear()[year]
     }
 
     getPercInstantAccess() {
@@ -67,7 +69,10 @@ class SubrTimeline {
         return 100 * (usage.fullSubscription + usage.docdel + usage.oa + usage.backCatalog) / this.getUsageTotal()
     }
 
-    getUsageByYear() {
+    getUsageByTypeByYear() {
+        if (this.cache.getUsageByTypeByYear) {
+            return this.cache.getUsageByTypeByYear
+        }
         const ret = {}
         this.apiUsage.forEach(apiUsageStats => {
             const total = apiUsageStats.useCount
@@ -84,12 +89,11 @@ class SubrTimeline {
             }
             ret[apiUsageStats.year] = usage
         })
+
+        this.cache.getUsageByTypeByYear = ret
         return ret
     }
 
-    getColor() {
-        return usageColors[this.name]
-    }
 }
 
 
@@ -100,7 +104,7 @@ class IllSubrTimeline extends SubrTimeline {
         this.displayName = "ILL"
     }
 
-    getUsageByYear() {
+    getUsageByTypeByYear() {
         const ret = {}
         this.apiUsage.forEach(apiUsageStats => {
             const total = apiUsageStats.useCount
@@ -122,9 +126,9 @@ class IllSubrTimeline extends SubrTimeline {
     }
 
 
-    getCostByYear() {
+    getCostByTypeByYear() {
         const ret = {}
-        Object.entries(this.getUsageByYear()).forEach(([k, v]) => {
+        Object.entries(this.getUsageByTypeByYear()).forEach(([k, v]) => {
             ret[k] = v.ill * this.userSettings.illCostPerUse
         })
         return ret
@@ -138,7 +142,7 @@ class DocdelSubrTimeline extends SubrTimeline {
         this.displayName = "DocDel"
     }
 
-    getUsageByYear() {
+    getUsageByTypeByYear() {
         const ret = {}
         this.apiUsage.forEach(apiUsageStats => {
             const total = apiUsageStats.useCount
@@ -159,9 +163,9 @@ class DocdelSubrTimeline extends SubrTimeline {
         return ret
     }
 
-    getCostByYear() {
+    getCostByTypeByYear() {
         const ret = {}
-        Object.entries(this.getUsageByYear()).forEach(([k, v]) => {
+        Object.entries(this.getUsageByTypeByYear()).forEach(([k, v]) => {
             ret[k] = v.docdel * this.userSettings.docDelCostPerUse
         })
         return ret
