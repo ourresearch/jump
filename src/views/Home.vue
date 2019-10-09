@@ -212,7 +212,7 @@
         },
         data: () => ({
             currentPage: 1,
-            pageSize: 20,
+            pageSize: 50,
             sortBy: "default",
             api: api,
             isLoading: false,
@@ -400,11 +400,8 @@
             },
             makeJournalsList(){
                 console.log("printing journals")
-                this.apiJournals.forEach((apiJournalData, index) => {
-                    this.journalsList.push(new Journal(
-                        apiJournalData,
-                        this.userSettings
-                    ))
+                this.journalsList = this.apiJournals.map(j=>{
+                    return new Journal(j, this.userSettings)
                 })
                 this.printScenarioComparison()
             }

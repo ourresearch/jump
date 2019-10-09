@@ -39,6 +39,11 @@
                                         {{stat.displayName}}
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td class="num">{{nf(scenario.journalsList.length, true)}}</td>
+                                    <td>100%</td>
+                                    <td>Total journals</td>
+                                </tr>
 
 
                             </table>
@@ -81,6 +86,11 @@
                                         {{usageType.displayName}}
                                     </td>
                                 </tr>
+                                <tr>
+                                    <td class="num">{{nf(scenario.getUsageTotal(), true)}}</td>
+                                    <td>100%</td>
+                                    <td>Total uses</td>
+                                </tr>
                             </table>
                         </v-flex>
 
@@ -122,7 +132,7 @@
                                 <tr>
                                     <td class="num">{{currency(scenario.getCostTotal(), true)}}</td>
                                     <td>100%</td>
-                                    <td>Total</td>
+                                    <td>Total cost</td>
                                 </tr>
                             </table>
                         </v-flex>
@@ -141,12 +151,12 @@
                     </tr>
                     <tr>
                         <td>A-la-carte</td>
-                        <td>{{currency(scenario.getCostTotal())}}</td>
+                        <td>{{currency(scenario.getCostTotal(), true)}}</td>
                         <td>{{nf(scenario.getUsageInstant())}}</td>
                     </tr>
                     <tr>
                         <td>Big Deal</td>
-                        <td>{{currency(oldScenario.getCostTotal())}}</td>
+                        <td>{{currency(oldScenario.getCostTotal(), true)}}</td>
                         <td>{{nf(oldScenario.getUsageInstant())}}</td>
                     </tr>
                 </table>
