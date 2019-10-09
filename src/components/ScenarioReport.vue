@@ -134,6 +134,11 @@
 
             <v-layout>
                 <table class="pretty">
+                    <tr style="font-weight: bold;">
+                        <td>Percent</td>
+                        <td>{{nf(100* scenario.getCostTotal() / oldScenario.getCostTotal())}}%</td>
+                        <td>{{nf(100* scenario.getUsageInstant() / oldScenario.getUsageInstant())}}%</td>
+                    </tr>
                     <tr>
                         <td>A-la-carte</td>
                         <td>{{currency(scenario.getCostTotal())}}</td>
@@ -143,11 +148,6 @@
                         <td>Big Deal</td>
                         <td>{{currency(oldScenario.getCostTotal())}}</td>
                         <td>{{nf(oldScenario.getUsageInstant())}}</td>
-                    </tr>
-                    <tr>
-                        <td>Percent</td>
-                        <td>{{nf(100* scenario.getCostTotal() / oldScenario.getCostTotal())}}%</td>
-                        <td>{{nf(100* scenario.getUsageInstant() / oldScenario.getUsageInstant())}}%</td>
                     </tr>
                 </table>
 
