@@ -28,8 +28,8 @@ export default class UserSettings {
         this.bigDealCost = 2000000
 
         // impact
-        this.downloadsPerCitation = 10
-        this.downloadsPerAuthorship = 10
+        this.downloadsPerCitation = 0
+        this.downloadsPerAuthorship = 0
     }
 
     getList(){

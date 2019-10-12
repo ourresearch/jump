@@ -127,7 +127,10 @@
 
 
         <!--- SUM-UP REPORT  -->
-        <scenario-report :scenario="scenario" :old-scenario="oldScenario"></scenario-report>
+        <scenario-report :scenario="scenario"
+                         :old-scenario="oldScenario"
+                         @subscribe="gangSubscribeHandler"
+        ></scenario-report>
 
 
 
@@ -344,6 +347,16 @@
                 this.unselectAll()
                 this.sortJournalsList()
                 this.printScenarioComparison()
+            },
+            gangSubscribeHandler(args){
+                console.log("gang subscribe!", args)
+                this.journalsList.forEach(j=>{
+                    j.subscribeToCheapest(args.docdelOnly)
+                })
+                this.unselectAll()
+                this.sortJournalsList()
+                this.printScenarioComparison()
+
             },
 
 

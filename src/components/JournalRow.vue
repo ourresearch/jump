@@ -44,8 +44,11 @@
                 </div>
             </v-flex>
 
-            <v-flex xs2 class="col cost">
-                <div>
+            <v-flex xs2 class="col cost numbers">
+                <div :style="{color: display.color(data.selectedTimeline.name)}">
+                    <div v-if="data.isOverpaid()" class="alert" style="color:darkred;">
+                        Overpaying!
+                    </div>
                     <div class="title upper">
                         {{ currency(data.selectedTimeline.getCostTotal() / 5) }}
                     </div>

@@ -163,6 +163,12 @@
 
 
             </v-layout>
+            <v-layout>
+                <v-flex>
+                    <v-btn @click="$emit('subscribe', {instantAccess:null, docdelOnly:false})">Cheapest ILL</v-btn>
+                    <v-btn @click="$emit('subscribe',  {instantAccess:null, docdelOnly:true})">Cheapest DocDel</v-btn>
+                </v-flex>
+            </v-layout>
 
 
         </v-container>
