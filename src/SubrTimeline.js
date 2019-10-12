@@ -25,10 +25,10 @@ class SubrTimeline {
 
 
     getCostTotal() {
-        return Object.values(this.getCostByTypeByYear()).reduce((a, b) => a + b)
+        return Object.values(this.getCostByTypeByYear()).reduce((a, b) => a + b) || 0
     }
     getCostPerNegotiableUse(){
-        return this.getCostTotal() / this.getNegotiableUsage()
+        return (this.getCostTotal() / this.getNegotiableUsage()) || 0
     }
 
     getCostByTypeByYear() {
@@ -138,7 +138,7 @@ class IllSubrTimeline extends SubrTimeline {
     _makeUsageDictFromYearStats(apiUsageStats){
         const usage = super._makeUsageDictFromYearStats(apiUsageStats)
         usage.ill = usage.fullSubscription * this.userSettings.hardTurnawayProp
-        usage.turnaway = usage.fullSubscription - usage.ill
+        usage.softTurnaway = usage.fullSubscription - usage.ill
         usage.fullSubscription = 0
         return usage
     }
@@ -162,7 +162,7 @@ class DocdelSubrTimeline extends SubrTimeline {
     _makeUsageDictFromYearStats(apiUsageStats){
         const usage = super._makeUsageDictFromYearStats(apiUsageStats)
         usage.docdel = usage.fullSubscription * this.userSettings.hardTurnawayProp
-        usage.turnaway = usage.fullSubscription - usage.docdel
+        usage.softTurnaway = usage.fullSubscription - usage.docdel
         usage.fullSubscription = 0
         return usage
     }

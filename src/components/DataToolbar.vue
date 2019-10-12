@@ -69,7 +69,7 @@
                     <v-flex grow class="data">
                         <div>
                             <div class="num headline">
-                                {{currency(scenario.getCostTotal())}}
+                                {{currency(scenario.getCostTotal(), true)}}
                             </div>
                             <div class="name body-1">
                                 Avg annual Cost
