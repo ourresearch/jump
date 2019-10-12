@@ -9,6 +9,7 @@ const usageColors = {
     fullSubscription: "#00acc1", // cyan 600
     backCatalog: "#43a047", // green 600
     oa: "#558b2f", // light green 700
+    rg: "#9e9d24",  // lime 800
 }
 const usageFillColors = {
     ...usageColors,
@@ -23,6 +24,7 @@ const usageDisplayNames = {
     fullSubscription: "Subscription",
     backCatalog: "Back catalog",
     oa: "Open Access",
+    rg: "ResearchGate",
 }
 
 

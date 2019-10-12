@@ -4,10 +4,13 @@
 const displayNames = {
     docDelCostPerUse: "DocDel transaction cost",
     illCostPerUse: "ILL transaction cost",
-    hardTurnawayProp: "Item-level request percentage",
+    hardTurnawayProp: "ILL/DocDel request percentage",
     bigDealCostAnnualIncrease: "Big Deal cost % annual increase",
     subrCostAnnualIncrease: "A-la-carte subscription cost % annual increase",
-    bigDealCost: "Big Deal annual cost"
+    bigDealCost: "Big Deal annual cost",
+
+    downloadsPerCitation: "Downloads to add for each citation",
+    downloadsPerAuthorship: "Downloads to add for each authorship",
 }
 
 export default class UserSettings {
@@ -15,17 +18,18 @@ export default class UserSettings {
         // item-level acquisition
         this.docDelCostPerUse = 25
         this.illCostPerUse = 5
-        this.hardTurnawayProp = 0.05
+        this.hardTurnawayProp = 0.5
 
         // cost: annual increase
         this.bigDealCostAnnualIncrease = 0.05
-        this.subrCostAnnualIncrease = 0.05
+        this.subrCostAnnualIncrease = 0.08
 
         // cost
-        this.bigDealCost = 1000000
+        this.bigDealCost = 2000000
 
         // impact
         this.downloadsPerCitation = 10
+        this.downloadsPerAuthorship = 10
     }
 
     getList(){

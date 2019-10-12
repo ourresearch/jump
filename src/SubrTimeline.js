@@ -2,13 +2,13 @@ import {sumObjects} from "./util";
 
 class SubrTimeline {
 
-    constructor(apiUsage, userSettings, firstYearCost) {
+    constructor(apiUsage, citations, userSettings, firstYearCost) {
         this.userSettings = userSettings
         this.firstYearCost = firstYearCost
         this.apiUsage = apiUsage
         this.name = "fullSubscription"
         this.displayName = "Subscription"
-        this.yearlyCitations = {}
+        this.citations = citations
 
         this.cache = {}
 
@@ -26,6 +26,9 @@ class SubrTimeline {
 
     getCostTotal() {
         return Object.values(this.getCostByTypeByYear()).reduce((a, b) => a + b)
+    }
+    getCostPerNegotiableUse(){
+        return this.getCostTotal() / this.getNegotiableUsage()
     }
 
     getCostByTypeByYear() {
@@ -46,9 +49,13 @@ class SubrTimeline {
         return Object.values(this.getUsageCounts()).reduce((a, b) => a + b)
     }
 
-    getNonfreeUsage() {
+    getFreeUsage() {
         const counts = this.getUsageCounts()
-        return this.getUsageTotal() - (counts.oa + counts.backCatalog)
+        return counts.oa + counts.backCatalog + counts.rg
+    }
+
+    getNegotiableUsage() {
+        return this.getUsageTotal() - this.getFreeUsage()
     }
 
     getUsageCounts() {
@@ -66,7 +73,7 @@ class SubrTimeline {
 
     getPercInstantAccess() {
         const usage = this.getUsageCounts()
-        return 100 * (usage.fullSubscription + usage.docdel + usage.oa + usage.backCatalog) / this.getUsageTotal()
+        return 100 * (usage.fullSubscription + usage.docdel + usage.oa + usage.backCatalog + usage.rg) / this.getUsageTotal()
     }
 
     getUsageByTypeByYear() {
@@ -75,24 +82,47 @@ class SubrTimeline {
         }
         const ret = {}
         this.apiUsage.forEach(apiUsageStats => {
-            const total = apiUsageStats.useCount
-            const free = apiUsageStats.oaUseCount + apiUsageStats.backCatalogUseCount
-            const nonFree = total - free
-
-            const usage = {
-                softTurnaway: 0,
-                fullSubscription: nonFree,
-                docdel: 0,
-                ill: 0,
-                oa: apiUsageStats.oaUseCount || 0,
-                backCatalog: apiUsageStats.backCatalogUseCount || 0
-            }
-            ret[apiUsageStats.year] = usage
+            ret[apiUsageStats.year] = this._makeUsageDictFromYearStats(apiUsageStats)
         })
 
         this.cache.getUsageByTypeByYear = ret
         return ret
     }
+
+    _weightApiUsageStats(apiUsageStats){
+        const citationWeight = this.userSettings.downloadsPerCitation / apiUsageStats.useCount
+        const authorshipWeight = this.userSettings.downloadsPerAuthorship / apiUsageStats.useCount
+        const ret = {}
+        Object.entries(apiUsageStats).forEach(([k,v])=>{
+            const citationDownloads = v * citationWeight
+            const authorshipDownloads = v * authorshipWeight
+            ret[k] = v + citationDownloads + authorshipDownloads
+        })
+        return ret
+    }
+
+
+    _makeUsageDictFromYearStats(apiUsageStats) {
+        const weightedStats = this._weightApiUsageStats(apiUsageStats)
+        const total = weightedStats.useCount
+        let free = weightedStats.oaUseCount + weightedStats.backCatalogUseCount + weightedStats.rgUseCount
+        if (free > total) free = total
+
+        const nonFree = total - free
+        return {
+            // these get changed in subclasses
+            softTurnaway: 0,
+            fullSubscription: nonFree,
+            docdel: 0,
+            ill: 0,
+
+            // these don't
+            oa: weightedStats.oaUseCount || 0,
+            backCatalog: weightedStats.backCatalogUseCount || 0,
+            rg: weightedStats.rgUseCount || 0,
+        }
+    }
+
 
 }
 
@@ -104,27 +134,14 @@ class IllSubrTimeline extends SubrTimeline {
         this.displayName = "ILL"
     }
 
-    getUsageByTypeByYear() {
-        const ret = {}
-        this.apiUsage.forEach(apiUsageStats => {
-            const total = apiUsageStats.useCount
-            const free = apiUsageStats.oaUseCount + apiUsageStats.backCatalogUseCount
-            const turnaway = total - free
-            const hardTurnawayCount = turnaway * this.userSettings.hardTurnawayProp
 
-            const usage = {
-                softTurnaway: Math.round(turnaway - hardTurnawayCount),
-                fullSubscription: 0,
-                docdel: 0,
-                ill: hardTurnawayCount,
-                oa: apiUsageStats.oaUseCount || 0,
-                backCatalog: apiUsageStats.backCatalogUseCount || 0
-            }
-            ret[apiUsageStats.year] = usage
-        })
-        return ret
+    _makeUsageDictFromYearStats(apiUsageStats){
+        const usage = super._makeUsageDictFromYearStats(apiUsageStats)
+        usage.ill = usage.fullSubscription * this.userSettings.hardTurnawayProp
+        usage.turnaway = usage.fullSubscription - usage.ill
+        usage.fullSubscription = 0
+        return usage
     }
-
 
     getCostByTypeByYear() {
         const ret = {}
@@ -142,25 +159,12 @@ class DocdelSubrTimeline extends SubrTimeline {
         this.displayName = "DocDel"
     }
 
-    getUsageByTypeByYear() {
-        const ret = {}
-        this.apiUsage.forEach(apiUsageStats => {
-            const total = apiUsageStats.useCount
-            const free = apiUsageStats.oaUseCount + apiUsageStats.backCatalogUseCount
-            const turnaway = total - free
-            const hardTurnawayCount = turnaway * this.userSettings.hardTurnawayProp
-
-            const usage = {
-                softTurnaway: Math.round(turnaway - hardTurnawayCount),
-                fullSubscription: 0,
-                docdel: hardTurnawayCount,
-                ill: 0,
-                oa: apiUsageStats.oaUseCount || 0,
-                backCatalog: apiUsageStats.backCatalogUseCount || 0
-            }
-            ret[apiUsageStats.year] = usage
-        })
-        return ret
+    _makeUsageDictFromYearStats(apiUsageStats){
+        const usage = super._makeUsageDictFromYearStats(apiUsageStats)
+        usage.docdel = usage.fullSubscription * this.userSettings.hardTurnawayProp
+        usage.turnaway = usage.fullSubscription - usage.docdel
+        usage.fullSubscription = 0
+        return usage
     }
 
     getCostByTypeByYear() {
@@ -172,11 +176,11 @@ class DocdelSubrTimeline extends SubrTimeline {
     }
 }
 
-const makeTimelines = function (apiUsage, userSettings, firstYearCost) {
+const makeTimelines = function (apiUsage, citations, userSettings, firstYearCost) {
     return {
-        fullSubscription: new SubrTimeline(apiUsage, userSettings, firstYearCost),
-        ill: new IllSubrTimeline(apiUsage, userSettings, firstYearCost),
-        docdel: new DocdelSubrTimeline(apiUsage, userSettings, firstYearCost),
+        fullSubscription: new SubrTimeline(apiUsage, citations, userSettings, firstYearCost),
+        ill: new IllSubrTimeline(apiUsage, citations, userSettings, firstYearCost),
+        docdel: new DocdelSubrTimeline(apiUsage, citations, userSettings, firstYearCost),
     }
 }
 

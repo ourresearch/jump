@@ -4,62 +4,18 @@
 
         <!-- journal META section -->
         <v-layout align-content-center align-center>
-
-
-            <v-flex xs3 class="col">
-                <div>
-                    <div class="name title upper">
-                        {{data.meta.title}}
-                    </div>
-                    <div class="topic body-1 lower">
-                        <!--                                {{data.meta.issnl}}-->
-                        {{ data.meta.subject}}
-                    </div>
-                </div>
-            </v-flex>
-
-
-            <v-flex xs1 class="impact citations numbers col">
-                <v-tooltip top>
+            <v-flex xs1 class="col">
+                <v-tooltip bottom>
                     <template v-slot:activator="{ on }">
                         <div v-on="on">
-                            {{data.citations.toLocaleString()}}
-                            <i class="fas fa-pencil-alt light"></i>
+                            {{Math.round(data.getTotalDownloads() / 5).toLocaleString()}}
                         </div>
                     </template>
                     <span>
-                            Annual citations from UVA faculty
-                        </span>
+                                    Total annual downloads
+                                </span>
                 </v-tooltip>
-            </v-flex>
 
-            <v-flex xs1 class="impact usage numbers col">
-                <div>
-                    <div class="upper">
-                        <v-tooltip top>
-                            <template v-slot:activator="{ on }">
-                                <div v-on="on">
-                                    {{Math.round(data.getAdjUse() / 5).toLocaleString()}}
-                                </div>
-                            </template>
-                            <span>
-                                Annual paid usage
-                            </span>
-                        </v-tooltip>
-                    </div>
-                    <div class="lower body-1">
-                        <v-tooltip bottom>
-                            <template v-slot:activator="{ on }">
-                                <div v-on="on">
-                                    {{Math.round(data.getTotalDownloads() / 5).toLocaleString()}}
-                                </div>
-                            </template>
-                            <span>
-                                Total annual downloads
-                            </span>
-                        </v-tooltip>
-                    </div>
-                </div>
             </v-flex>
             <v-flex style="max-width: 80px;" class="mx-4">
                 <div style="height: 100%; flex-grow: 1; display:flex;">
@@ -73,7 +29,34 @@
                 </div>
 
             </v-flex>
-            <v-flex class="subr fulfillment">
+
+
+
+            <v-flex xs4 class="col">
+                <div>
+                    <div class="name title upper">
+                        {{data.meta.title}}
+                    </div>
+                    <div class="topic body-1 lower">
+                        <!--                                {{data.meta.issnl}}-->
+                        {{ data.meta.subject}}
+                    </div>
+                </div>
+            </v-flex>
+
+            <v-flex xs2 class="col cost">
+                <div>
+                    <div class="title upper">
+                        {{ currency(data.selectedTimeline.getCostTotal() / 5) }}
+                    </div>
+                    <div class="lower">
+                        {{ currency(data.selectedTimeline.getCostPerNegotiableUse())}}
+                    </div>
+                </div>
+            </v-flex>
+
+
+            <v-flex v-if="false" class="subr fulfillment">
                 <div @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: 'fullSubscription'})"
                      class="subr full"
                      :style="{color: display.color('fullSubscription')}"
@@ -84,7 +67,7 @@
 
             </v-flex>
 
-            <v-flex class="item-level fulfillment">
+            <v-flex v-if="false" class="item-level fulfillment">
                 <div>
                     <div @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: 'ill'})"
                          class="subr ill"
@@ -139,8 +122,7 @@
             }
 
         },
-        computed: {
-        },
+        computed: {},
         watchers() {
         }
     }

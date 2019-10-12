@@ -34,7 +34,8 @@ export const api = {
                             issnl: journal.issn_l
 
                         },
-                        citations: journal.citations_from_mit_in_2018,
+                        citations: journal.num_citations,
+                        authorships: journal.num_authorships,
                         yearlyDownloads:downloadsByYear,
                         fullSubrCost2018: journal.dollars_2018_subscription,
 
@@ -55,11 +56,14 @@ export const api = {
 
 
 function apiDownloadsByYear(api_downloads) {
+
     return api_downloads.year.map((year, i) => {
+
         return {
             useCount: api_downloads.total[i],
             oaUseCount: api_downloads.oa[i],
             backCatalogUseCount: api_downloads.back_catalog[i],
+            rgUseCount:  api_downloads.researchgate[i],
             year: year
         }
     })

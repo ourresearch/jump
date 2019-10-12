@@ -47,7 +47,12 @@ class Scenario {
     }
     getUsageInstant(){
         const usage = this.getUsageByType()
-        return usage.fullSubscription + usage.docdel + usage.oa + usage.backCatalog
+        return usage.fullSubscription + usage.oa + usage.backCatalog + usage.rg
+    }
+    getUsageDelayed(){
+        const usage = this.getUsageByType()
+        return usage.ill + usage.docdel
+
     }
     getPercInstantAccess(){
         return 100 * this.getUsageInstant() / this.getUsageTotal()

@@ -8,6 +8,7 @@ class Journal {
 
         this.timelines = makeTimelines(
             apiData.yearlyDownloads,
+            3,
             userSettings,
             apiData.fullSubrCost2018
         )
@@ -25,7 +26,7 @@ class Journal {
     }
 
     getAdjUse(){
-        return this.selectedTimeline.getNonfreeUsage()
+        return this.selectedTimeline.getNegotiableUsage()
     }
 
     getAdjSubrCost(){
@@ -53,7 +54,8 @@ class Journal {
         this.sortKeys = {
             title: this.apiData.meta.title,
             subrCpua: this.getAdjSubrCPU() || 1000000000,
-            totalUsage: this.getTotalDownloads()
+            totalUsage: this.getTotalDownloads(),
+            citations: this.citations,
         }
     }
 }

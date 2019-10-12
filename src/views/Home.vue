@@ -144,7 +144,7 @@
                                 class="pa-0 mt-1"></v-checkbox>
                     </v-flex>
                     <v-flex grow>
-                        <journal-row @subscribe="subscribe" :data="journalData"></journal-row>
+                        <journal-row @subscribe="subscribeHandler" :data="journalData"></journal-row>
                     </v-flex>
                 </v-layout>
             </v-flex>
@@ -212,7 +212,7 @@
         },
         data: () => ({
             currentPage: 1,
-            pageSize: 50,
+            pageSize: 20,
             sortBy: "default",
             api: api,
             isLoading: false,
@@ -220,6 +220,7 @@
                 {text: "Subscription value", name: "subrCpua"},
                 {text: "Total usage", name: "totalUsage", isDescending: true},
                 {text: "Title", name: "title"},
+                {text: "Citations", name: "citations", isDescending: true},
 
             ],
             selectedSorter: {text: "Total usage", name: "totalUsage", isDescending: true},
@@ -238,6 +239,7 @@
             userSettingsList: [],
             display: display,
             apiJournals: [],
+            subrs: {},
 
         }),
         computed: {
@@ -337,6 +339,7 @@
                 console.log("subscribe selected", newSubscriptionName)
                 this.selectedJournals.forEach(j => {
                     j.subscribe(newSubscriptionName)
+                    this.subrs[j.meta.issnl] = newSubscriptionName
                 })
                 this.unselectAll()
                 this.sortJournalsList()
@@ -344,10 +347,6 @@
             },
 
 
-            getSubscription(issnl) {
-                if (this.subscriptions[issnl]) return this.subscriptions[issnl]
-                return "free"
-            },
 
             printScenarioComparison() {
                 this.scenario = new Scenario(this.journalsList)
@@ -362,9 +361,11 @@
 
             },
 
-            subscribe(args) {
+
+            subscribeHandler(args) {
                 const myIssnl = args.issnl
                 const mySubscriptionName = args.subscriptionName
+                this.subrs[myIssnl] = mySubscriptionName
 
                 this.journalsList.find(j => {
                     return j.meta.issnl === myIssnl
@@ -401,8 +402,13 @@
             makeJournalsList(){
                 console.log("printing journals")
                 this.journalsList = this.apiJournals.map(j=>{
-                    return new Journal(j, this.userSettings)
+                    const myJournal = new Journal(j, this.userSettings)
+                    if (this.subrs[myJournal.meta.issnl]) {
+                        myJournal.subscribe(this.subrs[myJournal.meta.issnl])
+                    }
+                    return myJournal
                 })
+                this.sortJournalsList()
                 this.printScenarioComparison()
             }
 
