@@ -47,7 +47,7 @@ class Scenario {
     }
     getUsageInstant(){
         const usage = this.getUsageByType()
-        return usage.fullSubscription + usage.oa + usage.backCatalog + usage.rg
+        return usage.fullSubscription + usage.oa + usage.backCatalog + usage.rg + usage.docdel
     }
     getUsageDelayed(){
         const usage = this.getUsageByType()
