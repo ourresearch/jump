@@ -2,13 +2,16 @@ import {sumObjects} from "./util";
 
 class SubrTimeline {
 
-    constructor(apiUsage, citations, userSettings, firstYearCost) {
+    constructor(apiData, userSettings) {
         this.userSettings = userSettings
-        this.firstYearCost = firstYearCost
-        this.apiUsage = apiUsage
+
+        this.firstYearCost = apiData.fullSubrCost2018
+        this.apiUsage = apiData.yearlyDownloads
+        this.citations = apiData.citations
+        this.authorships = apiData.authorships
+
         this.name = "fullSubscription"
         this.displayName = "Subscription"
-        this.citations = citations
 
         this.cache = {}
 
@@ -94,8 +97,14 @@ class SubrTimeline {
     }
 
     _weightApiUsageStats(apiUsageStats){
-        const citationWeight = this.userSettings.downloadsPerCitation / apiUsageStats.useCount
-        const authorshipWeight = this.userSettings.downloadsPerAuthorship / apiUsageStats.useCount
+        const downloadsFromCitations = this.userSettings.downloadsPerCitation * this.citations
+        const downloadsFromAuthorships = this.userSettings.downloadsPerAuthorship * this.authorships
+
+
+
+        const citationWeight = downloadsFromCitations / apiUsageStats.useCount
+        const authorshipWeight = downloadsFromAuthorships / apiUsageStats.useCount
+
         const ret = {}
         Object.entries(apiUsageStats).forEach(([k,v])=>{
             const citationDownloads = v * citationWeight
@@ -180,17 +189,9 @@ class DocdelSubrTimeline extends SubrTimeline {
     }
 }
 
-const makeTimelines = function (apiUsage, citations, userSettings, firstYearCost) {
-    return {
-        fullSubscription: new SubrTimeline(apiUsage, citations, userSettings, firstYearCost),
-        ill: new IllSubrTimeline(apiUsage, citations, userSettings, firstYearCost),
-        docdel: new DocdelSubrTimeline(apiUsage, citations, userSettings, firstYearCost),
-    }
-}
 
 
 export {
-    makeTimelines,
     SubrTimeline,
     IllSubrTimeline,
     DocdelSubrTimeline,

@@ -104,7 +104,38 @@
         <!-- expanded section! -->
         <v-layout v-if="data.isExpanded">
             <v-flex>
-                EXPANDO
+                <table class="pretty usage-metrics">
+                    <tr>
+                        <th>usage metric</th>
+                        <th>count</th>
+                        <th>multiplier</th>
+                        <th>contribution</th>
+                    </tr>
+                    <tr>
+                        <td>COUNTER downloads</td>
+                        <td>{{data.getAnnualRawDownloadsTotal()}}</td>
+                        <td>1x</td>
+                        <td>{{data.getAnnualRawDownloadsTotal()}}</td>
+                    </tr>
+                    <tr>
+                        <td>institutional citations</td>
+                        <td>{{data.citations}}</td>
+                        <td>{{ data.userSettings.downloadsPerCitation }}x</td>
+                        <td>{{data.citations * data.userSettings.downloadsPerCitation}}</td>
+                    </tr>
+                    <tr>
+                        <td>institutional authorships</td>
+                        <td>{{data.authorships}}</td>
+                        <td>{{ data.userSettings.downloadsPerAuthorship }}x</td>
+                        <td>{{data.authorships * data.userSettings.downloadsPerAuthorship}}</td>
+                    </tr>
+                    <tr>
+                        <td>weighted usage (total)</td>
+                        <td></td>
+                        <td></td>
+                        <td>{{data.getTotalDownloads().toLocaleString()}}</td>
+                    </tr>
+                </table>
             </v-flex>
         </v-layout>
 
@@ -150,6 +181,13 @@
 </script>
 
 <style scoped lang="scss">
+    table.usage-metrics {
+        td, th {
+            max-width: 7em;
+            line-height: 1;
+            padding: 5px;
+        }
+    }
 
     .subr {
         cursor: pointer;

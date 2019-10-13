@@ -1,4 +1,4 @@
-import {makeTimelines} from "./SubrTimeline";
+import {SubrTimeline, IllSubrTimeline, DocdelSubrTimeline} from "./SubrTimeline";
 
 
 class Journal {
@@ -6,17 +6,19 @@ class Journal {
         this.meta = apiData.meta
         this.userSettings = userSettings
 
-        this.timelines = makeTimelines(
-            apiData.yearlyDownloads,
-            3,
-            userSettings,
-            apiData.fullSubrCost2018
-        )
+        this.timelines = {
+            fullSubscription: new SubrTimeline(apiData, userSettings),
+            ill: new IllSubrTimeline(apiData, userSettings),
+            docdel: new DocdelSubrTimeline(apiData, userSettings),
+        };
+
+
         this.selectedTimeline = this.timelines.ill
         this.sortKeys = {}
         this.apiData = apiData
         this.isSelected = false
         this.citations = apiData.citations
+        this.authorships = apiData.authorships
 
         this.isExpanded = false
 
@@ -24,7 +26,10 @@ class Journal {
     }
 
     getTotalDownloads(){
-        return this.selectedTimeline.getAnnualUsageTotal()
+        return Math.round(this.selectedTimeline.getAnnualUsageTotal())
+    }
+    getAnnualRawDownloadsTotal(){
+        return Math.round(_.sum(this.apiData.yearlyDownloads.map(year=>year.useCount)) / 5 || 0)
     }
 
     getAdjUse(){

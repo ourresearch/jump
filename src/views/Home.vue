@@ -454,6 +454,18 @@
                     }
                     return myJournal
                 })
+                this.cheapestCost = _.sum(this.journalsList.map(j=>j.getCheapestCost()));
+
+                // make the Big Deal Scenario
+                const fullSubscriptionJournals = this.apiJournals.map(j=>{
+                    const myJournal = new Journal(j, this.userSettings);
+                    myJournal.subscribe("fullSubscription");
+                    return myJournal
+                })
+                this.oldScenario = new BigDealScenario(
+                    fullSubscriptionJournals,
+                    this.userSettings
+                )
                 this.sortJournalsList()
                 this.printScenarioComparison()
             }
@@ -468,19 +480,10 @@
                 .then(resp => {
                     this.apiJournals = resp
                     this.makeJournalsList()
-                    this.cheapestCost = _.sum(this.journalsList.map(j=>j.getCheapestCost()));
 
 
-                    // make the Big Deal Scenario just once
-                    const fullSubscriptionJournals = this.apiJournals.map(j=>{
-                        const myJournal = new Journal(j, this.userSettings);
-                        myJournal.subscribe("fullSubscription");
-                        return myJournal
-                    })
-                    this.oldScenario = new BigDealScenario(
-                        fullSubscriptionJournals,
-                        this.userSettings
-                    )
+
+
                 })
         },
         watch: {}
