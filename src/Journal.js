@@ -18,6 +18,8 @@ class Journal {
         this.isSelected = false
         this.citations = apiData.citations
 
+        this.isExpanded = false
+
         this.subscribe("ill")
     }
 
@@ -86,11 +88,10 @@ class Journal {
     _setSortKeys() {
         this.sortKeys = {
             title: this.apiData.meta.title,
-            subrCpua: this.getAdjSubrCPU() || 1000000000,
             totalUsage: this.getTotalDownloads(),
             citations: this.citations,
-            bestCpnu: this.getCheapestTimeline().getCostPerNegotiableUse(),
-            bestCpnuNoIll: this.getCheapestTimeline(true).getCostPerNegotiableUse(),
+            bestCpnu: this.getCheapestTimeline().getCostPerNegotiableUse()|| 1000000000,
+            bestCpnuNoIll: this.getCheapestTimeline(true).getCostPerNegotiableUse()|| 1000000000,
         }
     }
 }

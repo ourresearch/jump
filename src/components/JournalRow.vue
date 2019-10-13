@@ -1,24 +1,32 @@
 <template>
-    <v-container grid-list-sm fluid class="journal pa-0">
+    <v-container  grid-list-sm fluid class="journal pa-0">
 
 
         <!-- journal META section -->
-        <v-layout align-content-center align-center>
+        <v-layout class="top-row" @click="data.isExpanded=!data.isExpanded" align-content-center align-center>
             <v-flex xs1 class="col">
-                <v-tooltip bottom>
-                    <template v-slot:activator="{ on }">
-                        <div v-on="on">
-                            {{Math.round(data.getTotalDownloads()).toLocaleString()}}
-                        </div>
-                    </template>
-                    <span>
-                                    Total annual downloads
-                                </span>
-                </v-tooltip>
+                <div>
+                    <div class="upper title">
+                        <v-tooltip bottom>
+                            <template v-slot:activator="{ on }">
+                                <div v-on="on">
+                                    {{Math.round(data.getTotalDownloads()).toLocaleString()}}
+                                </div>
+                            </template>
+                            <span>
+                                Total annual downloads
+                            </span>
+                        </v-tooltip>
+                    </div>
+
+                </div>
 
             </v-flex>
             <v-flex style="max-width: 80px;" class="mx-4">
-                <div style="height: 100%; flex-grow: 1; display:flex;">
+                <div v-if="!data.getTotalDownloads()" style="display:flex;align-content:center; justify-content: center; opacity: .5;">
+                    No usage
+                </div>
+                <div style="height: 100%; flex-grow: 1; display:flex;" v-if="data.getTotalDownloads() > 0">
                     <div :key="year"
                          style="height: 50px; flex-grow: 1"
                          v-for="(usageDict, year) in data.selectedTimeline.getUsageByTypeByYear()">
@@ -90,6 +98,16 @@
 
             </v-flex>
         </v-layout>
+
+
+
+        <!-- expanded section! -->
+        <v-layout v-if="data.isExpanded">
+            <v-flex>
+                EXPANDO
+            </v-flex>
+        </v-layout>
+
 
 
     </v-container>

@@ -25,7 +25,10 @@ class SubrTimeline {
 
 
     getCostTotal() {
-        return Object.values(this.getCostByTypeByYear()).reduce((a, b) => a + b) / 5 || 0
+        if (this.cache.getCostTotal) return this.cache.getCostTotal
+        const ret = Object.values(this.getCostByTypeByYear()).reduce((a, b) => a + b) / 5 || 0
+        this.cache.getCostTotal = ret
+        return ret
     }
     getCostPerNegotiableUse(){
         return (this.getCostTotal() / this.getNegotiableUsage()) || 0

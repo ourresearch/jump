@@ -140,7 +140,7 @@
                     v-for="journalData in journalsPage"
                     :key="journalData.issnl"
                     class="ma-3">
-                <v-layout>
+                <v-layout class="journal-row" :class="{expanded:journalData.isExpanded}">
                     <v-flex shrink>
                         <v-checkbox
                                 v-model="journalData.isSelected"
@@ -220,7 +220,6 @@
             api: api,
             isLoading: false,
             sorters: [
-                {text: "Subscription value", name: "subrCpua"},
                 {text: "Best Cost Per Negotiable Use", name: "bestCpnu"},
                 {text: "Best Cost Per Negotiable Use (no ILL)", name: "bestCpnuNoIll"},
                 {text: "Total usage", name: "totalUsage", isDescending: true},
@@ -491,6 +490,18 @@
 
 
 <style lang="scss">
+    .journal-row {
+        cursor:pointer;
+        &:hover {
+            background: #f0f0f0;
+        }
+        &.expanded {
+            background: #f0f0f0;
+
+        }
+    }
+
+
     .sorting-by {
         opacity: .5;
     }
