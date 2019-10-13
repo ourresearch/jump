@@ -22,7 +22,7 @@ class Journal {
     }
 
     getTotalDownloads(){
-        return this.selectedTimeline.getUsageTotal()
+        return this.selectedTimeline.getAnnualUsageTotal()
     }
 
     getAdjUse(){
@@ -46,8 +46,19 @@ class Journal {
         return this.timelines.fullSubscription.getCostTotal() < this.selectedTimeline.getCostTotal()
     }
 
+    getFullSubrCostAboveIll(){
+        return this.timelines.fullSubscription.getCostTotal() - this.timelines.ill.getCostTotal()
+    }
 
-    subscribeToCheapest(docdelOnly=false){
+    getCheapestCost(){
+        return this.getCheapestTimeline(false).getCostTotal()
+    }
+    getCheapestTimelineName(){
+        return this.getCheapestTimeline(false).name
+    }
+
+
+    getCheapestTimeline(docdelOnly){
         const filtered =  Object.values(this.timelines).filter(timeline=>{
             if (docdelOnly && timeline.name==='ill') {
                 return false
@@ -59,7 +70,12 @@ class Journal {
         let sorted = filtered.sort((a,b)=>{
                 return a.getCostTotal() - b.getCostTotal()
         })
-        this.subscribe(sorted[0].name)
+        return sorted[0]
+    }
+
+
+    subscribeToCheapest(docdelOnly=false){
+        this.subscribe(this.getCheapestTimeline(docdelOnly).name)
     }
 
     subscribe(subscriptionName) {
@@ -67,13 +83,14 @@ class Journal {
         this._setSortKeys()
     }
 
-
     _setSortKeys() {
         this.sortKeys = {
             title: this.apiData.meta.title,
             subrCpua: this.getAdjSubrCPU() || 1000000000,
             totalUsage: this.getTotalDownloads(),
             citations: this.citations,
+            bestCpnu: this.getCheapestTimeline().getCostPerNegotiableUse(),
+            bestCpnuNoIll: this.getCheapestTimeline(true).getCostPerNegotiableUse(),
         }
     }
 }

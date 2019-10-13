@@ -33,6 +33,14 @@ class Scenario {
         })
 
         this.cache.getUsageByTypeByYear = ret
+
+        // return format looks like this:
+        const exampleReturn = {
+            2020: {fullSubscription: 12, ill: 42 },
+            2021: {fullSubscription: 32, ill: 49 },
+        }
+
+
         return ret
     }
 
@@ -42,20 +50,15 @@ class Scenario {
             return mySum / 5
         })
     }
-    getUsageTotal(){
+    getAnnualUsageTotal(){
         return Object.values(this.getUsageByType()).reduce((a, b) => a + b)
     }
     getUsageInstant(){
         const usage = this.getUsageByType()
         return usage.fullSubscription + usage.oa + usage.backCatalog + usage.rg + usage.docdel
     }
-    getUsageDelayed(){
-        const usage = this.getUsageByType()
-        return usage.ill + usage.docdel
-
-    }
     getPercInstantAccess(){
-        return 100 * this.getUsageInstant() / this.getUsageTotal()
+        return 100 * this.getUsageInstant() / this.getAnnualUsageTotal()
     }
 
 
@@ -85,18 +88,32 @@ class Scenario {
 
         const groups = this._getTimelinesByName()
         const costBySubr =  _.mapValues(groups, timelinesList=>{  //  ill, docdel, and fullSubscription
-            return timelinesList.map(t=>t.getCostTotal() / 5).reduce((a,b)=>a+b)
+            return timelinesList.map(t=>t.getCostTotal()).reduce((a,b)=>a+b)
         })
         return costBySubr
     }
 
     getCostTotal(){
+        return this.journalsList.map(j=>j.selectedTimeline.getCostTotal()).reduce((a,b)=>a+b)
         return Object.values(this.getCostByType()).reduce((a,b)=>a+b)
     }
 
 
     getCostPerInstantUse(){
         return this.getCostTotal() / this.getUsageInstant()
+    }
+
+
+
+
+    /// setters
+
+    subscribe(maxCost=Infinity, noIll=false){
+
+    }
+
+    subscribeToIssnl(issnl, newSubrName){
+
     }
 
 

@@ -87,7 +87,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="num">{{nf(scenario.getUsageTotal(), true)}}</td>
+                                    <td class="num">{{nf(scenario.getAnnualUsageTotal(), true)}}</td>
                                     <td>100%</td>
                                     <td>Total uses</td>
                                 </tr>
@@ -166,7 +166,7 @@
             <v-layout>
                 <v-flex>
                     <v-btn @click="$emit('subscribe', {instantAccess:null, docdelOnly:false})">Cheapest ILL</v-btn>
-                    <v-btn @click="$emit('subscribe',  {instantAccess:null, docdelOnly:true})">Cheapest DocDel</v-btn>
+                    <v-btn @click="$emit('subscribe',  {instantAccess:null, maxCost:2200000, docdelOnly:false})">Spend $2.2M, no docdel</v-btn>
                 </v-flex>
             </v-layout>
 

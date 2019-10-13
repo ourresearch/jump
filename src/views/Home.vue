@@ -84,7 +84,7 @@
                                     <v-list-tile
                                             v-for="sorter in sorters"
                                             :key="sorter.name"
-                                            @click="selectSorter(sorter)"
+                                            @click="setSorter(sorter.name)"
                                     >
                                         <v-list-tile-title>{{ sorter.text }}</v-list-tile-title>
                                     </v-list-tile>
@@ -221,6 +221,8 @@
             isLoading: false,
             sorters: [
                 {text: "Subscription value", name: "subrCpua"},
+                {text: "Best Cost Per Negotiable Use", name: "bestCpnu"},
+                {text: "Best Cost Per Negotiable Use (no ILL)", name: "bestCpnuNoIll"},
                 {text: "Total usage", name: "totalUsage", isDescending: true},
                 {text: "Title", name: "title"},
                 {text: "Citations", name: "citations", isDescending: true},
@@ -243,6 +245,7 @@
             display: display,
             apiJournals: [],
             subrs: {},
+            cheapestCost: 0,
 
         }),
         computed: {
@@ -314,7 +317,6 @@
 
             },
             unselectAll() {
-                console.log("unselect all")
                 this.journalsList.forEach(j => {
                     j.isSelected = false
                 })
@@ -350,14 +352,45 @@
             },
             gangSubscribeHandler(args){
                 console.log("gang subscribe!", args)
+
+                const docdelOnly = args.docdelOnly
+                if (docdelOnly){
+                    this.setSorter("bestCpnuNoIll")
+                }
+                else {
+                    this.setSorter("bestCpnu")
+                }
+
+
+                // how much are we spending?
+                let costSoFar = this.cheapestCost
+                const maxCost = args.maxCost || this.cheapestCost
+
+                console.log("setting new subscriptions. max cost: ", maxCost)
+
                 this.journalsList.forEach(j=>{
-                    j.subscribeToCheapest(args.docdelOnly)
+                    let mySubr
+                    const fullSubrCostAboveIll = j.getFullSubrCostAboveIll()
+                    if (costSoFar < maxCost && fullSubrCostAboveIll > 0){
+                        mySubr = "fullSubscription"
+                        costSoFar += fullSubrCostAboveIll
+                    }
+                    else {
+                        mySubr = j.getCheapestTimelineName()
+                        // no need to add or subtract to cost because the costsSoFar variable we are using
+                        // was already the sum of all the cheapest costs.
+                    }
+
+                    j.subscribe(mySubr)
+                    this.subrs[j.meta.issnl] = mySubr
                 })
+
+                console.log("done setting new subscriptions")
                 this.unselectAll()
-                this.sortJournalsList()
                 this.printScenarioComparison()
 
             },
+
 
 
 
@@ -389,7 +422,8 @@
 
 
             },
-            selectSorter(newSorter) {
+            setSorter(newSorterName) {
+                const newSorter = this.sorters.find(s=>s.name===newSorterName)
                 console.log("select sort!", newSorter)
                 this.selectedSorter = newSorter
                 this.sortJournalsList()
@@ -435,12 +469,13 @@
                 .then(resp => {
                     this.apiJournals = resp
                     this.makeJournalsList()
+                    this.cheapestCost = _.sum(this.journalsList.map(j=>j.getCheapestCost()));
 
 
                     // make the Big Deal Scenario just once
                     const fullSubscriptionJournals = this.apiJournals.map(j=>{
-                        const myJournal = new Journal(j, this.userSettings)
-                        myJournal.subscribe("fullSubscription")
+                        const myJournal = new Journal(j, this.userSettings);
+                        myJournal.subscribe("fullSubscription");
                         return myJournal
                     })
                     this.oldScenario = new BigDealScenario(

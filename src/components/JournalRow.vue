@@ -8,7 +8,7 @@
                 <v-tooltip bottom>
                     <template v-slot:activator="{ on }">
                         <div v-on="on">
-                            {{Math.round(data.getTotalDownloads() / 5).toLocaleString()}}
+                            {{Math.round(data.getTotalDownloads()).toLocaleString()}}
                         </div>
                     </template>
                     <span>
@@ -50,7 +50,7 @@
                         Overpaying!
                     </div>
                     <div class="title upper">
-                        {{ currency(data.selectedTimeline.getCostTotal() / 5) }}
+                        {{ currency(data.selectedTimeline.getCostTotal()) }}
                     </div>
                     <div class="lower">
                         {{ currency(data.selectedTimeline.getCostPerNegotiableUse())}}
@@ -65,7 +65,7 @@
                      :style="{color: display.color('fullSubscription')}"
                      :class="{selected: data.selectedTimeline.name==='fullSubscription'}">
                     <div class="upper">{{currency(data.getAdjSubrCPU())}}</div>
-                    <div class="lower">+{{ currency(data.getAdjSubrCost() / 5) }}</div>
+                    <div class="lower">+{{ currency(data.getAdjSubrCost()) }}</div>
                 </div>
 
             </v-flex>
@@ -76,14 +76,14 @@
                          class="subr ill"
                          :style="{color: display.color('ill')}"
                          :class="{selected: data.selectedTimeline.name==='ill'}">
-                        <span class="num">{{currency(data.getIllCost() / 5, true)}}</span>
+                        <span class="num">{{currency(data.getIllCost(), true)}}</span>
                         <span class="word">base (ILL)</span>
                     </div>
                     <div @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: 'docdel'})"
                          class="subr docdel"
                          :style="{color: display.color('docdel')}"
                          :class="{selected: data.selectedTimeline.name==='docdel'}">
-                        <span class="num">+{{ currency(data.getDocdelCost() / 5, true) }}</span>
+                        <span class="num">+{{ currency(data.getDocdelCost(), true) }}</span>
                         <span class="word">DocDel</span>
                     </div>
                 </div>

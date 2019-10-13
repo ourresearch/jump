@@ -25,7 +25,7 @@ class SubrTimeline {
 
 
     getCostTotal() {
-        return Object.values(this.getCostByTypeByYear()).reduce((a, b) => a + b) || 0
+        return Object.values(this.getCostByTypeByYear()).reduce((a, b) => a + b) / 5 || 0
     }
     getCostPerNegotiableUse(){
         return (this.getCostTotal() / this.getNegotiableUsage()) || 0
@@ -45,21 +45,22 @@ class SubrTimeline {
         return ret
     }
 
-    getUsageTotal() {
-        return Object.values(this.getUsageCounts()).reduce((a, b) => a + b)
+    getAnnualUsageTotal() {
+        return Object.values(this.getAnnualUsageByType()).reduce((a, b) => a + b)
     }
 
     getFreeUsage() {
-        const counts = this.getUsageCounts()
-        return counts.oa + counts.backCatalog + counts.rg
+        const counts = this.getAnnualUsageByType()
+        return (counts.oa + counts.backCatalog + counts.rg)
     }
 
     getNegotiableUsage() {
-        return this.getUsageTotal() - this.getFreeUsage()
+        return (this.getAnnualUsageTotal() - this.getFreeUsage())
     }
 
-    getUsageCounts() {
-        return Object.values(this.getUsageByTypeByYear()).reduce(sumObjects)
+    getAnnualUsageByType() {
+        const totals = Object.values(this.getUsageByTypeByYear()).reduce(sumObjects)
+        return _.mapValues(totals, x => x / 5)
     }
 
 
@@ -72,8 +73,8 @@ class SubrTimeline {
     }
 
     getPercInstantAccess() {
-        const usage = this.getUsageCounts()
-        return 100 * (usage.fullSubscription + usage.docdel + usage.oa + usage.backCatalog + usage.rg) / this.getUsageTotal()
+        const usage = this.getAnnualUsageByType()
+        return 100 * (usage.fullSubscription + usage.docdel + usage.oa + usage.backCatalog + usage.rg) / (this.getAnnualUsageTotal() * 5)
     }
 
     getUsageByTypeByYear() {
