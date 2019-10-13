@@ -1,5 +1,5 @@
 <template>
-    <v-container  grid-list-sm fluid class="journal pa-0">
+    <v-container grid-list-sm fluid class="journal pa-0">
 
 
         <!-- journal META section -->
@@ -23,7 +23,8 @@
 
             </v-flex>
             <v-flex style="max-width: 80px;" class="mx-4">
-                <div v-if="!data.getTotalDownloads()" style="display:flex;align-content:center; justify-content: center; opacity: .5;">
+                <div v-if="!data.getTotalDownloads()"
+                     style="display:flex;align-content:center; justify-content: center; opacity: .5;">
                     No usage
                 </div>
                 <div style="height: 100%; flex-grow: 1; display:flex;" v-if="data.getTotalDownloads() > 0">
@@ -37,7 +38,6 @@
                 </div>
 
             </v-flex>
-
 
 
             <v-flex xs4 class="col">
@@ -100,7 +100,6 @@
         </v-layout>
 
 
-
         <!-- expanded section! -->
         <v-layout v-if="data.isExpanded">
             <v-flex>
@@ -137,8 +136,33 @@
                     </tr>
                 </table>
             </v-flex>
-        </v-layout>
+            <v-flex>
+                <table class="stats infographic">
+                    <tr :key="usageType.name"
+                        v-for="usageType in display.barSegments(data.selectedTimeline.getAnnualUsageByType())"
+                        v-if="true"
+                        class="stat"
+                        :style="{color: usageType.color}"
+                        :class="{callout: usageType.name==='fullSubscription'}">
+                        <td class="num">
+                            {{ nf(usageType.count) }}
+                        </td>
+                        <td class="perc">
+                            {{ nf(usageType.perc) }}%
+                        </td>
+                        <td>
+                            {{usageType.displayName}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="num">{{nf(data.selectedTimeline.getAnnualUsageTotal(), true)}}</td>
+                        <td>100%</td>
+                        <td>Total usage</td>
+                    </tr>
+                </table>
+            </v-flex>
 
+        </v-layout>
 
 
     </v-container>

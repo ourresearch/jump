@@ -89,7 +89,7 @@
                                 <tr>
                                     <td class="num">{{nf(scenario.getAnnualUsageTotal(), true)}}</td>
                                     <td>100%</td>
-                                    <td>Total uses</td>
+                                    <td>Total usage</td>
                                 </tr>
                             </table>
                         </v-flex>
