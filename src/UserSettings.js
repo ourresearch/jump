@@ -30,7 +30,22 @@ export default class UserSettings {
         // impact
         this.downloadsPerCitation = 0
         this.downloadsPerAuthorship = 0
+
+        // subscriptions
+        this.subrs = {}
+
+
     }
+
+    setSubr(issnl, subrName){
+        this.subrs[issnl] = subrName
+    }
+    getSubr(issnl){
+        console.log("getting subr from userSettings")
+        return this.subrs[issnl] || "ill"
+
+    }
+
 
     getList(){
         return Object.entries(displayNames).map(([k, v])=>{

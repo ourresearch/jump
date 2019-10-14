@@ -243,7 +243,6 @@
             userSettingsList: [],
             display: display,
             apiJournals: [],
-            subrs: {},
             cheapestCost: 0,
 
         }),
@@ -343,7 +342,7 @@
                 console.log("subscribe selected", newSubscriptionName)
                 this.selectedJournals.forEach(j => {
                     j.subscribe(newSubscriptionName)
-                    this.subrs[j.meta.issnl] = newSubscriptionName
+                    this.userSettings.setSubr(j.meta.issnl, newSubscriptionName)
                 })
                 this.unselectAll()
                 this.sortJournalsList()
@@ -381,7 +380,7 @@
                     }
 
                     j.subscribe(mySubr)
-                    this.subrs[j.meta.issnl] = mySubr
+                    this.userSettings.setSubr(j.meta.issnl, mySubr)
                 })
 
                 console.log("done setting new subscriptions")
@@ -410,7 +409,7 @@
             subscribeHandler(args) {
                 const myIssnl = args.issnl
                 const mySubscriptionName = args.subscriptionName
-                this.subrs[myIssnl] = mySubscriptionName
+                this.userSettings.setSubr(myIssnl, mySubscriptionName)
 
                 this.journalsList.find(j => {
                     return j.meta.issnl === myIssnl
@@ -449,9 +448,7 @@
                 console.log("printing journals")
                 this.journalsList = this.apiJournals.map(j=>{
                     const myJournal = new Journal(j, this.userSettings)
-                    if (this.subrs[myJournal.meta.issnl]) {
-                        myJournal.subscribe(this.subrs[myJournal.meta.issnl])
-                    }
+                    myJournal.subscribe(this.userSettings.getSubr(myJournal.meta.issnl))
                     return myJournal
                 })
                 this.cheapestCost = _.sum(this.journalsList.map(j=>j.getCheapestCost()));
