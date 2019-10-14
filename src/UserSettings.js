@@ -1,3 +1,5 @@
+import JournalSorter from "./JournalSorter.js"
+import {hashCode} from "./util";
 
 
 
@@ -32,21 +34,33 @@ export default class UserSettings {
         this.downloadsPerAuthorship = 0
 
         // subscriptions
-        this.subrs = {}
+        this.subrs = {
+            fullSubscription: [],
+            ill: [],
+            docdel: [],
+        }
+        this.subrDict = {}
+
+        this.hash = "foo"
         this.defaultSubr = "ill"
 
+        // cache
         this.cache = {}
 
-
+        // sorting journals
+        this.journalSorter = new JournalSorter()
     }
 
     setSubr(issnl, subrName){
-        this.subrs[issnl] = subrName
+        this.subrDict[issnl] = subrName
+        const str = "salt" + JSON.stringify(this.subrDict)
+        this.hash =  hashCode(str)
         this.clearCacheIssnl(issnl)
+        return
 
     }
     getSubr(issnl){
-        return this.subrs[issnl] || this.defaultSubr
+        return this.subrDict[issnl] || this.defaultSubr
     }
 
 

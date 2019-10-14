@@ -23,8 +23,11 @@ class Journal {
 
     getSubr(){
         const mySubrName = this.userSettings.getSubr(this.meta.issnl)
-        return this.timelines[mySubrName]
+        if (this.userSettings.hash !== 999999999){
+            return this.timelines[mySubrName]
+        }
     }
+
 
 
     // @todo delete
