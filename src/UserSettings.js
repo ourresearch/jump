@@ -33,19 +33,42 @@ export default class UserSettings {
 
         // subscriptions
         this.subrs = {}
+        this.defaultSubr = "ill"
+
+        this.cache = {}
 
 
     }
 
     setSubr(issnl, subrName){
         this.subrs[issnl] = subrName
+        this.clearCacheIssnl(issnl)
+
     }
     getSubr(issnl){
-        console.log("getting subr from userSettings")
-        return this.subrs[issnl] || "ill"
-
+        return this.subrs[issnl] || this.defaultSubr
     }
 
+
+    getCache(issnl, subrName, fnName){
+        if (this.cache[issnl]
+            && this.cache[issnl][subrName]
+            && this.cache[issnl][subrName][fnName]){
+            return this.cache[issnl][subrName][fnName]
+        }
+    }
+
+    setCache(issnl, subrName, fnName, value){
+        if (!this.cache[issnl]) this.cache[issnl] = {}
+        if (!this.cache[issnl][subrName]) this.cache[issnl][subrName] = {}
+        this.cache[issnl][subrName][fnName] = value
+    }
+    clearCacheIssnl(issnl){
+        this.cache[issnl] = {}
+    }
+    clearCache(){
+        this.cache = {}
+    }
 
     getList(){
         return Object.entries(displayNames).map(([k, v])=>{
@@ -57,6 +80,7 @@ export default class UserSettings {
         })
     }
     setFromList(myList){
+        this.clearCache()
         myList.forEach(setting=>{
             this[setting.name] = parseFloat(setting.val)
         })

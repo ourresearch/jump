@@ -1,16 +1,21 @@
 import _ from "lodash";
 import {sumObjects} from "./util";
+import {FullSubscriptionJournal, Journal} from "./Journal";
 
 
 class Scenario {
-    constructor(journalsList, userSettings) {
-        this.journalsList = journalsList
-        this.isBigdeal = false
+    constructor(userSettings) {
         this.userSettings = userSettings
-
-        this.cache = {}
+        this.journals = []
 
     }
+
+    setJournals(apiJournals){
+        this.journals = apiJournals.map(j=>{
+            return new Journal(j, this.userSettings)
+        })
+    }
+
 
     getSubrTable(){
         const groups = this._getTimelinesByName()
@@ -22,17 +27,14 @@ class Scenario {
     // usage methods
 
     getUsageByTypeByYear(){
-        if (this.cache.getUsageByTypeByYear) return this.cache.getUsageByTypeByYear
         const ret = {}
         this._getYearsCovered().forEach(year=>{
-            const thisYearUsagesList = this.journalsList.map(j=>{
-                return j.selectedTimeline.getUsageYear(year)
+            const thisYearUsagesList = this.journals.map(j=>{
+                return j.getSubr().getUsageYear(year)
             })
 
             ret[year] = thisYearUsagesList.reduce(sumObjects)
         })
-
-        this.cache.getUsageByTypeByYear = ret
 
         // return format looks like this:
         const exampleReturn = {
@@ -65,7 +67,6 @@ class Scenario {
 
     // cost methods
     getCostByTypeByYear() {
-        if (this.cache.getCostByTypeByYear) return this.cache.getCostByTypeByYear
 
         const groups = this._getTimelinesByName()
 
@@ -79,8 +80,6 @@ class Scenario {
                 ret[year][name] = cost
             })
         })
-
-        this.cache.getCostByTypeByYear = ret
         return ret
     }
     getCostByType(){
@@ -94,7 +93,7 @@ class Scenario {
     }
 
     getCostTotal(){
-        return this.journalsList.map(j=>j.selectedTimeline.getCostTotal()).reduce((a,b)=>a+b)
+        return this.journals.map(j=>j.getSubr().getCostTotal()).reduce((a,b)=>a+b)
         return Object.values(this.getCostByType()).reduce((a,b)=>a+b)
     }
 
@@ -103,18 +102,23 @@ class Scenario {
         return this.getCostTotal() / this.getUsageInstant()
     }
 
-
-
-
-    /// setters
-
-    subscribe(maxCost=Infinity, noIll=false){
-
+    getCheapestCost(){
+        return _.sum(this.journals.map(j=>j.getCheapestCost()));
     }
 
-    subscribeToIssnl(issnl, newSubrName){
 
+
+
+    /// selection methods
+    getSelectedJournals(){
+        return this.journals.filter(j=>j.isSelected)
     }
+    subscribeSelected(){
+        this.getSelectedJournals().forEach(j=>{
+
+        })
+    }
+
 
 
 
@@ -122,22 +126,28 @@ class Scenario {
 
 
     _getTimelinesByName(){
-        const selectedTimelines = this.journalsList.map(j=>j.selectedTimeline)
+        const selectedTimelines = this.journals.map(j=>j.getSubr())
         return _.groupBy(selectedTimelines, t=>{
             return t.name
         })
     }
     _getYearsCovered(){
-        return this.journalsList[0].selectedTimeline.getYears()
+        return this.journals[0].getSubr().getYears()
     }
 
 }
 
 class BigDealScenario extends Scenario {
-    constructor(journalsList, userSettings) {
-        super(journalsList, userSettings);
+    constructor(userSettings) {
+        super(userSettings);
     }
 
+
+    setJournals(apiJournals){
+        this.journals = apiJournals.map(j=>{
+            return new FullSubscriptionJournal(j, this.userSettings)
+        })
+    }
 
     getCostTotal(){
         let years = {}

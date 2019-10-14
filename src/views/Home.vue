@@ -29,21 +29,21 @@
                             <v-icon>indeterminate_check_box</v-icon>
                         </v-btn>
                         <span class="num">
-                            {{this.selectedJournals.length}}
+                            {{this.scenario.getSelectedJournals().length}}
                         </span>
                         selected
                         <span v-if="isPartSelected">
                             <v-btn small flat class="add-everything"
 
                                    @click="selectAll">
-                                select all {{nf(this.journalsList.length)}}
+                                select all {{nf(this.scenario.journals.length)}}
                             </v-btn>
                         </span>
                     </v-flex>
 
                     <v-flex grow></v-flex>
 
-                    <v-flex shrink v-if="this.selectedJournals.length" class="mr-3"
+                    <v-flex shrink v-if="this.scenario.getSelectedJournals().length" class="mr-3"
                             style="border-right: 1px solid #bbb;">
                         <v-menu offset-y>
                             <template v-slot:activator="{ on }">
@@ -197,7 +197,7 @@
     import DataToolbar from "../components/DataToolbar"
 
     import {currency, nFormat} from "../util";
-    import {Journal} from "../Journal.js";
+    import {Journal, FullSubscriptionJournal} from "../Journal.js";
     import {Scenario, BigDealScenario} from "../Scenario";
 
     import UserSettings from "../UserSettings";
@@ -258,20 +258,25 @@
                 return this.currentPage <= 1
             },
             isOnLastPage() {
-                const numPages = Math.ceil(this.journalsList.length / this.pageSize)
+                const numPages = Math.ceil(this.scenario.journals.length / this.pageSize)
                 return this.currentPage >= numPages
             },
 
 
             journalsPage() {
-                return this.journalsList
-                    .slice(this.pageStartIndex, this.pageEndIndex)
+                if (this.scenario.journals) {
+                    return this.scenario.journals
+                        .slice(this.pageStartIndex, this.pageEndIndex)
+                }
+                else {
+                    return []
+                }
             },
             selectedJournals() {
-                return this.journalsList.filter(j => j.isSelected)
+                return this.scenario.journals.filter(j => j.isSelected)
             },
             isAllSelected() {
-                return this.journalsList.length === this.selectedJournals.length
+                return this.scenario.journals.length === this.selectedJournals.length
             },
             isPartSelected() {
                 return !this.isAllSelected && this.selectedJournals.length
@@ -309,13 +314,13 @@
             // *****************
             selectAll() {
                 console.log("select all")
-                this.journalsList.forEach(j => {
+                this.scenario.journals.forEach(j => {
                     j.isSelected = true
                 })
 
             },
             unselectAll() {
-                this.journalsList.forEach(j => {
+                this.scenario.journals.forEach(j => {
                     j.isSelected = false
                 })
             },
@@ -341,15 +346,14 @@
             subscribeSelected(newSubscriptionName) {
                 console.log("subscribe selected", newSubscriptionName)
                 this.selectedJournals.forEach(j => {
-                    j.subscribe(newSubscriptionName)
                     this.userSettings.setSubr(j.meta.issnl, newSubscriptionName)
                 })
                 this.unselectAll()
                 this.sortJournalsList()
-                this.printScenarioComparison()
             },
             gangSubscribeHandler(args){
                 console.log("gang subscribe!", args)
+                this.unselectAll()
 
                 const docdelOnly = args.docdelOnly
                 if (docdelOnly){
@@ -366,7 +370,7 @@
 
                 console.log("setting new subscriptions. max cost: ", maxCost)
 
-                this.journalsList.forEach(j=>{
+                this.scenario.journals.forEach(j=>{
                     let mySubr
                     const fullSubrCostAboveIll = j.getFullSubrCostAboveIll()
                     if (costSoFar < maxCost && fullSubrCostAboveIll > 0){
@@ -379,46 +383,27 @@
                         // was already the sum of all the cheapest costs.
                     }
 
-                    j.subscribe(mySubr)
                     this.userSettings.setSubr(j.meta.issnl, mySubr)
                 })
 
-                console.log("done setting new subscriptions")
-                this.unselectAll()
-                this.printScenarioComparison()
+
 
             },
 
-
-
-
-            printScenarioComparison() {
-                this.scenario = new Scenario(this.journalsList)
-            },
 
             saveSettings() {
                 this.isEditingSettings = false
                 this.userSettings.setFromList(this.userSettingsList)
                 this.userSettingsList = this.userSettings.getList()
                 console.log("saving settings!", this.userSettings)
-                this.makeJournalsList()
+                // this.makeJournalsList()
 
             },
 
 
             subscribeHandler(args) {
-                const myIssnl = args.issnl
-                const mySubscriptionName = args.subscriptionName
-                this.userSettings.setSubr(myIssnl, mySubscriptionName)
-
-                this.journalsList.find(j => {
-                    return j.meta.issnl === myIssnl
-                }).subscribe(mySubscriptionName)
-
+                this.userSettings.setSubr(args.issnl, args.subscriptionName)
                 this.sortJournalsList()
-                this.printScenarioComparison()
-
-
             },
             setSorter(newSorterName) {
                 const newSorter = this.sorters.find(s=>s.name===newSorterName)
@@ -428,12 +413,16 @@
                 this.unselectAll()
                 this.currentPage = 1
             },
+
             sortJournalsList() {
                 const sortKey = this.selectedSorter.name
                 const desc = this.selectedSorter.isDescending
                 const sortFn = function (a, b) {
                     let ret = 0
-                    if (a.sortKeys[sortKey] < b.sortKeys[sortKey]) {
+                    const aVal = a.getSortFn(sortKey)()
+                    const bVal = b.getSortFn(sortKey)()
+
+                    if (aVal < bVal) {
                         ret = -1
                     } else {
                         ret = 1
@@ -442,41 +431,52 @@
 
                     return ret
                 }
-                this.journalsList.sort(sortFn)
+                this.scenario.journals.sort(sortFn)
             },
             makeJournalsList(){
                 console.log("printing journals")
-                this.journalsList = this.apiJournals.map(j=>{
-                    const myJournal = new Journal(j, this.userSettings)
-                    myJournal.subscribe(this.userSettings.getSubr(myJournal.meta.issnl))
-                    return myJournal
-                })
-                this.cheapestCost = _.sum(this.journalsList.map(j=>j.getCheapestCost()));
+                // this.journalsList = this.apiJournals.map(j=>{
+                //     return new Journal(j, this.userSettings)
+                // })
+
 
                 // make the Big Deal Scenario
-                const fullSubscriptionJournals = this.apiJournals.map(j=>{
-                    const myJournal = new Journal(j, this.userSettings);
-                    myJournal.subscribe("fullSubscription");
-                    return myJournal
-                })
                 this.oldScenario = new BigDealScenario(
-                    fullSubscriptionJournals,
-                    this.userSettings
+                    this.userSettings,
+                    this.apiJournals
                 )
+
+                this.scenario = new Scenario(
+                    this.userSettings,
+                    this.apiJournals
+                )
+                this.cheapestCost = this.scenario.getCheapestCost()
                 this.sortJournalsList()
-                this.printScenarioComparison()
             }
 
         },
         mounted() {
             console.log("mounted")
+
             this.userSettings = new UserSettings()
+            this.scenario = new Scenario(this.userSettings)
+            this.oldScenario = new BigDealScenario(this.userSettings)
+
+
             this.userSettingsList = this.userSettings.getList()
 
             api.fetchJournals()
                 .then(resp => {
+                    console.log("printing journals")
+
                     this.apiJournals = resp
-                    this.makeJournalsList()
+                    this.scenario.setJournals(resp)
+                    this.oldScenario.setJournals(resp)
+                    this.cheapestCost = this.scenario.getCheapestCost()
+                    this.sortJournalsList()
+
+
+
 
 
 

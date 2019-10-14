@@ -13,27 +13,31 @@ class Journal {
         };
 
 
-        this.selectedTimeline = this.timelines.ill
-        this.sortKeys = {}
         this.apiData = apiData
         this.isSelected = false
         this.citations = apiData.citations
         this.authorships = apiData.authorships
 
         this.isExpanded = false
-
-        this.subscribe("ill")
     }
 
+    getSubr(){
+        const mySubrName = this.userSettings.getSubr(this.meta.issnl)
+        return this.timelines[mySubrName]
+    }
+
+
+    // @todo delete
     getTotalDownloads(){
-        return Math.round(this.selectedTimeline.getAnnualUsageTotal())
+        return Math.round(this.getSubr().getAnnualUsageTotal())
     }
     getAnnualRawDownloadsTotal(){
         return Math.round(_.sum(this.apiData.yearlyDownloads.map(year=>year.useCount)) / 5 || 0)
     }
 
+    // @todo delete
     getAdjUse(){
-        return this.selectedTimeline.getNegotiableUsage()
+        return this.getSubr().getNegotiableUsage()
     }
 
     getAdjSubrCost(){
@@ -50,7 +54,7 @@ class Journal {
     }
 
     isOverpaid(){
-        return this.timelines.fullSubscription.getCostTotal() < this.selectedTimeline.getCostTotal()
+        return this.timelines.fullSubscription.getCostTotal() < this.getSubr().getCostTotal()
     }
 
     getFullSubrCostAboveIll(){
@@ -81,27 +85,31 @@ class Journal {
     }
 
 
-    subscribeToCheapest(docdelOnly=false){
-        this.subscribe(this.getCheapestTimeline(docdelOnly).name)
-    }
-
-    subscribe(subscriptionName) {
-        this.selectedTimeline = this.timelines[subscriptionName]
-        this._setSortKeys()
-    }
-
-    _setSortKeys() {
-        this.sortKeys = {
-            title: this.apiData.meta.title,
-            totalUsage: this.getTotalDownloads(),
-            citations: this.citations,
-            bestCpnu: this.getCheapestTimeline().getCostPerNegotiableUse()|| 1000000000,
-            bestCpnuNoIll: this.getCheapestTimeline(true).getCostPerNegotiableUse()|| 1000000000,
-        }
+    getSortFn(name){
+        return {
+            title: () => this.apiData.meta.title,
+            totalUsage: ()=> this.getTotalDownloads(),
+            citations: () => this.citations,
+            bestCpnu: () => {
+              return this.getCheapestTimeline().getCostPerNegotiableUse()|| 1000000000
+            },
+            bestCpnuNoIll: () => {
+              return this.getCheapestTimeline(true).getCostPerNegotiableUse()|| 1000000000
+            }
+        }[name];
     }
 }
 
 
+class FullSubscriptionJournal extends Journal {
+    getSubr(){
+        return this.timelines["fullSubscription"]
+    }
+}
+
+
+
 export {
-    Journal
+    Journal,
+    FullSubscriptionJournal
 }

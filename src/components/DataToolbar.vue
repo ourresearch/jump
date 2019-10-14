@@ -1,5 +1,5 @@
 <template>
-    <v-container v-if="scenario.journalsList" fluid class="data-toolbar pa-0 ma-0">
+    <v-container v-if="scenario.journals.length" fluid class="data-toolbar pa-0 ma-0">
         <v-layout class="py-1 px-3">
             <!-- num journals -->
             <v-flex xs3>

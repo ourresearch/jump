@@ -1,5 +1,5 @@
 <template>
-    <v-container grid-list-sm fluid class="journal pa-0">
+    <v-container v-if="data" grid-list-sm fluid class="journal pa-0">
 
 
         <!-- journal META section -->
@@ -30,7 +30,7 @@
                 <div style="height: 100%; flex-grow: 1; display:flex;" v-if="data.getTotalDownloads() > 0">
                     <div :key="year"
                          style="height: 50px; flex-grow: 1"
-                         v-for="(usageDict, year) in data.selectedTimeline.getUsageByTypeByYear()">
+                         v-for="(usageDict, year) in data.getSubr().getUsageByTypeByYear()">
                         <downloads-bar :year="year"
                                        :segments="display.barSegments(usageDict)">
                         </downloads-bar>
@@ -53,15 +53,15 @@
             </v-flex>
 
             <v-flex xs2 class="col cost numbers">
-                <div :style="{color: display.color(data.selectedTimeline.name)}">
+                <div :style="{color: display.color(data.getSubr().name)}">
                     <div v-if="data.isOverpaid()" class="alert" style="color:darkred;">
                         Overpaying!
                     </div>
                     <div class="title upper">
-                        {{ currency(data.selectedTimeline.getCostTotal()) }}
+                        {{ currency(data.getSubr().getCostTotal()) }}
                     </div>
                     <div class="lower">
-                        {{ currency(data.selectedTimeline.getCostPerNegotiableUse())}}
+                        {{ currency(data.getSubr().getCostPerNegotiableUse())}}
                     </div>
                 </div>
             </v-flex>
@@ -71,7 +71,7 @@
                 <div @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: 'fullSubscription'})"
                      class="subr full"
                      :style="{color: display.color('fullSubscription')}"
-                     :class="{selected: data.selectedTimeline.name==='fullSubscription'}">
+                     :class="{selected: data.getSubr().name==='fullSubscription'}">
                     <div class="upper">{{currency(data.getAdjSubrCPU())}}</div>
                     <div class="lower">+{{ currency(data.getAdjSubrCost()) }}</div>
                 </div>
@@ -83,14 +83,14 @@
                     <div @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: 'ill'})"
                          class="subr ill"
                          :style="{color: display.color('ill')}"
-                         :class="{selected: data.selectedTimeline.name==='ill'}">
+                         :class="{selected: data.getSubr().name==='ill'}">
                         <span class="num">{{currency(data.getIllCost(), true)}}</span>
                         <span class="word">base (ILL)</span>
                     </div>
                     <div @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: 'docdel'})"
                          class="subr docdel"
                          :style="{color: display.color('docdel')}"
-                         :class="{selected: data.selectedTimeline.name==='docdel'}">
+                         :class="{selected: data.getSubr().name==='docdel'}">
                         <span class="num">+{{ currency(data.getDocdelCost(), true) }}</span>
                         <span class="word">DocDel</span>
                     </div>
@@ -139,7 +139,7 @@
             <v-flex>
                 <table class="stats infographic">
                     <tr :key="usageType.name"
-                        v-for="usageType in display.barSegments(data.selectedTimeline.getAnnualUsageByType())"
+                        v-for="usageType in display.barSegments(data.getSubr().getAnnualUsageByType())"
                         v-if="true"
                         class="stat"
                         :style="{color: usageType.color}"
@@ -155,7 +155,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="num">{{nf(data.selectedTimeline.getAnnualUsageTotal(), true)}}</td>
+                        <td class="num">{{nf(data.getSubr().getAnnualUsageTotal(), true)}}</td>
                         <td>100%</td>
                         <td>Total usage</td>
                     </tr>

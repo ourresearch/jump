@@ -1,6 +1,6 @@
 <template>
     <div class="scenario-report"
-         v-if="scenario.journalsList">
+         v-if="scenario.journals.length">
         <v-container fluid>
             <!--- *testing space  -->
             <v-layout>
@@ -40,7 +40,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="num">{{nf(scenario.journalsList.length, true)}}</td>
+                                    <td class="num">{{nf(scenario.journals.length, true)}}</td>
                                     <td>100%</td>
                                     <td>Total journals</td>
                                 </tr>

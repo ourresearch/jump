@@ -4,6 +4,7 @@ class SubrTimeline {
 
     constructor(apiData, userSettings) {
         this.userSettings = userSettings
+        this.issnl = apiData.meta.issnl
 
         this.firstYearCost = apiData.fullSubrCost2018
         this.apiUsage = apiData.yearlyDownloads
@@ -13,41 +14,43 @@ class SubrTimeline {
         this.name = "fullSubscription"
         this.displayName = "Subscription"
 
-        this.cache = {}
-
-
     }
 
-    setUsage(apiUsage) {
 
+    _getCache(name){
+        return this.userSettings.getCache(this.issnl, this.name, name)
     }
-
-    setType(type) {
-        this.type = type
+    _setCache(name, value){
+        return this.userSettings.setCache(this.issnl, this.name, name, value)
     }
-
 
     getCostTotal() {
-        if (this.cache.getCostTotal) return this.cache.getCostTotal
+        if (this._getCache("getCostTotal")){
+            return this._getCache("getCostTotal")
+        }
+
         const ret = Object.values(this.getCostByTypeByYear()).reduce((a, b) => a + b) / 5 || 0
-        this.cache.getCostTotal = ret
+        this._setCache("getCostTotal", ret)
         return ret
+
+
     }
     getCostPerNegotiableUse(){
         return (this.getCostTotal() / this.getNegotiableUsage()) || 0
     }
 
     getCostByTypeByYear() {
-        if (this.cache.getCostByTypeByYear) {
-            return this.cache.getCostByTypeByYear
+        if (this._getCache("getCostByTypeByYear")) {
+            return this._getCache("getCostByTypeByYear")
         }
+
         let annualCost = this.firstYearCost
         const ret = {}
         this.apiUsage.forEach(myYear => {
             ret[myYear.year] = annualCost
             annualCost = annualCost + (annualCost * this.userSettings.subrCostAnnualIncrease)
         })
-        this.cache.getCostByTypeByYear = ret
+        this._setCache("getCostByTypeByYear", ret)
         return ret
     }
 
@@ -84,15 +87,15 @@ class SubrTimeline {
     }
 
     getUsageByTypeByYear() {
-        if (this.cache.getUsageByTypeByYear) {
-            return this.cache.getUsageByTypeByYear
+        if (this._getCache("getUsageByTypeByYear")){
+            return this._getCache("getUsageByTypeByYear")
         }
         const ret = {}
         this.apiUsage.forEach(apiUsageStats => {
             ret[apiUsageStats.year] = this._makeUsageDictFromYearStats(apiUsageStats)
         })
 
-        this.cache.getUsageByTypeByYear = ret
+        this._setCache("getUsageByTypeByYear", ret)
         return ret
     }
 
