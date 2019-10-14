@@ -1,7 +1,3 @@
-
-
-
-
 const usageColors = {
     softTurnaway: "#666666", // blue grey 100
     ill: "#7e57c2", // deep purple 400
@@ -16,9 +12,19 @@ const usageFillColors = {
     softTurnaway: "#bbbbbb"
 }
 
+const sortOrder = {
+    softTurnaway: 1,
+    fullSubscription: 2,
+    docdel: 3,
+    ill: 4,
+    backCatalog: 5,
+    rg: 6,
+    oa: 7,
+}
+
 
 const usageDisplayNames = {
-    softTurnaway: "Soft turnaway",
+    softTurnaway: "Other delayed",
     ill: "ILL",
     docdel: "DocDel",
     fullSubscription: "Subscription",
@@ -27,11 +33,29 @@ const usageDisplayNames = {
     rg: "ResearchGate",
 }
 
+const sorter = function(a, b){
+    return sortOrder[a.name] - sortOrder[b.name]
+}
 
 
-const barSegments = function(dataDict){
-    const total = Object.values(dataDict).reduce((a,b)=>a+b)
-    return Object.entries(dataDict).map(([k,v])=>{
+const barSegmentLabels = function () {
+    const ret = Object.keys(usageColors).map(k=>{
+        return {
+            name: k,
+            fillColor: usageFillColors[k],
+            color: usageColors[k],
+            displayName: usageDisplayNames[k]
+        }
+    })
+    ret.sort(sorter)
+    return ret
+}
+
+
+
+const barSegments = function (dataDict) {
+    const total = Object.values(dataDict).reduce((a, b) => a + b)
+    let ret = Object.entries(dataDict).map(([k, v]) => {
         return {
             name: k,
             count: v,
@@ -41,18 +65,20 @@ const barSegments = function(dataDict){
             displayName: usageDisplayNames[k]
         }
     })
+    ret.sort(sorter)
+    return ret
 }
-const color = function(k){
+const color = function (k) {
     return usageColors[k]
 }
-const displayName = function(k){
+const displayName = function (k) {
     return usageDisplayNames[k]
 }
 
 
-
 export {
     barSegments,
+    barSegmentLabels,
     color,
     displayName,
 }

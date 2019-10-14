@@ -132,60 +132,65 @@
                          @subscribe="gangSubscribeHandler"
         ></scenario-report>
 
+
+
+
+
         <v-layout>
-            <v-flex>
-                <pre>{{userSettings.hash}}</pre></v-flex>
-        </v-layout>
+
+            <!--- SIDEBAR  -->
+            <v-flex xs3 class="pa-4">
+                <v-layout>
+                    <div>
+                        <table>
+                            <tr :key="setting.name"
+                                v-for="setting in userSettingsList">
+                                <td style="text-align:right;">
+                                    {{setting.displayName}}
+                                </td>
+                                <td>
+                                    <v-text-field
+                                            class="pa-0 ma-0"
+                                            v-model="setting.val"
+                                    ></v-text-field>
+                                </td>
+                            </tr>
+
+                        </table>
+                        <v-layout class="buttons">
+                            <v-flex grow></v-flex>
+                            <v-btn outline small @click="saveSettings">Save</v-btn>
+                            <v-btn outline small @click="isEditingSettings=false">Cancel</v-btn>
+                        </v-layout>
+                    </div>
+
+                </v-layout>
+            </v-flex>
 
 
-
-        <!--- JOURNALS LIST  -->
-        <v-layout column>
-            <v-flex grow
-                    v-for="journalData in journalsPage"
-                    :key="journalData.issnl"
-                    class="ma-3">
-                <v-layout class="journal-row" :class="{expanded:journalData.isExpanded}">
-                    <v-flex shrink>
-                        <v-checkbox
-                                v-model="journalData.isSelected"
-                                class="pa-0 mt-1"></v-checkbox>
-                    </v-flex>
-                    <v-flex grow>
-                        <journal-row @subscribe="subscribeHandler" :data="journalData"></journal-row>
+            <!--- JOURNALS LIST  -->
+            <v-flex xs9>
+                <v-layout column>
+                    <v-flex grow
+                            v-for="journalData in journalsPage"
+                            :key="journalData.issnl"
+                            class="ma-3">
+                        <v-layout class="journal-row" :class="{expanded:journalData.isExpanded}">
+                            <v-flex shrink>
+                                <v-checkbox
+                                        v-model="journalData.isSelected"
+                                        class="pa-0 mt-1"></v-checkbox>
+                            </v-flex>
+                            <v-flex grow>
+                                <journal-row @subscribe="subscribeHandler" :data="journalData"></journal-row>
+                            </v-flex>
+                        </v-layout>
                     </v-flex>
                 </v-layout>
             </v-flex>
         </v-layout>
 
 
-        <!--- SETTINGS  -->
-        <v-layout class="settings pa-5">
-            <v-flex>
-                <div>
-                    <table>
-                        <tr :key="setting.name"
-                            v-for="setting in userSettingsList">
-                            <td style="text-align:right;">
-                                {{setting.displayName}}
-                            </td>
-                            <td>
-                                <v-text-field
-                                        class="pa-0 ma-0"
-                                        v-model="setting.val"
-                                ></v-text-field>
-                            </td>
-                        </tr>
-
-                    </table>
-                    <v-layout class="buttons">
-                        <v-flex grow></v-flex>
-                        <v-btn outline small @click="saveSettings">Save</v-btn>
-                        <v-btn outline small @click="isEditingSettings=false">Cancel</v-btn>
-                    </v-layout>
-                </div>
-            </v-flex>
-        </v-layout>
 
 
     </v-container>
@@ -449,7 +454,6 @@
 
 <style lang="scss">
     .journal-row {
-        cursor:pointer;
         &:hover {
             background: #f0f0f0;
         }

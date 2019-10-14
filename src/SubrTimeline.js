@@ -71,6 +71,10 @@ class SubrTimeline {
         const totals = Object.values(this.getUsageByTypeByYear()).reduce(sumObjects)
         return _.mapValues(totals, x => x / 5)
     }
+    getAnnualInstantUsagePurchased(){
+        const usage = this.getAnnualUsageByType()
+        return usage.docdel + usage.fullSubscription
+    }
 
 
     getYears() {

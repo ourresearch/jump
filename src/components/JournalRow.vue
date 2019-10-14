@@ -3,7 +3,7 @@
 
 
         <!-- journal META section -->
-        <v-layout class="top-row" @click="data.isExpanded=!data.isExpanded" align-content-center align-center>
+        <v-layout class="top-row" align-content-center align-center>
             <v-flex xs1 class="col">
                 <div>
                     <div class="upper title">
@@ -58,10 +58,10 @@
                         Overpaying!
                     </div>
                     <div class="title upper">
-                        {{ currency(data.getSubr().getCostTotal()) }}
+                        {{ currency(data.getFullSubrCostAboveIll()) }}
                     </div>
                     <div class="lower">
-                        {{ currency(data.getSubr().getCostPerNegotiableUse())}}
+                        {{ currency(data.getSubscriptionRealCPU())}}
                     </div>
                 </div>
             </v-flex>
@@ -97,6 +97,25 @@
                 </div>
 
             </v-flex>
+            <v-flex grow></v-flex>
+            <v-flex>
+                <div>
+                    <v-btn class="expand-button"
+                           small
+                           flat
+                           @click="data.isExpanded=true"
+                           v-if="!data.isExpanded">
+                        expand
+                    </v-btn>
+                    <v-btn class="shrink-button"
+                           small
+                           flat
+                           @click="data.isExpanded=false"
+                           v-if="data.isExpanded">
+                        ensmallen
+                    </v-btn>
+                </div>
+            </v-flex>
         </v-layout>
 
 
@@ -107,60 +126,75 @@
                     <tr>
                         <th>usage metric</th>
                         <th>count</th>
-                        <th>multiplier</th>
                         <th>contribution</th>
                     </tr>
                     <tr>
                         <td>COUNTER downloads</td>
                         <td>{{data.getAnnualRawDownloadsTotal()}}</td>
-                        <td>1x</td>
-                        <td>{{data.getAnnualRawDownloadsTotal()}}</td>
+                        <td>
+                            {{data.getAnnualRawDownloadsTotal()}}
+                            <span class="contrib body-1">(1x)</span>
+                        </td>
                     </tr>
                     <tr>
                         <td>institutional citations</td>
                         <td>{{data.citations}}</td>
-                        <td>{{ data.userSettings.downloadsPerCitation }}x</td>
-                        <td>{{data.citations * data.userSettings.downloadsPerCitation}}</td>
+                        <td>
+                            {{data.citations * data.userSettings.downloadsPerCitation}}
+                            <span class="contrib body-1">({{data.userSettings.downloadsPerCitation}}x)</span>
+                        </td>
                     </tr>
                     <tr>
                         <td>institutional authorships</td>
                         <td>{{data.authorships}}</td>
-                        <td>{{ data.userSettings.downloadsPerAuthorship }}x</td>
-                        <td>{{data.authorships * data.userSettings.downloadsPerAuthorship}}</td>
+                        <td>
+                            {{data.authorships * data.userSettings.downloadsPerAuthorship}}
+                            <span class="contrib body-1">({{ data.userSettings.downloadsPerAuthorship }}x)</span>
+                        </td>
                     </tr>
                     <tr>
                         <td>weighted usage (total)</td>
                         <td></td>
-                        <td></td>
-                        <td>{{data.getTotalDownloads().toLocaleString()}}</td>
-                    </tr>
-                </table>
-            </v-flex>
-            <v-flex>
-                <table class="stats infographic">
-                    <tr :key="usageType.name"
-                        v-for="usageType in display.barSegments(data.getSubr().getAnnualUsageByType())"
-                        v-if="true"
-                        class="stat"
-                        :style="{color: usageType.color}"
-                        :class="{callout: usageType.name==='fullSubscription'}">
-                        <td class="num">
-                            {{ nf(usageType.count) }}
-                        </td>
-                        <td class="perc">
-                            {{ nf(usageType.perc) }}%
-                        </td>
                         <td>
-                            {{usageType.displayName}}
+                            {{data.getTotalDownloads().toLocaleString()}}
+                            <span class="contrib"></span>
                         </td>
-                    </tr>
-                    <tr>
-                        <td class="num">{{nf(data.getSubr().getAnnualUsageTotal(), true)}}</td>
-                        <td>100%</td>
-                        <td>Total usage</td>
                     </tr>
                 </table>
             </v-flex>
+            <v-flex shrink class="subr-usage-options">
+                <v-layout row>
+                    <v-flex>
+                        <div class="subr-col">
+                            <div class="name">.</div>
+                            <div :key="usageType.name"
+                                 :style="{color: usageType.color}"
+                                 v-for="usageType in display.barSegmentLabels()">
+                                {{ usageType.displayName }}
+                            </div>
+                        </div>
+                    </v-flex>
+                    <v-flex :key="name"
+                            v-for="(timeline, name) in data.timelines">
+                        <div class="subr-col" :class="{selected: name===data.getSubr().name}">
+                            <div class="name">{{ display.displayName(timeline.name) }}</div>
+                            <div :key="usageType.name"
+                                 :style="{color: usageType.color}"
+                                 v-for="usageType in display.barSegments(timeline.getAnnualUsageByType())">
+                                <span class="num" v-if="usageType.perc !== 0">
+                                    {{ nf(usageType.perc) }}%
+                                </span>
+                                <span v-if="usageType.perc==0">
+                                    -
+                                </span>
+
+                            </div>
+                        </div>
+                    </v-flex>
+                </v-layout>
+            </v-flex>
+            <v-flex grow></v-flex>
+
 
         </v-layout>
 
@@ -205,11 +239,44 @@
 </script>
 
 <style scoped lang="scss">
+    .journal {
+        .expand-button {
+            display: none;
+        }
+
+        .top-row:hover {
+            background: #f2f2f2;
+
+            .expand-button {
+                display: block;
+            }
+        }
+
+    }
+
+
     table.usage-metrics {
         td, th {
             max-width: 7em;
             line-height: 1;
             padding: 5px;
+        }
+
+        span.contrib {
+            display: none;
+        }
+    }
+
+    .subr-usage-options {
+        text-align: right;
+
+        .subr-col {
+            padding: 5px;
+            margin: 5px;
+
+            &.selected {
+                border: 1px solid #999;
+            }
         }
     }
 
@@ -250,7 +317,6 @@
     }
 
     .subscription-item {
-        cursor: pointer;
         padding: 5px 10px;
         /*border-radius: 5px;*/
         /*border: 1px solid transparent;*/
@@ -258,10 +324,6 @@
         margin-right: 1px;
         border-bottom: 5px solid;
 
-
-        &:hover {
-            background: #f2f2f2;
-        }
 
         &.selected {
             font-weight: bold;

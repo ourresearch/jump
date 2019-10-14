@@ -202,6 +202,9 @@
 </script>
 
 <style lang="scss">
+    .scenario-report {
+        background: #ddd;
+    }
     .stats {
         td.num {
             text-align: right;
