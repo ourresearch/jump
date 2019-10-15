@@ -57,6 +57,22 @@ class Scenario {
         return Object.values(this.getUsageByType()).reduce((a, b) => a + b)
     }
 
+    getUsageFreeInstant(){
+        const usage = this.getUsageByType()
+        return usage.oa + usage.backCatalog + usage.rg
+    }
+    getUsagePaidInstant() {
+        const usage = this.getUsageByType()
+        return usage.fullSubscription + usage.docdel
+
+    }
+
+    getUsageDelayed(){
+        const usage = this.getUsageByType()
+        return usage.ill + usage.softTurnaway
+    }
+
+
     getUsageInstant() {
         const usage = this.getUsageByType()
         return usage.fullSubscription + usage.oa + usage.backCatalog + usage.rg + usage.docdel
@@ -90,14 +106,14 @@ class Scenario {
 
         const groups = this._getTimelinesByName()
         const costBySubr = _.mapValues(groups, timelinesList => {  //  ill, docdel, and fullSubscription
-            return timelinesList.map(t => t.getCostTotal()).reduce((a, b) => a + b)
+            return timelinesList.map(t => t.getCostTotal()).reduce((a, b) => a + b, 0)
         })
         return costBySubr
     }
 
     getCostTotal() {
-        return this.journals.map(j => j.getSubr().getCostTotal()).reduce((a, b) => a + b)
-        return Object.values(this.getCostByType()).reduce((a, b) => a + b)
+        return this.journals.map(j => j.getSubr().getCostTotal()).reduce((a, b) => a + b, 0)
+        return Object.values(this.getCostByType()).reduce((a, b) => a + b, 0)
     }
 
 
