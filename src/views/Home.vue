@@ -174,8 +174,8 @@
                     <v-flex grow
                             v-for="journalData in journalsPage"
                             :key="journalData.issnl"
-                            class="ma-3">
-                        <v-layout class="journal-row" :class="{expanded:journalData.isExpanded}">
+                            class="ma-1">
+                        <v-layout class="journal-row pa-3" :class="{expanded:journalData.isExpanded, subscribed: journalData.getSubr().name==='fullSubscription'}">
                             <v-flex shrink>
                                 <v-checkbox
                                         v-model="journalData.isSelected"
@@ -454,6 +454,9 @@
 
 <style lang="scss">
     .journal-row {
+        &.subscribed {
+            background: lightblue;
+        }
         &:hover {
             background: #f0f0f0;
         }

@@ -62,6 +62,9 @@ export default class UserSettings {
     getSubr(issnl){
         return this.subrDict[issnl] || this.defaultSubr
     }
+    isSubscribed(issnl){
+        return this.subrDict[issnl] === "fullSubscription"
+    }
 
 
     getCache(issnl, subrName, fnName){

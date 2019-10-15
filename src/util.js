@@ -45,8 +45,8 @@ const currency = function (num, roundToDollars, asDiff) {
     if (asDiff && num < 0) {
         return str.replace("-", "-$")
     }
-    else if (asDiff && num >= 0) {
-        return "+$" + str
+    if (num < 0){
+        return "-$" + str.slice(1, str.length)
     }
     else {
         return "$" + str

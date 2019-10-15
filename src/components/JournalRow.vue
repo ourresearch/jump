@@ -18,6 +18,7 @@
                             </span>
                         </v-tooltip>
                     </div>
+                    <div class="lower">.</div>
 
                 </div>
 
@@ -53,12 +54,12 @@
             </v-flex>
 
             <v-flex xs2 class="col cost numbers">
-                <div :style="{color: display.color(data.getSubr().name)}">
-                    <div v-if="data.isOverpaid()" class="alert" style="color:darkred;">
-                        Overpaying!
-                    </div>
+                <div :class="{isFullSubr:false }">
+<!--                    <div v-if="data.isOverpaid()" class="alert" style="color:darkred;">-->
+<!--                        Overpaying!-->
+<!--                    </div>-->
                     <div class="title upper">
-                        {{ currency(data.getFullSubrCostAboveIll()) }}
+                        {{ currency(data.getFullSubrCostAboveIll(), true) }}
                     </div>
                     <div class="lower">
                         {{ currency(data.getSubscriptionRealCPU())}}
@@ -120,7 +121,7 @@
 
 
         <!-- expanded section! -->
-        <v-layout v-if="data.isExpanded">
+        <v-layout v-if="data.isExpanded" class="pt-5">
             <v-flex>
                 <table class="pretty usage-metrics">
                     <tr>
@@ -229,7 +230,9 @@
             nf: nFormat,
             setSubscription: function (newSubscription) {
                 console.log("setting subscription!", newSubscription)
-            }
+            },
+
+
 
         },
         computed: {},
