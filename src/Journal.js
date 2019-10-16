@@ -64,7 +64,8 @@ class Journal {
         return this.timelines.fullSubscription.getCostTotal() - this.timelines.ill.getCostTotal()
     }
     getSubscriptionRealCPU(){
-        return this.getFullSubrCostAboveIll() / this.timelines.fullSubscription.getNegotiableUsage()
+        const ret = this.getFullSubrCostAboveIll() / this.timelines.fullSubscription.getNegotiableUsage()
+        return ret
     }
 
     getCheapestCost(){

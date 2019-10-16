@@ -18,7 +18,8 @@
 
                 <!-- TOOLS TOOLBAR -->
                 <v-layout align-center flat class="toolbar pa-0">
-                    <v-flex shrink>
+                    <v-flex xs3></v-flex>
+                    <v-flex shrink class="ml-2">
                         <v-btn icon @click="selectPage" v-if="isNonePageSelected">
                             <v-icon>check_box_outline_blank</v-icon>
                         </v-btn>
@@ -455,13 +456,16 @@
 <style lang="scss">
     .journal-row {
         &.subscribed {
-            background: lightblue;
+            /*background: rgba(176, 255, 255, 0.4);*/
+            background: rgba(0, 229, 226, 0.1) !important;
         }
         &:hover {
-            background: #f0f0f0;
+            &.subscribed {
+                /*background: rgba(176, 255, 255, 0.4);*/
+                background: rgba(0, 229, 226, 0.1);
+            }
         }
         &.expanded {
-            background: #f0f0f0;
 
         }
     }

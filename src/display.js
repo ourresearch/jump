@@ -1,15 +1,16 @@
 const usageColors = {
-    softTurnaway: "#666666", // blue grey 100
-    ill: "#7e57c2", // deep purple 400
+    softTurnaway: "#669395",
+    ill: "#4f38ff",
     docdel: "#2196f3", // blue 500
-    fullSubscription: "#00acc1", // cyan 600
-    backCatalog: "#43a047", // green 600
-    oa: "#558b2f", // light green 700
-    rg: "#9e9d24",  // lime 800
+    fullSubscription: "#00b3b1", // cyan 600
+    backCatalog: "#558b2f", // light green 700
+    oa: "#00b200", // light green 700
+    rg: "#45a559",  // custom from light green
 }
 const usageFillColors = {
     ...usageColors,
-    softTurnaway: "#bbbbbb"
+    fullSubscription: "#00b3b1",
+    // softTurnaway: "#bbbbbb"
 }
 
 const sortOrder = {
@@ -18,8 +19,8 @@ const sortOrder = {
     docdel: 3,
     ill: 4,
     backCatalog: 5,
-    rg: 6,
-    oa: 7,
+    oa: 6,
+    rg: 7,
 }
 
 
@@ -46,7 +47,8 @@ const barSegmentLabels = function () {
             color: usageColors[k],
             displayName: usageDisplayNames[k]
         }
-    })
+    }).filter(x=>x.name !== 'docdel')
+
     ret.sort(sorter)
     return ret
 }
@@ -64,7 +66,7 @@ const barSegments = function (dataDict) {
             color: usageColors[k],
             displayName: usageDisplayNames[k]
         }
-    })
+    }).filter(x=>x.name !== 'docdel')
     ret.sort(sorter)
     return ret
 }

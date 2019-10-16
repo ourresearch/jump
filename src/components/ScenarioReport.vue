@@ -270,12 +270,12 @@
                     instant: {
                         height: this.scenario.getPercInstantAccess(),
                         free: {
-                            color: "#00b200",
+                            color: display.color("oa"),
                             name: "Free Instant",
                             width: 100 * this.scenario.getUsageFreeInstant() / this.scenario.getUsageInstant()
                         },
                         paid: {
-                            color: "#00d1d4",
+                            color: display.color("fullSubscription"),
                             name: "Subscription",
                             width: 100 * this.scenario.getUsagePaidInstant() / this.scenario.getUsageInstant()
                         }
@@ -283,13 +283,13 @@
                     delayed: {
                         height: 100 - this.scenario.getPercInstantAccess(),
                         free: {
-                            color: "#669395",
+                            color: display.color("softTurnaway"),
                             name: "Free Delayed",
                             width: 100 * this.scenario.userSettings.hardTurnawayProp,
 
                         },
                         paid: {
-                            color: "#4027ff",
+                            color: display.color("ill"),
                             name: "ILL",
                             width: 100 * (1 - this.scenario.userSettings.hardTurnawayProp),
 

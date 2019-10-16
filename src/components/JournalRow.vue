@@ -61,43 +61,14 @@
                     <div class="title upper">
                         {{ currency(data.getFullSubrCostAboveIll(), true) }}
                     </div>
-                    <div class="lower">
+                    <div class="lower" v-if="data.getSubscriptionRealCPU() < Infinity">
                         {{ currency(data.getSubscriptionRealCPU())}}
                     </div>
                 </div>
             </v-flex>
 
 
-            <v-flex v-if="false" class="subr fulfillment">
-                <div @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: 'fullSubscription'})"
-                     class="subr full"
-                     :style="{color: display.color('fullSubscription')}"
-                     :class="{selected: data.getSubr().name==='fullSubscription'}">
-                    <div class="upper">{{currency(data.getAdjSubrCPU())}}</div>
-                    <div class="lower">+{{ currency(data.getAdjSubrCost()) }}</div>
-                </div>
 
-            </v-flex>
-
-            <v-flex v-if="false" class="item-level fulfillment">
-                <div>
-                    <div @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: 'ill'})"
-                         class="subr ill"
-                         :style="{color: display.color('ill')}"
-                         :class="{selected: data.getSubr().name==='ill'}">
-                        <span class="num">{{currency(data.getIllCost(), true)}}</span>
-                        <span class="word">base (ILL)</span>
-                    </div>
-                    <div @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: 'docdel'})"
-                         class="subr docdel"
-                         :style="{color: display.color('docdel')}"
-                         :class="{selected: data.getSubr().name==='docdel'}">
-                        <span class="num">+{{ currency(data.getDocdelCost(), true) }}</span>
-                        <span class="word">DocDel</span>
-                    </div>
-                </div>
-
-            </v-flex>
             <v-flex grow></v-flex>
             <v-flex>
                 <div>
@@ -163,6 +134,8 @@
                     </tr>
                 </table>
             </v-flex>
+
+
             <v-flex shrink class="subr-usage-options">
                 <v-layout row>
                     <v-flex>
@@ -176,8 +149,11 @@
                         </div>
                     </v-flex>
                     <v-flex :key="name"
+                            v-if="name !== 'docdel'"
                             v-for="(timeline, name) in data.timelines">
-                        <div class="subr-col" :class="{selected: name===data.getSubr().name}">
+                        <div class="subr-col"
+                             @click="$emit('subscribe',{issnl: data.meta.issnl, subscriptionName: name})"
+                             :class="{selected: name===data.getSubr().name}">
                             <div class="name">{{ display.displayName(timeline.name) }}</div>
                             <div :key="usageType.name"
                                  :style="{color: usageType.color}"
@@ -248,7 +224,6 @@
         }
 
         .top-row:hover {
-            background: #f2f2f2;
 
             .expand-button {
                 display: block;
@@ -276,9 +251,13 @@
         .subr-col {
             padding: 5px;
             margin: 5px;
+            cursor:pointer;
 
             &.selected {
                 border: 1px solid #999;
+            }
+            &:hover {
+                background: #f9f9f9;
             }
         }
     }

@@ -10,6 +10,7 @@ const displayNames = {
     bigDealCostAnnualIncrease: "Big Deal cost % annual increase",
     subrCostAnnualIncrease: "A-la-carte subscription cost % annual increase",
     bigDealCost: "Big Deal annual cost",
+    showDocdel: "Include Document Delivery",
 
     downloadsPerCitation: "Downloads to add for each citation",
     downloadsPerAuthorship: "Downloads to add for each authorship",
@@ -32,6 +33,10 @@ export default class UserSettings {
         // impact
         this.downloadsPerCitation = 0
         this.downloadsPerAuthorship = 0
+
+        // showing subrs
+        this.showDocdel = false
+
 
         // subscriptions
         this.subrs = {
