@@ -296,6 +296,9 @@
                             if (this.isAllExpanded){
                                 j.isExpanded = true
                             }
+                            else {
+                                j.isExpanded = false
+                            }
                             return j
                         })
                 } else {
