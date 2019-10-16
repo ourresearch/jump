@@ -17,8 +17,38 @@
 
                 <!-- TOOLS TOOLBAR -->
                 <v-layout align-center flat class="toolbar pa-0">
-                    <v-flex xs3></v-flex>
-                    <v-flex shrink class="ml-2">
+                    <v-flex shrink xs3 class="mr-1"
+                            style="border-right: 1px solid #bbb;">
+
+                        <div v-if="this.scenario.getSelectedJournals().length">
+                            <v-menu offset-y>
+                                <template v-slot:activator="{ on }">
+                                    <v-btn
+                                            flat
+                                            small
+                                            v-on="on"
+                                    >
+                                        Change subscriptions
+                                    </v-btn>
+                                </template>
+                                <v-list>
+                                    <v-list-tile
+                                            v-for="(menuItem, index) in subrMenu"
+                                            :key="index"
+                                            @click="subscribeSelected(menuItem.name)"
+                                    >
+                                        <v-list-tile-title :style="{color: menuItem.color}">
+                                            {{ menuItem.displayName }}
+                                        </v-list-tile-title>
+                                    </v-list-tile>
+                                </v-list>
+                            </v-menu>
+
+                        </div>
+
+                    </v-flex>
+
+                    <v-flex shrink>
                         <v-btn icon @click="selectPage" v-if="isNonePageSelected">
                             <v-icon>check_box_outline_blank</v-icon>
                         </v-btn>
@@ -43,31 +73,7 @@
 
                     <v-flex grow></v-flex>
 
-                    <v-flex shrink v-if="this.scenario.getSelectedJournals().length" class="mr-3"
-                            style="border-right: 1px solid #bbb;">
-                        <v-menu offset-y>
-                            <template v-slot:activator="{ on }">
-                                <v-btn
-                                        flat
-                                        small
-                                        v-on="on"
-                                >
-                                    Change subscriptions
-                                </v-btn>
-                            </template>
-                            <v-list>
-                                <v-list-tile
-                                        v-for="(menuItem, index) in subrMenu"
-                                        :key="index"
-                                        @click="subscribeSelected(menuItem.name)"
-                                >
-                                    <v-list-tile-title :style="{color: menuItem.color}">
-                                        {{ menuItem.displayName }}
-                                    </v-list-tile-title>
-                                </v-list-tile>
-                            </v-list>
-                        </v-menu>
-                    </v-flex>
+
 
 
                     <v-flex shrink class="pr-3 mr-3" style="border-right: 1px solid #bbb;">
@@ -507,6 +513,7 @@
     }
 
     .fixed-header {
+
     }
 
     table.infographic {
