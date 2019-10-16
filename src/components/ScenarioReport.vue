@@ -18,7 +18,11 @@
                                 </div>
                                 <div class="quad"
                                      style="height:100%;"
-                                     :style="{width: quads.instant.free.width+'%', background: quads.instant.free.color}"></div>
+                                     :style="{width: quads.instant.free.width+'%', background:'transparent'}">
+                                    <div class="stripe" :style="{height: quads.instant.oa.height+'%', background: display.color('oa')}">OA</div>
+                                    <div class="stripe" :style="{height: quads.instant.backCatalog.height+'%', background: display.color('oa')}">Back Catalog</div>
+                                    <div class="stripe" :style="{height: quads.instant.rg.height+'%', background: display.color('oa')}">ResearchGate</div>
+                                </div>
                                 <div class="quad"
                                      style="height:100%; margin-left: 5px;"
                                      :style="{width: quads.instant.paid.width+'%', background: quads.instant.paid.color}"></div>
@@ -249,6 +253,18 @@
                             color: display.color("fullSubscription"),
                             name: "Subscription",
                             width: 100 * this.scenario.getUsagePaidInstant() / this.scenario.getUsageInstant()
+                        },
+                        oa: {
+                            name: "OA",
+                            height: 100 * this.scenario.getUsageByType().oa / this.scenario.getUsageFreeInstant(),
+                        },
+                        rg: {
+                            name: "ResearchGate",
+                            height: 100 * this.scenario.getUsageByType().rg / this.scenario.getUsageFreeInstant(),
+                        },
+                        backCatalog: {
+                            name: "Back Catalog",
+                            height: 100 * this.scenario.getUsageByType().backCatalog / this.scenario.getUsageFreeInstant(),
                         }
                     },
                     delayed: {
@@ -297,6 +313,11 @@
     .square {
         .row {
             position: relative;
+            .stripe {
+                border-top: 1px solid #fff;
+                color: #fff;
+                padding-left: 10px;
+            }
 
             .row-label {
                 position: absolute;
