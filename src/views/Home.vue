@@ -15,7 +15,6 @@
                 <data-toolbar :scenario="scenario"></data-toolbar>
 
 
-
                 <!-- TOOLS TOOLBAR -->
                 <v-layout align-center flat class="toolbar pa-0">
                     <v-flex xs3></v-flex>
@@ -97,7 +96,7 @@
 
                     </v-flex>
 
-                    <v-flex shrink class="paging">
+                    <v-flex shrink class="paging" style="border-right: 1px solid #bbb;">
                         <v-layout align-center>
                             <v-flex class="number">
                                 {{pageStartIndex + 1}}-{{pageEndIndex}}
@@ -121,6 +120,21 @@
 
                         </v-layout>
                     </v-flex>
+                    <v-flex shrink>
+                        <v-layout align-center>
+                            <v-tooltip bottom>
+                                <template v-slot:activator="{ on }">
+                                    <v-btn icon v-on="on" @click="isAllExpanded = !isAllExpanded">
+                                        <i class="fas fa-expand-arrows-alt" v-if="!isAllExpanded"></i>
+                                        <i class="fas fa-compress-arrows-alt" v-if="isAllExpanded"></i>
+                                    </v-btn>
+                                </template>
+                                <span>
+                                        expand all journals
+                                </span>
+                            </v-tooltip>
+                        </v-layout>
+                    </v-flex>
 
                 </v-layout>
             </div>
@@ -132,9 +146,6 @@
                          :old-scenario="oldScenario"
                          @subscribe="gangSubscribeHandler"
         ></scenario-report>
-
-
-
 
 
         <v-layout>
@@ -176,7 +187,8 @@
                             v-for="journalData in journalsPage"
                             :key="journalData.issnl"
                             class="ma-1">
-                        <v-layout class="journal-row pa-3" :class="{expanded:journalData.isExpanded, subscribed: journalData.getSubr().name==='fullSubscription'}">
+                        <v-layout class="journal-row pa-3"
+                                  :class="{expanded:journalData.isExpanded, subscribed: journalData.getSubr().name==='fullSubscription'}">
                             <v-flex shrink>
                                 <v-checkbox
                                         v-model="journalData.isSelected"
@@ -190,8 +202,6 @@
                 </v-layout>
             </v-flex>
         </v-layout>
-
-
 
 
     </v-container>
@@ -243,7 +253,7 @@
             bigDealCost: 1000000,
             scenarioComparison: {},
             oldScenario: {},
-            scenario:{},
+            scenario: {},
             subscriptionNames: [
                 "fullSubscription",
                 "docdel",
@@ -255,6 +265,7 @@
             display: display,
             apiJournals: [],
             cheapestCost: 0,
+            isAllExpanded: false,
 
         }),
         computed: {
@@ -273,7 +284,7 @@
                 return this.currentPage >= numPages
             },
 
-            settingsHash(){
+            settingsHash() {
                 return this.userSettings.getHash()
             },
 
@@ -281,8 +292,13 @@
                 if (this.scenario.journals) {
                     return this.scenario.getFilteredJournals()
                         .slice(this.pageStartIndex, this.pageEndIndex)
-                }
-                else {
+                        .map(j=>{
+                            if (this.isAllExpanded){
+                                j.isExpanded = true
+                            }
+                            return j
+                        })
+                } else {
                     return []
                 }
             },
@@ -309,7 +325,7 @@
                 return !this.isAllPageSelected && !this.isNonePageSelected
             },
             subrMenu() {
-                return ["ill", "docdel", "fullSubscription"].map(name=>{
+                return ["ill", "docdel", "fullSubscription"].map(name => {
                     return {
                         name: name,
                         displayName: display.displayName(name),
@@ -356,6 +372,11 @@
                 }
             },
 
+            expandAll() {
+                console.log("expand all!")
+                this.isAllExpanded = true
+            },
+
 
             subscribeSelected(newSubscriptionName) {
                 console.log("subscribe selected", newSubscriptionName)
@@ -366,11 +387,10 @@
                 this.unselectAll()
                 // this.sortJournalsList()
             },
-            gangSubscribeHandler(args){
+            gangSubscribeHandler(args) {
                 console.log("gang subscribe!", args)
                 this.unselectAll()
                 this.scenario.setSubrsToCheapest(args.maxCost)
-
 
 
             },
@@ -391,7 +411,7 @@
                 // this.sortJournalsList()
             },
             setSorter(newSorterName) {
-                const newSorter = this.sorters.find(s=>s.name===newSorterName)
+                const newSorter = this.sorters.find(s => s.name === newSorterName)
                 this.selectedSorter = newSorter
                 // this.sortJournalsList()
                 this.unselectAll()
@@ -440,11 +460,6 @@
                     // this.sortJournalsList()
 
 
-
-
-
-
-
                 })
         },
         watch: {}
@@ -459,12 +474,14 @@
             /*background: rgba(176, 255, 255, 0.4);*/
             background: rgba(0, 229, 226, 0.1) !important;
         }
+
         &:hover {
             &.subscribed {
                 /*background: rgba(176, 255, 255, 0.4);*/
                 background: rgba(0, 229, 226, 0.1);
             }
         }
+
         &.expanded {
 
         }

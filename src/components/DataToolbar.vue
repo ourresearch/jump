@@ -2,14 +2,9 @@
     <v-container v-if="scenario.journals.length" fluid class="data-toolbar pa-0 ma-0">
         <v-layout class="py-1 px-3">
             <!-- num journals -->
-            <v-flex xs3>
+            <v-flex xs3></v-flex>
+            <v-flex xs3 class="pl-4">
                 <v-layout>
-                    <v-flex xs1 class="graphic mr-2">
-                        <div style="height: 100%; flex-grow: 1">
-                            <downloads-bar
-                                    :segments="display.barSegments(scenario.getSubrTable())"></downloads-bar>
-                        </div>
-                    </v-flex>
                     <v-flex grow class="data">
                         <div>
                             <div class="num headline">
@@ -27,17 +22,6 @@
             <!-- usage -->
             <v-flex xs3>
                 <v-layout>
-                    <v-flex xs2 class="graphic mr-2">
-                        <div style="height: 100%; flex-grow: 1; display:flex;">
-                            <div :key="year"
-                                 style="height: 50px; flex-grow: 1"
-                                 v-for="(usageDict, year) in scenario.getUsageByTypeByYear()">
-                                <downloads-bar :year="year"
-                                               :segments="display.barSegments(usageDict)">
-                                </downloads-bar>
-                            </div>
-                        </div>
-                    </v-flex>
                     <v-flex grow class="data">
                         <div>
                             <div class="num headline">
@@ -55,16 +39,6 @@
             <!-- cost -->
             <v-flex xs3>
                 <v-layout>
-                    <v-flex xs2 class="graphic mr-2" style="display:flex;">
-                        <div :key="year"
-                             style="height: 50px; flex-grow: 1"
-                             v-for="(costsDict, year) in scenario.getCostByTypeByYear()">
-                            <downloads-bar :year="year"
-                                           :is-currency="true"
-                                           :segments="display.barSegments(costsDict)">
-                            </downloads-bar>
-                        </div>
-                    </v-flex>
 
                     <v-flex grow class="data">
                         <div>
@@ -72,7 +46,7 @@
                                 {{currency(scenario.getCostTotal(), true)}}
                             </div>
                             <div class="name body-1">
-                                Avg annual Cost
+                                Annual Cost
                             </div>
                         </div>
                     </v-flex>
@@ -119,6 +93,20 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+    .data-toolbar {
+        border-bottom: 1px solid #999;
+    }
+    div.num {
+        display: inline;
+        &.headline {
+            font-size: 20px !important;
+        }
+
+    }
+    div.name {
+        display: inline;
+    }
+
 
 </style>
