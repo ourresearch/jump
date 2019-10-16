@@ -53,8 +53,9 @@
                 </div>
             </v-flex>
 
-            <v-flex xs2 class="col cost numbers">
-                <div :class="{isFullSubr:false }">
+            <v-flex xs2 class="col cost numbers"
+                    :class="{'full-subr':data.isFullSubscription() }">
+                <div>
 <!--                    <div v-if="data.isOverpaid()" class="alert" style="color:darkred;">-->
 <!--                        Overpaying!-->
 <!--                    </div>-->
@@ -283,6 +284,10 @@
             display: inline-block;
             text-align: left;
         }
+    }
+
+    .col.cost {
+        font-weight: 100;
     }
 
     .numbers {

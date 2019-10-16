@@ -2,11 +2,76 @@
     <div class="scenario-report"
          v-if="scenario.journals.length">
         <v-container fluid>
-            <!--- *testing space  -->
-            <v-layout>
-                <!--                    <pre>-->
-                <!--                        {{ display.barSegments(scenario.getCostByType())}}-->
-                <!--                    </pre>-->
+<v-layout class="quadrants py-5">
+                <v-flex>
+                    <v-layout class="top labels"></v-layout>
+                    <v-layout class="square">
+                        <div style="height: 300px; width: 400px;">
+                            <div class="top-row row"
+                                 style="display:flex;"
+                                 :style="{height: quads.instant.height+'%'}">
+
+                                <div class="row-label">
+                                    <div class="percent">{{nf(quads.instant.height)}}%</div>
+                                    <div class="num">{{scenario.getUsageInstant().toLocaleString()}}</div>
+                                    <div class="label">Instant uses</div>
+                                </div>
+                                <div class="quad"
+                                     style="height:100%;"
+                                     :style="{width: quads.instant.free.width+'%', background: quads.instant.free.color}"></div>
+                                <div class="quad"
+                                     style="height:100%; margin-left: 5px;"
+                                     :style="{width: quads.instant.paid.width+'%', background: quads.instant.paid.color}"></div>
+
+                            </div>
+                            <div class="bottom-row row"
+                                 style="display:flex; border-top: 10px solid transparent;"
+                                 :style="{height: quads.delayed.height+'%'}">
+
+                                <div class="row-label bottom-right">
+                                    <div class="percent">{{nf(quads.delayed.height)}}%</div>
+                                    <div class="num">{{scenario.getUsageDelayed().toLocaleString()}}</div>
+                                    <div class="label">Delayed uses</div>
+                                </div>
+
+                                <div class="quad"
+                                     style="height:100%; margin-right: 5px;"
+                                     :style="{width: quads.delayed.free.width+'%', background: quads.delayed.free.color}"></div>
+
+
+                                <div class="quad"
+                                     style="height:100%"
+                                     :style="{width: quads.delayed.paid.width+'%', background: quads.delayed.paid.color}"></div>
+
+                            </div>
+                        </div>
+                    </v-layout>
+                </v-flex>
+                <v-flex class="controls">
+                    <div>
+                        <div>
+                            $<input v-model.lazy="userBudget"
+                                    type="text" class="budget">
+                            <v-btn flat primary
+                                   @click="$emit('subscribe',  {instantAccess:null, maxCost:userBudget.replace(/,/gi, ''), docdelOnly:false})">
+                                Simulate
+                            </v-btn>
+                            <v-btn icon @click="$emit('subscribe', {instantAccess:null, docdelOnly:false})"><i
+                                    class="fas fa-magic"></i></v-btn>
+
+                        </div>
+                        <div>
+                            <strong>
+
+                                {{nf(100* scenario.getCostTotal() / oldScenario.getCostTotal())}}%
+                            </strong>
+                            of Big Deal price
+                        </div>
+
+                    </div>
+
+
+                </v-flex>
             </v-layout>
 
             <!--- data about the scenario  -->
@@ -142,100 +207,6 @@
 
             </v-layout>
 
-            <v-layout class="quadrants py-5">
-                <v-flex>
-                    <v-layout class="top labels"></v-layout>
-                    <v-layout class="square">
-                        <div style="height: 300px; width: 400px;">
-                            <div class="top-row row"
-                                 style="display:flex;"
-                                 :style="{height: quads.instant.height+'%'}">
-
-                                <div class="row-label">
-                                    <div class="percent">{{nf(quads.instant.height)}}%</div>
-                                    <div class="num">{{scenario.getUsageInstant().toLocaleString()}}</div>
-                                    <div class="label">Instant uses</div>
-                                </div>
-                                <div class="quad"
-                                     style="height:100%;"
-                                     :style="{width: quads.instant.free.width+'%', background: quads.instant.free.color}"></div>
-                                <div class="quad"
-                                     style="height:100%; margin-left: 5px;"
-                                     :style="{width: quads.instant.paid.width+'%', background: quads.instant.paid.color}"></div>
-
-                            </div>
-                            <div class="bottom-row row"
-                                 style="display:flex; border-top: 10px solid transparent;"
-                                 :style="{height: quads.delayed.height+'%'}">
-
-                                <div class="row-label bottom-right">
-                                    <div class="percent">{{nf(quads.delayed.height)}}%</div>
-                                    <div class="num">{{scenario.getUsageDelayed().toLocaleString()}}</div>
-                                    <div class="label">Delayed uses</div>
-                                </div>
-
-                                <div class="quad"
-                                     style="height:100%; margin-right: 5px;"
-                                     :style="{width: quads.delayed.free.width+'%', background: quads.delayed.free.color}"></div>
-
-
-                                <div class="quad"
-                                     style="height:100%"
-                                     :style="{width: quads.delayed.paid.width+'%', background: quads.delayed.paid.color}"></div>
-
-                            </div>
-                        </div>
-                    </v-layout>
-                </v-flex>
-                <v-flex class="controls">
-                    <div>
-                        <div>
-                            $<input v-model.lazy="userBudget"
-                                    type="text" class="budget">
-                            <v-btn flat primary
-                                   @click="$emit('subscribe',  {instantAccess:null, maxCost:userBudget.replace(/,/gi, ''), docdelOnly:false})">
-                                Simulate
-                            </v-btn>
-                            <v-btn icon @click="$emit('subscribe', {instantAccess:null, docdelOnly:false})"><i
-                                    class="fas fa-magic"></i></v-btn>
-
-                        </div>
-                        <div>
-                            <strong>
-
-                                {{nf(100* scenario.getCostTotal() / oldScenario.getCostTotal())}}%
-                            </strong>
-                            of Big Deal price
-                        </div>
-
-                    </div>
-
-
-                </v-flex>
-            </v-layout>
-
-
-            <!--            <v-layout>-->
-            <!--                <table class="pretty">-->
-            <!--                    <tr style="font-weight: bold;">-->
-            <!--                        <td>Percent</td>-->
-            <!--                        <td>{{nf(100* scenario.getCostTotal() / oldScenario.getCostTotal())}}%</td>-->
-            <!--                        <td>{{nf(100* scenario.getUsageInstant() / oldScenario.getUsageInstant())}}%</td>-->
-            <!--                    </tr>-->
-            <!--                    <tr>-->
-            <!--                        <td>A-la-carte</td>-->
-            <!--                        <td>{{currency(scenario.getCostTotal(), true)}}</td>-->
-            <!--                        <td>{{nf(scenario.getUsageInstant())}}</td>-->
-            <!--                    </tr>-->
-            <!--                    <tr>-->
-            <!--                        <td>Big Deal</td>-->
-            <!--                        <td>{{currency(oldScenario.getCostTotal(), true)}}</td>-->
-            <!--                        <td>{{nf(oldScenario.getUsageInstant())}}</td>-->
-            <!--                    </tr>-->
-            <!--                </table>-->
-
-
-            <!--            </v-layout>-->
         </v-container>
     </div>
 </template>

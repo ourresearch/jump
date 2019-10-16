@@ -59,6 +59,9 @@ class Journal {
     isOverpaid(){
         return this.timelines.fullSubscription.getCostTotal() < this.getSubr().getCostTotal()
     }
+    isFullSubscription(){
+        return this.getSubr().name === "fullSubscription"
+    }
 
     getFullSubrCostAboveIll(){
         return this.timelines.fullSubscription.getCostTotal() - this.timelines.ill.getCostTotal()
