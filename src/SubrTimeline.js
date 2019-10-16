@@ -90,16 +90,17 @@ class SubrTimeline {
         return 100 * (usage.fullSubscription + usage.docdel + usage.oa + usage.backCatalog + usage.rg) / (this.getAnnualUsageTotal() * 5)
     }
 
-    getUsageByTypeByYear() {
-        if (this._getCache("getUsageByTypeByYear")){
-            return this._getCache("getUsageByTypeByYear")
+    getUsageByTypeByYear(weighted=true) {
+        const cacheName = "getUsageByTypeByYear"+weighted
+        if (this._getCache(cacheName)){
+            return this._getCache(cacheName)
         }
         const ret = {}
         this.apiUsage.forEach(apiUsageStats => {
-            ret[apiUsageStats.year] = this._makeUsageDictFromYearStats(apiUsageStats)
+            ret[apiUsageStats.year] = this._makeUsageDictFromYearStats(apiUsageStats, weighted)
         })
 
-        this._setCache("getUsageByTypeByYear", ret)
+        this._setCache(cacheName, ret)
         return ret
     }
 
@@ -122,10 +123,13 @@ class SubrTimeline {
     }
 
 
-    _makeUsageDictFromYearStats(apiUsageStats) {
-        const weightedStats = this._weightApiUsageStats(apiUsageStats)
-        const total = weightedStats.useCount
-        let free = weightedStats.oaUseCount + weightedStats.backCatalogUseCount + weightedStats.rgUseCount
+    _makeUsageDictFromYearStats(apiUsageStats, weighted=true) {
+
+        const stats = (weighted) ? this._weightApiUsageStats(apiUsageStats) : apiUsageStats
+
+
+        const total = stats.useCount
+        let free = stats.oaUseCount + stats.backCatalogUseCount + stats.rgUseCount
         if (free > total) free = total
 
         const nonFree = total - free
@@ -137,9 +141,9 @@ class SubrTimeline {
             ill: 0,
 
             // these don't
-            oa: weightedStats.oaUseCount || 0,
-            backCatalog: weightedStats.backCatalogUseCount || 0,
-            rg: weightedStats.rgUseCount || 0,
+            oa: stats.oaUseCount || 0,
+            backCatalog: stats.backCatalogUseCount || 0,
+            rg: stats.rgUseCount || 0,
         }
     }
 
@@ -155,8 +159,8 @@ class IllSubrTimeline extends SubrTimeline {
     }
 
 
-    _makeUsageDictFromYearStats(apiUsageStats){
-        const usage = super._makeUsageDictFromYearStats(apiUsageStats)
+    _makeUsageDictFromYearStats(apiUsageStats, weighted=true){
+        const usage = super._makeUsageDictFromYearStats(apiUsageStats, weighted)
         usage.ill = usage.fullSubscription * this.userSettings.hardTurnawayProp
         usage.softTurnaway = usage.fullSubscription - usage.ill
         usage.fullSubscription = 0
@@ -165,7 +169,7 @@ class IllSubrTimeline extends SubrTimeline {
 
     getCostByTypeByYear() {
         const ret = {}
-        Object.entries(this.getUsageByTypeByYear()).forEach(([k, v]) => {
+        Object.entries(this.getUsageByTypeByYear(false)).forEach(([k, v]) => {
             ret[k] = v.ill * this.userSettings.illCostPerUse
         })
         return ret
