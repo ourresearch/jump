@@ -29,7 +29,7 @@ const usageDisplayNames = {
     ill: "ILL",
     docdel: "DocDel",
     fullSubscription: "Subscription",
-    backCatalog: "Back catalog",
+    backCatalog: "Backfile",
     oa: "Open Access",
     rg: "ResearchGate",
 }

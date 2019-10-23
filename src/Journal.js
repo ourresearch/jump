@@ -101,7 +101,7 @@ class Journal {
             totalUsage: ()=> this.getTotalDownloads(),
             citations: () => this.citations,
             bestCpnu: () => {
-              return this.getCheapestTimeline().getCostPerNegotiableUse()|| 1000000000
+              return this.getSubscriptionRealCPU() || 1000000000
             },
             bestCpnuNoIll: () => {
               return this.getCheapestTimeline(true).getCostPerNegotiableUse()|| 1000000000

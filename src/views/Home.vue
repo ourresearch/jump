@@ -154,10 +154,12 @@
         ></scenario-report>
 
 
-        <v-layout>
 
-            <!--- SIDEBAR  -->
-            <v-flex xs3 class="pa-4">
+        <v-layout style="background: #bbb;">
+            <!--- SETTINGS  -->
+            <v-btn small class="small" @click="showSettings = !showSettings">Show/hide settings</v-btn>
+
+            <v-flex class="pa-4" v-if="showSettings">
                 <v-layout>
                     <div>
                         <table>
@@ -185,9 +187,15 @@
                 </v-layout>
             </v-flex>
 
+        </v-layout>
+
+
+
+        <v-layout>
+
 
             <!--- JOURNALS LIST  -->
-            <v-flex xs9>
+            <v-flex >
                 <v-layout column>
                     <v-flex grow
                             v-for="journalData in journalsPage"
@@ -247,8 +255,8 @@
             isLoading: false,
             sorter: {},
             sorters: [
-                {text: "Best Cost Per Negotiable Use", name: "bestCpnu"},
-                {text: "Best Cost Per Negotiable Use (no ILL)", name: "bestCpnuNoIll"},
+                {text: "Best Cost Per Paywalled Use", name: "bestCpnu"},
+                // {text: "Best Cost Per Negotiable Use (no ILL)", name: "bestCpnuNoIll"},
                 {text: "Total usage", name: "totalUsage", isDescending: true},
                 {text: "Title", name: "title"},
                 {text: "Citations", name: "citations", isDescending: true},
@@ -272,6 +280,7 @@
             apiJournals: [],
             cheapestCost: 0,
             isAllExpanded: false,
+            showSettings: false,
 
         }),
         computed: {

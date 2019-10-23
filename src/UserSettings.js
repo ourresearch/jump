@@ -31,8 +31,8 @@ export default class UserSettings {
         this.bigDealCost = 2200000
 
         // impact
-        this.downloadsPerCitation = 0
-        this.downloadsPerAuthorship = 0
+        this.downloadsPerCitation = 100
+        this.downloadsPerAuthorship = 10
 
         // showing subrs
         this.showDocdel = false

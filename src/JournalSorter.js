@@ -1,8 +1,8 @@
 export default class JournalSorter {
     constructor(){
         this.sorters = [
-                {text: "Best Cost Per Negotiable Use", name: "bestCpnu"},
-                {text: "Best Cost Per Negotiable Use (no ILL)", name: "bestCpnuNoIll"},
+                {text: "Best Cost Per Paywalled Use", name: "bestCpnu"},
+                // {text: "Best Cost Per Negotiable Use (no ILL)", name: "bestCpnuNoIll"},
                 {text: "Total usage", name: "totalUsage", isDescending: true, isSelected: true},
                 {text: "Title", name: "title"},
                 {text: "Citations", name: "citations", isDescending: true},

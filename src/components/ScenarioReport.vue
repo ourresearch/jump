@@ -2,7 +2,7 @@
     <div class="scenario-report"
          v-if="scenario.journals.length">
         <v-container fluid>
-<v-layout class="quadrants py-5">
+            <v-layout class="quadrants py-5">
                 <v-flex>
                     <v-layout class="top labels"></v-layout>
                     <v-layout class="square">
@@ -19,9 +19,18 @@
                                 <div class="quad"
                                      style="height:100%;"
                                      :style="{width: quads.instant.free.width+'%', background:'transparent'}">
-                                    <div class="stripe" :style="{height: quads.instant.oa.height+'%', background: display.color('oa')}">OA</div>
-                                    <div class="stripe" :style="{height: quads.instant.backCatalog.height+'%', background: display.color('oa')}">Back Catalog</div>
-                                    <div class="stripe" :style="{height: quads.instant.rg.height+'%', background: display.color('oa')}">ResearchGate</div>
+                                    <div class="stripe"
+                                         :style="{height: quads.instant.oa.height+'%', background: display.color('oa')}">
+                                        OA
+                                    </div>
+                                    <div class="stripe"
+                                         :style="{height: quads.instant.backCatalog.height+'%', background: display.color('oa')}">
+                                        Backfile
+                                    </div>
+                                    <div class="stripe"
+                                         :style="{height: quads.instant.rg.height+'%', background: display.color('oa')}">
+                                        ResearchGate
+                                    </div>
                                 </div>
                                 <div class="quad"
                                      style="height:100%; margin-left: 5px;"
@@ -74,6 +83,51 @@
 
                     </div>
 
+                    <div class="col body-1 pt-3">
+                        <div class="body-1">Annual usage</div>
+                        <v-layout>
+                            <v-flex xs2 class="graphic mr-2">
+                                <div style="height: 100%; flex-grow: 1; display:flex;">
+                                    <div :key="year"
+                                         style="height: 250px; flex-grow: 1"
+                                         v-for="(usageDict, year) in scenario.getUsageByTypeByYear()">
+                                        <downloads-bar :year="year"
+                                                       :segments="display.barSegments(usageDict)">
+                                        </downloads-bar>
+                                    </div>
+                                </div>
+                            </v-flex>
+
+
+                            <v-flex xs10>
+                                <table class="stats infographic">
+                                    <tr :key="usageType.name"
+                                        v-for="usageType in display.barSegments(scenario.getUsageByType())"
+                                        v-if="true"
+                                        class="stat"
+                                        :style="{color: usageType.color}"
+                                        :class="{callout: usageType.name==='fullSubscription'}">
+                                        <td class="num">
+                                            {{ nf(usageType.count) }}
+                                        </td>
+                                        <td class="perc">
+                                            {{ nf(usageType.perc) }}%
+                                        </td>
+                                        <td>
+                                            {{usageType.displayName}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="num">{{nf(scenario.getAnnualUsageTotal(), true)}}</td>
+                                        <td>100%</td>
+                                        <td>Total usage</td>
+                                    </tr>
+                                </table>
+                            </v-flex>
+
+                        </v-layout>
+                    </div>
+
 
                 </v-flex>
             </v-layout>
@@ -118,51 +172,6 @@
                             </table>
 
                         </v-flex>
-                    </v-layout>
-                </v-flex>
-
-                <v-flex xs4 class="col body-1">
-                    <div class="body-1">Annual usage</div>
-                    <v-layout>
-                        <v-flex xs2 class="graphic mr-2">
-                            <div style="height: 100%; flex-grow: 1; display:flex;">
-                                <div :key="year"
-                                     style="height: 50px; flex-grow: 1"
-                                     v-for="(usageDict, year) in scenario.getUsageByTypeByYear()">
-                                    <downloads-bar :year="year"
-                                                   :segments="display.barSegments(usageDict)">
-                                    </downloads-bar>
-                                </div>
-                            </div>
-                        </v-flex>
-
-
-                        <v-flex xs10>
-                            <table class="stats infographic">
-                                <tr :key="usageType.name"
-                                    v-for="usageType in display.barSegments(scenario.getUsageByType())"
-                                    v-if="true"
-                                    class="stat"
-                                    :style="{color: usageType.color}"
-                                    :class="{callout: usageType.name==='fullSubscription'}">
-                                    <td class="num">
-                                        {{ nf(usageType.count) }}
-                                    </td>
-                                    <td class="perc">
-                                        {{ nf(usageType.perc) }}%
-                                    </td>
-                                    <td>
-                                        {{usageType.displayName}}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="num">{{nf(scenario.getAnnualUsageTotal(), true)}}</td>
-                                    <td>100%</td>
-                                    <td>Total usage</td>
-                                </tr>
-                            </table>
-                        </v-flex>
-
                     </v-layout>
                 </v-flex>
 
@@ -263,7 +272,7 @@
                             height: 100 * this.scenario.getUsageByType().rg / this.scenario.getUsageFreeInstant(),
                         },
                         backCatalog: {
-                            name: "Back Catalog",
+                            name: "Backfile",
                             height: 100 * this.scenario.getUsageByType().backCatalog / this.scenario.getUsageFreeInstant(),
                         }
                     },
@@ -272,13 +281,13 @@
                         free: {
                             color: display.color("softTurnaway"),
                             name: "Free Delayed",
-                            width: 100 * (1-this.scenario.userSettings.hardTurnawayProp),
+                            width: 100 * (1 - this.scenario.userSettings.hardTurnawayProp),
 
                         },
                         paid: {
                             color: display.color("ill"),
                             name: "ILL",
-                            width: 100 * ( this.scenario.userSettings.hardTurnawayProp),
+                            width: 100 * (this.scenario.userSettings.hardTurnawayProp),
 
                         }
                     },
@@ -313,6 +322,7 @@
     .square {
         .row {
             position: relative;
+
             .stripe {
                 border-top: 1px solid #fff;
                 color: #fff;
