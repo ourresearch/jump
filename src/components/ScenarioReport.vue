@@ -272,13 +272,13 @@
                         free: {
                             color: display.color("softTurnaway"),
                             name: "Free Delayed",
-                            width: 100 * this.scenario.userSettings.hardTurnawayProp,
+                            width: 100 * (1-this.scenario.userSettings.hardTurnawayProp),
 
                         },
                         paid: {
                             color: display.color("ill"),
                             name: "ILL",
-                            width: 100 * (1 - this.scenario.userSettings.hardTurnawayProp),
+                            width: 100 * ( this.scenario.userSettings.hardTurnawayProp),
 
                         }
                     },
