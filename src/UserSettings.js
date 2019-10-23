@@ -21,14 +21,14 @@ export default class UserSettings {
         // item-level acquisition
         this.docDelCostPerUse = 25
         this.illCostPerUse = 5
-        this.hardTurnawayProp = 0.5
+        this.hardTurnawayProp = 0.1
 
         // cost: annual increase
         this.bigDealCostAnnualIncrease = 0.05
         this.subrCostAnnualIncrease = 0.08
 
         // cost
-        this.bigDealCost = 2000000
+        this.bigDealCost = 2200000
 
         // impact
         this.downloadsPerCitation = 0
